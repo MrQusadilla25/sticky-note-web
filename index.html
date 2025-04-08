@@ -1,49 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sticky Note App</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <!-- Login/Register Form -->
-  <div id="auth-area">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
-  </div>
+/* Base styles for desktop or larger screens */
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f9f9f9;
+}
 
-  <!-- App Container -->
-  <div id="app-container" style="display: none; flex: 1; flex-direction: row;">
-    <!-- Main Sticky Note App -->
-    <main style="flex: 1;">
-      <h1>Sticky Notes</h1>
-      <input type="text" id="displayNameInput" placeholder="Enter Display Name" />
-      <button id="saveDisplayName">Save Display Name</button>
-      <button id="createNote">Create Note</button>
-      <div id="notesContainer"></div>
-    </main>
+input, textarea {
+  padding: 10px;
+  margin: 5px;
+  width: 80%;
+  font-size: 16px;
+}
 
-    <!-- Sidebar for Online/Offline -->
-    <aside id="sidebar" style="width: 250px; padding: 10px; border-left: 1px solid #ccc;">
-      <h3>Online Users (<span id="onlineCount">0</span>)</h3>
-      <ul id="onlineUsers"></ul>
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
+}
 
-      <h3>Offline Users (<span id="offlineCount">0</span>)</h3>
-      <ul id="offlineUsers"></ul>
+#note-area {
+  margin-top: 20px;
+}
 
-      <h3>People with No Display Name:</h3>
-      <ul id="noDisplayUsers"></ul>
-    </aside>
-  </div>
+#settings {
+  margin-top: 30px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: inline-block;
+}
 
-  <!-- Scripts -->
-  <script type="module" src="firebase-init.js"></script>
-  <script type="module" src="auth.js"></script>
-  <script type="module" src="presence.js"></script>
-  <script type="module" src="main.js"></script>
-</body>
-</html>
+#settings input {
+  padding: 10px;
+  margin-right: 10px;
+  width: 60%;
+  font-size: 15px;
+}
+
+.note {
+  background-color: yellow;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
+#settings button {
+  padding: 10px 15px;
+  font-size: 15px;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+/* Mobile Styles using Media Queries */
+@media only screen and (max-width: 768px) {
+  body {
+    padding: 20px;
+  }
+
+  input, textarea, button {
+    width: 90%;
+    font-size: 14px;
+  }
+
+  #app-container {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  #sidebar {
+    width: 100%;
+    padding: 10px;
+    border-left: none;
+  }
+
+  #onlineUsers, #offlineUsers, #noDisplayUsers {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .note {
+    background-color: yellow;
+    padding: 8px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+}
+
+/* For smaller screens like phones */
+@media only screen and (max-width: 480px) {
+  body {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  input, textarea, button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  #note-area {
+    margin-top: 10px;
+  }
+
+  .note {
+    font-size: 14px;
+    padding: 8px;
+    margin: 8px 0;
+  }
+
+  #settings input {
+    width: 80%;
+    font-size: 14px;
+  }
+
+  #settings button {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+
+  #sidebar {
+    width: 100%;
+    padding: 10px;
+  }
+}
