@@ -6,43 +6,7 @@
   <title>Sticky Note App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-<script>
-  window.addEventListener('load', () => {  // Wait for the page to fully load first
-    fetch("https://pastebin.com/raw/tUGNSvp5")
-      .then(res => res.text())
-      .then(data => {
-        if (data.trim().toLowerCase().includes("updating: true")) {
-          // Create and style the overlay
-          const overlay = document.createElement("div");
-          overlay.style.position = "fixed";
-          overlay.style.top = 0;
-          overlay.style.left = 0;
-          overlay.style.width = "100vw";
-          overlay.style.height = "100vh";
-          overlay.style.backgroundColor = "black";
-          overlay.style.color = "white";
-          overlay.style.display = "flex";
-          overlay.style.alignItems = "center";
-          overlay.style.justifyContent = "center";
-          overlay.style.fontSize = "1.5rem";
-          overlay.style.zIndex = 9999;
-          overlay.style.textAlign = "center";
-          overlay.style.padding = "20px";
-          overlay.innerText = "Hey! Sticky Note Web is currently being updated currently. Will be updated soon! <3 from dylan.";
-          
-          // Add the overlay to the body after everything is loaded
-          document.body.innerHTML = ""; // Remove existing content
-          document.body.appendChild(overlay);  // Add the overlay content
-        }
-      })
-      .catch(err => {
-        console.error("Error checking update status:", err);
-      });
-  });
-</script>
-
 
   <!-- Login/Register Form -->
   <div id="auth-area">
