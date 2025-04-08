@@ -39,6 +39,13 @@ button {
   font-size: 15px;
 }
 
+.note {
+  background-color: yellow;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
 #settings button {
   padding: 10px 15px;
   font-size: 15px;
