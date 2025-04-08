@@ -1,61 +1,49 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 0;
   text-align: center;
+  padding: 30px;
+  background: #f9f9f9;
 }
 
-#auth-area {
-  padding: 20px;
-  max-width: 400px;
-  margin: 60px auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-#auth-area input {
-  display: block;
-  width: 90%;
-  margin: 10px auto;
+input, textarea {
   padding: 10px;
+  margin: 5px;
+  width: 80%;
   font-size: 16px;
 }
 
-#auth-area button {
-  margin: 5px;
+button {
   padding: 10px 20px;
-  font-size: 15px;
-  background-color: #2d89ef;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  font-size: 16px;
+  margin: 10px;
   cursor: pointer;
-}
-
-#auth-area button:hover {
-  background-color: #1a5ec8;
-}
-
-main {
-  padding: 30px;
 }
 
 #note-area {
   margin-top: 20px;
 }
 
-#note-area textarea {
-  width: 90%;
-  height: 120px;
-  padding: 10px;
-  font-size: 16px;
+#settings {
+  margin-top: 30px;
+  background: #fff;
+  padding: 15px;
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: inline-block;
 }
 
-#note-area button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  font-size: 16px;
+#settings input {
+  padding: 10px;
+  margin-right: 10px;
+  width: 60%;
+  font-size: 15px;
+}
+
+#settings button {
+  padding: 10px 15px;
+  font-size: 15px;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 5px;
 }
