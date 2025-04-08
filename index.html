@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StickyNote Web</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>StickyNote</h1>
+    <p>Send digital sticky notes — anonymous or not.</p>
+  </header>
+
+  <main>
+    <section id="note-send">
+      <h2>Send a Sticky Note</h2>
+      <input type="text" id="recipient" placeholder="To (Name)" />
+      <textarea id="message" maxlength="200" placeholder="Your message..."></textarea>
+      <label>
+        <input type="checkbox" id="anonymous" /> Send anonymously
+      </label>
+      <select id="note-color">
+        <option value="#ffeb3b">Yellow</option>
+        <option value="#f48fb1">Pink</option>
+        <option value="#b2dfdb">Teal</option>
+        <option value="#c5cae9">Lavender</option>
+      </select>
+      <button onclick="sendNote()">Send Note</button>
+    </section>
+
+    <section id="note-inbox">
+      <h2>Your Notes</h2>
+      <div id="inbox"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
