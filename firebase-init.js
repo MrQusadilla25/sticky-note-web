@@ -4,6 +4,7 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
   authDomain: "stickynoteapp-883b8.firebaseapp.com",
@@ -15,8 +16,10 @@ const firebaseConfig = {
   measurementId: "G-D27CEZ4WJN"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 
+// Export authentication and realtime database
 export const auth = getAuth(app);
 export const db = getDatabase(app);
