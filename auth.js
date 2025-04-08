@@ -1,53 +1,44 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+// auth.js
+import { auth, db } from './firebase-init.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-const auth = window.auth;
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const authArea = document.getElementById("auth-area");
+const main = document.querySelector("main");
 
-window.signup = () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
+window.signup = function () {
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then(() => alert("Account created! You can now log in."))
-    .catch((err) => alert(err.message));
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      console.log("User signed up:", userCredential.user);
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 };
 
-window.login = () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
+window.login = function () {
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-  signInWithEmailAndPassword(auth, email, pass)
-    .catch((err) => alert(err.message));
-};
-
-window.logout = () => {
-  signOut(auth);
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      console.log("User logged in:", userCredential.user);
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 };
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    document.getElementById("auth-area").style.display = "none";
-    document.querySelector("main").style.display = "block";
-    document.getElementById("user-display-name").textContent = user.displayName || "Anonymous";
+    authArea.style.display = "none";
+    main.style.display = "block";
   } else {
-    document.getElementById("auth-area").style.display = "block";
-    document.querySelector("main").style.display = "none";
+    authArea.style.display = "block";
+    main.style.display = "none";
   }
 });
-
-window.updateDisplayName = () => {
-  const newName = document.getElementById("newDisplayName").value;
-  if (!newName) return alert("Please enter a name.");
-
-  updateProfile(auth.currentUser, { displayName: newName })
-    .then(() => {
-      document.getElementById("user-display-name").textContent = newName;
-      alert("Display name updated!");
-    })
-    .catch((err) => alert(err.message));
-};
