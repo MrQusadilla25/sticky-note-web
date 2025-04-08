@@ -1,27 +1,43 @@
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+// main.js
+import { db } from './firebase-init.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { ref, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-const db = getDatabase();
-const auth = window.auth;
+// Elements
+const createNoteBtn = document.getElementById("createNote");
+const notesContainer = document.getElementById("notesContainer");
 
-document.getElementById("createNote").addEventListener("click", async () => {
-  const user = auth.currentUser;
+onAuthStateChanged(window.auth, (user) => {
+  if (user) {
+    createNoteBtn.disabled = false;
+  } else {
+    createNoteBtn.disabled = true;
+  }
+});
+
+createNoteBtn.addEventListener("click", async () => {
+  const user = window.auth.currentUser;
   if (!user) return;
 
-  const userRef = ref(db, `users/${user.uid}`);
-  const snapshot = await get(userRef);
-  const userData = snapshot.val();
+  try {
+    const userRef = ref(db, `users/${user.uid}`);
+    const snapshot = await get(userRef);
+    const userData = snapshot.val();
 
-  if (!userData || !userData.displayName || userData.displayName === "NO DISPLAY NAME") {
-    alert("⚠️ You must set a display name in settings before posting a sticky note!");
-    return;
-  }
+    if (!userData || !userData.displayName || userData.displayName === "NO DISPLAY NAME") {
+      alert("⚠️ You must set a display name before posting a sticky note!");
+      return;
+    }
 
-  const noteText = prompt("Write your sticky note:");
-  if (noteText) {
-    const note = document.createElement("div");
-    note.className = "note";
-    note.textContent = noteText;
-    document.getElementById("notesContainer").appendChild(note);
+    const noteText = prompt("Write your sticky note:");
+    if (noteText) {
+      const note = document.createElement("div");
+      note.className = "note";
+      note.textContent = `${userData.displayName}: ${noteText}`;
+      notesContainer.appendChild(note);
+    }
+  } catch (error) {
+    console.error("Error creating note:", error);
+    alert("An error occurred. Please try again.");
   }
 });
