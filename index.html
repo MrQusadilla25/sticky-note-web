@@ -3,12 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sticky Notes</title>
+  <title>Sticky Note App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <!-- Login/Signup Area -->
   <div id="auth-area">
     <h2>Login or Sign Up</h2>
     <input type="email" id="email" placeholder="Email" />
@@ -17,40 +15,25 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
-  <!-- Main App Interface (Hidden Until Logged In) -->
   <main style="display: none;">
     <h1>Sticky Notes</h1>
-    <!-- You can move your sticky note HTML here -->
+    <p id="welcome-name">Welcome, <span id="user-display-name">Loading...</span></p>
+
     <div id="note-area">
       <textarea placeholder="Write a note..."></textarea>
       <button>Add Note</button>
     </div>
+
+    <div id="settings">
+      <h3>Settings</h3>
+      <input type="text" id="newDisplayName" placeholder="Change display name" />
+      <button onclick="updateDisplayName()">Save Name</button>
+    </div>
+
     <button onclick="logout()">Logout</button>
   </main>
 
-  <!-- Firebase + Auth Setup -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
-      authDomain: "stickynoteapp-883b8.firebaseapp.com",
-      projectId: "stickynoteapp-883b8",
-      storageBucket: "stickynoteapp-883b8.firebasestorage.app",
-      messagingSenderId: "637398429722",
-      appId: "1:637398429722:web:e3f58a02328e68b75961a3",
-      measurementId: "G-D27CEZ4WJN"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    window.auth = auth;
-  </script>
-
-  <!-- Auth Logic -->
+  <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
 </body>
 </html>
