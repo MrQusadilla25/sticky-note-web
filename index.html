@@ -17,16 +17,18 @@
   </div>
 
   <!-- App Container -->
-  <div style="display: flex;">
+  <div id="app-container" style="display: none; flex: 1; flex-direction: row;">
     <!-- Main Sticky Note App -->
-    <main style="display: none; flex: 1;">
+    <main style="flex: 1;">
       <h1>Sticky Notes</h1>
+      <input type="text" id="displayNameInput" placeholder="Enter Display Name" />
+      <button id="saveDisplayName">Save Display Name</button>
       <button id="createNote">Create Note</button>
       <div id="notesContainer"></div>
     </main>
 
     <!-- Sidebar for Online/Offline -->
-    <aside style="width: 250px; padding: 10px; border-left: 1px solid #ccc; display: none;" id="sidebar">
+    <aside id="sidebar" style="width: 250px; padding: 10px; border-left: 1px solid #ccc;">
       <h3>Online Users (<span id="onlineCount">0</span>)</h3>
       <ul id="onlineUsers"></ul>
 
@@ -38,31 +40,10 @@
     </aside>
   </div>
 
-  <!-- Firebase Init -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
-      authDomain: "stickynoteapp-883b8.firebaseapp.com",
-      projectId: "stickynoteapp-883b8",
-      storageBucket: "stickynoteapp-883b8.appspot.com",
-      messagingSenderId: "637398429722",
-      appId: "1:637398429722:web:e3f58a02328e68b75961a3",
-      measurementId: "G-D27CEZ4WJN"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    window.auth = auth;
-  </script>
-
   <!-- Scripts -->
+  <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="presence.js"></script>
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
