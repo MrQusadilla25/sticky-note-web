@@ -1,6 +1,17 @@
 // auth.js
 import { auth, db } from './firebase-init.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {
+  ref,
+  set,
+  update,
+  onDisconnect
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -13,7 +24,12 @@ window.signup = function () {
 
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-      console.log("User signed up:", userCredential.user);
+      const user = userCredential.user;
+      const userRef = ref(db, 'users/' + user.uid);
+      set(userRef, {
+        displayName: "NO DISPLAY NAME",
+        status: "online"
+      });
     })
     .catch((error) => {
       alert(error.message);
@@ -26,7 +42,15 @@ window.login = function () {
 
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-      console.log("User logged in:", userCredential.user);
+      const user = userCredential.user;
+      const userRef = ref(db, 'users/' + user.uid);
+
+      update(userRef, {
+        status: "online"
+      });
+
+      // Set offline status on disconnect
+      onDisconnect(ref(db, 'users/' + user.uid + '/status')).set("offline");
     })
     .catch((error) => {
       alert(error.message);
@@ -42,3 +66,15 @@ onAuthStateChanged(auth, (user) => {
     main.style.display = "none";
   }
 });
+
+// Optional: If you want a sign out button somewhere
+window.logout = function () {
+  const user = auth.currentUser;
+  if (user) {
+    const userRef = ref(db, 'users/' + user.uid);
+    update(userRef, { status: "offline" });
+  }
+
+  signOut(auth);
+};
+
