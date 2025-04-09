@@ -16,16 +16,15 @@ import {
 const db = getDatabase();
 const auth = getAuth();
 
-// DOM elements
+// DOM Elements
 const receivedNotes = document.getElementById("receivedNotes");
 const recipientList = document.getElementById("recipientList");
 const privateRecipientList = document.getElementById("privateRecipientList");
 const welcomeMessage = document.getElementById("welcomeMessage");
-
 const appContainer = document.getElementById("app-container");
 const authArea = document.getElementById("auth-area");
 
-// Listen for auth state
+// Auth State Listener
 onAuthStateChanged(auth, (user) => {
   if (user) {
     authArea.style.display = "none";
@@ -40,17 +39,19 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Load all users for recipient lists
+// Load all users into recipient dropdowns
 function loadUsers() {
   const usersRef = ref(db, "users");
   onValue(usersRef, (snapshot) => {
     recipientList.innerHTML = "";
     privateRecipientList.innerHTML = "";
+
     snapshot.forEach((child) => {
       const user = child.val();
       const option = document.createElement("option");
       option.value = child.key;
       option.textContent = user.displayName || user.email;
+
       recipientList.appendChild(option.cloneNode(true));
       privateRecipientList.appendChild(option.cloneNode(true));
     });
@@ -93,7 +94,7 @@ function loadPrivateNotes(currentUid) {
 // Send public note
 document.getElementById("sendNote").addEventListener("click", () => {
   const to = recipientList.value;
-  const message = document.getElementById("noteMessage").value;
+  const message = document.getElementById("noteMessage").value.trim();
   const color = document.getElementById("noteColor").value;
   const from = auth.currentUser.uid;
 
@@ -115,7 +116,7 @@ document.getElementById("sendNote").addEventListener("click", () => {
 // Send private note
 document.getElementById("sendPrivateNoteBtn").addEventListener("click", () => {
   const to = privateRecipientList.value;
-  const message = document.getElementById("privateNoteMessage").value;
+  const message = document.getElementById("privateNoteMessage").value.trim();
   const from = auth.currentUser.uid;
 
   if (!to || !message) return alert("Fill all fields.");
@@ -158,7 +159,7 @@ function updateWelcomeMessage(uid) {
   });
 }
 
-// Logout function
+// Logout
 window.logout = function () {
   signOut(auth).then(() => {
     alert("Logged out");
@@ -166,7 +167,7 @@ window.logout = function () {
   });
 };
 
-// Tab switching using showTab()
+// Show tab by ID
 window.showTab = function (tabId) {
   document.querySelectorAll(".tab-section").forEach((section) => {
     section.style.display = "none";
