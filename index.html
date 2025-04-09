@@ -1,4 +1,4 @@
-// v1.0.3
+<!-- v1.0.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,8 +27,10 @@
 
     <section id="createNoteSection">
       <h3>Create a Sticky Note</h3>
-      <select id="recipientList"></select><br />
-      <textarea id="noteMessage" placeholder="Write your note here..."></textarea><br />
+      <select id="recipientList">
+        <option disabled selected>Select a recipient</option>
+      </select><br />
+      <textarea id="noteMessage" rows="5" cols="40" placeholder="Write your note here..."></textarea><br />
       <select id="noteColor">
         <option value="yellow">Yellow</option>
         <option value="pink">Pink</option>
@@ -41,7 +43,8 @@
 
   <!-- Firebase + Scripts -->
   <script type="module" src="firebase-init.js"></script>
-  <script src="auth.js"></script>
+  <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
