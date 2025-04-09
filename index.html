@@ -8,6 +8,7 @@
 </head>
 <body>
 
+  <!-- Auth Area -->
   <div id="auth-area">
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Email" />
@@ -16,48 +17,77 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
+  <!-- App Container -->
   <div id="app-container" style="display: none;">
+    
+    <!-- Tab Navigation -->
+    <div id="tabNav">
+      <button class="tabBtn" data-tab="dashboardTab">Dashboard</button>
+      <button class="tabBtn" data-tab="publicNotesTab">Public Notes</button>
+      <button class="tabBtn" data-tab="privateNotesTab">Private Notes</button>
+      <button class="tabBtn" data-tab="settingsTab">Settings</button>
+      <button id="logoutBtn" class="tabBtn" style="float:right; background-color:#e74c3c;">Logout</button>
+    </div>
 
-<section id="changeDisplayNameSection">
-  <h3>Change Your Display Name</h3>
-  <input type="text" id="displayNameInput" placeholder="Enter new display name..." />
-  <button id="saveDisplayName">Save Name</button>
-</section>
+    <!-- Tabs Content -->
+    <div id="tabContent">
+      
+      <!-- Dashboard -->
+      <div id="dashboardTab" class="tabSection">
+        <h2>Welcome</h2>
+        <p id="welcomeMessage"></p>
+        <section id="mailbox">
+          <h3>Your Mailbox</h3>
+          <ul id="receivedNotes"></ul>
+        </section>
+      </div>
 
-    <h2 id="welcomeMessage"></h2>
+      <!-- Public Notes -->
+      <div id="publicNotesTab" class="tabSection" style="display:none;">
+        <h2>Create a Public Note</h2>
+        <select id="recipientList"></select><br />
+        <textarea id="noteMessage" placeholder="Write your note here..."></textarea><br />
+        <select id="noteColor">
+          <option value="yellow">Yellow</option>
+          <option value="pink">Pink</option>
+          <option value="lightblue">Blue</option>
+          <option value="lightgreen">Green</option>
+        </select>
+        <button id="sendNote">Send Note</button>
+      </div>
 
-    <section id="mailbox">
-      <h3>Your Mailbox</h3>
-      <ul id="receivedNotes"></ul>
-    </section>
+      <!-- Private Notes -->
+      <div id="privateNotesTab" class="tabSection" style="display:none;">
+        <h2>Send a Private Note</h2>
+        <select id="privateRecipientList"></select><br />
+        <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea><br />
+        <button id="sendPrivateNoteBtn">Send Private Note</button>
+      </div>
 
-    <section id="createNoteSection">
-      <h3>Create a Sticky Note</h3>
-      <select id="recipientList"></select><br />
-      <textarea id="noteMessage" placeholder="Write your note here..."></textarea><br />
-      <select id="noteColor">
-        <option value="yellow">Yellow</option>
-        <option value="pink">Pink</option>
-        <option value="lightblue">Blue</option>
-        <option value="lightgreen">Green</option>
-      </select>
-      <button id="sendNote">Send Note</button>
-    </section>
+      <!-- Settings -->
+      <div id="settingsTab" class="tabSection" style="display:none;">
+        <h2>Settings</h2>
+        <h3>Change Display Name</h3>
+        <input type="text" id="displayNameInput" placeholder="Enter new display name..." />
+        <button id="saveDisplayName">Save Name</button>
+      </div>
 
-    <section id="sendPrivateNoteSection">
-      <h3>Send a Private Sticky Note</h3>
-      <select id="privateRecipientList"></select><br />
-      <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea><br />
-      <button id="sendPrivateNoteBtn">Send Private Note</button>
-    </section>
-
-    <button id="logoutBtn">Log Out</button>
-
+    </div>
   </div>
 
   <!-- Firebase + Scripts -->
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
+  <script>
+    // Tab switching logic
+    document.querySelectorAll(".tabBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-tab");
+        document.querySelectorAll(".tabSection").forEach(tab => tab.style.display = "none");
+        if (target) document.getElementById(target).style.display = "block";
+      });
+    });
+  </script>
 </body>
 </html>
