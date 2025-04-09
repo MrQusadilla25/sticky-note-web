@@ -10,6 +10,7 @@ const onlineCount = document.getElementById("onlineCount");
 const offlineCount = document.getElementById("offlineCount");
 const sidebar = document.getElementById("sidebar");
 
+// Listen for auth state
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     sidebar.style.display = "none";
@@ -20,6 +21,7 @@ onAuthStateChanged(auth, (user) => {
 
   const usersRef = ref(db, "users");
 
+  // Get users data
   onValue(usersRef, (snapshot) => {
     onlineList.innerHTML = "";
     offlineList.innerHTML = "";
@@ -30,17 +32,19 @@ onAuthStateChanged(auth, (user) => {
 
     const users = [];
 
+    // Loop through users in the database
     snapshot.forEach((childSnapshot) => {
       const data = childSnapshot.val();
       users.push({
-        displayName: data.displayName?.trim() || "NO DISPLAY NAME",
-        status: data.status || "offline"
+        displayName: data.displayName?.trim() || "NO DISPLAY NAME", // Handling missing displayName
+        status: data.status || "offline" // Default status is 'offline'
       });
     });
 
-    // Sort alphabetically by displayName
+    // Sort users alphabetically by displayName
     users.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
+    // Loop through sorted users and populate the lists
     users.forEach(({ displayName, status }) => {
       const li = document.createElement("li");
       li.textContent = `${displayName} - ${status}`;
@@ -57,6 +61,7 @@ onAuthStateChanged(auth, (user) => {
       }
     });
 
+    // Update online and offline count
     onlineCount.textContent = online;
     offlineCount.textContent = offline;
   });
