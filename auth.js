@@ -8,12 +8,19 @@ import {
 import {
   getDatabase,
   ref,
-  set
+  set,
+  get
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const auth = getAuth();
 const db = getDatabase();
 window.auth = auth;
+
+// Helper function for email validation
+function isValidEmail(email) {
+  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return re.test(email);
+}
 
 // Signup function
 window.signup = function () {
@@ -23,6 +30,13 @@ window.signup = function () {
   if (!email || !password) {
     return alert("Please fill out both email and password fields.");
   }
+
+  if (!isValidEmail(email)) {
+    return alert("Please enter a valid email address.");
+  }
+
+  // Show loading spinner (optional)
+  document.getElementById("loading-spinner").style.display = "block";
 
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -38,7 +52,12 @@ window.signup = function () {
       alert("Account created successfully!");
       showApp();
     })
-    .catch((err) => alert("Signup Error: " + err.message));
+    .catch((err) => {
+      alert("Signup Error: " + err.message);
+    })
+    .finally(() => {
+      document.getElementById("loading-spinner").style.display = "none"; // Hide loading spinner
+    });
 };
 
 // Login function
@@ -50,12 +69,24 @@ window.login = function () {
     return alert("Please fill out both email and password fields.");
   }
 
+  if (!isValidEmail(email)) {
+    return alert("Please enter a valid email address.");
+  }
+
+  // Show loading spinner (optional)
+  document.getElementById("loading-spinner").style.display = "block";
+
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
       alert("Logged in successfully!");
       showApp();
     })
-    .catch((err) => alert("Login Error: " + err.message));
+    .catch((err) => {
+      alert("Login Error: " + err.message);
+    })
+    .finally(() => {
+      document.getElementById("loading-spinner").style.display = "none"; // Hide loading spinner
+    });
 };
 
 // Logout function
