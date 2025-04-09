@@ -1,88 +1,112 @@
-/* General Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+  --bg: #f9f9f9;
+  --text: #111;
+  --card: #fff;
+  --accent: #444;
+  --accent-hover: #333;
+  --input-border: #ccc;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+body.dark {
+  --bg: #121212;
+  --text: #e0e0e0;
+  --card: #1e1e1e;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --input-border: #444;
+  --shadow: rgba(0, 0, 0, 0.4);
 }
 
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5;
-  color: #333;
-  padding: 20px;
-}
-
-/* Auth Area */
-#auth-area {
-  max-width: 400px;
-  margin: 100px auto;
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-#auth-area h2 {
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-/* App Container */
-#app-container {
-  max-width: 800px;
-  margin: auto;
-}
-
-/* Tab Navigation */
-#tabNav {
+  font-family: Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
   display: flex;
-  background: #ffffff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  border-radius: 8px;
-  margin-bottom: 20px;
-  overflow-x: auto;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.tabBtn {
-  flex: 1;
-  padding: 12px 16px;
-  background: #ffffff;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s;
-}
-
-.tabBtn:hover {
-  background-color: #e0e0e0;
-}
-
-.tabBtn:focus {
-  outline: none;
-}
-
-.tabBtn.active {
-  background-color: #dcdcdc;
-  font-weight: bold;
-}
-
-/* Sections */
-.tabSection {
-  background: white;
+#auth-area {
+  margin: auto;
+  max-width: 400px;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 20px;
+  background-color: var(--card);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px var(--shadow);
 }
 
-/* Inputs and Buttons */
+#app-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+#sidebar {
+  background-color: var(--card);
+  border-right: 1px solid var(--input-border);
+  padding: 20px;
+  width: 220px;
+  height: 100%;
+  box-shadow: 2px 0 5px var(--shadow);
+}
+
+#sidebar h2 {
+  margin-top: 0;
+}
+
+.tab-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tab-btn:hover {
+  background-color: var(--accent-hover);
+}
+
+#main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  transition: opacity 0.3s ease;
+}
+
+.tab-content {
+  display: none;
+  background-color: var(--card);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--shadow);
+  animation: fade 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 input, textarea, select, button {
   width: 100%;
   margin: 10px 0;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
 }
 
 textarea {
@@ -90,27 +114,25 @@ textarea {
 }
 
 button {
-  background-color: #3b82f6;
+  background-color: var(--accent);
   color: white;
   border: none;
-  transition: background 0.2s;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #2563eb;
+  background-color: var(--accent-hover);
 }
 
-/* Mailbox */
 #receivedNotes li {
-  background-color: #f1f5f9;
   padding: 10px;
-  border-radius: 6px;
-  margin: 6px 0;
+  border-radius: 5px;
+  margin: 5px 0;
   list-style: none;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
-/* Online/Offline indicators */
 li[data-status="online"]::before {
   content: "●";
   color: limegreen;
