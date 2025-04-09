@@ -46,3 +46,15 @@ button:hover {
   list-style: none;
   color: black;
 }
+
+li[data-status="online"]::before {
+  content: "●";
+  color: limegreen;
+  margin-right: 5px;
+}
+
+li[data-status="offline"]::before {
+  content: "●";
+  color: gray;
+  margin-right: 5px;
+}
