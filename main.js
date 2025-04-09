@@ -1,43 +1,74 @@
-// main.js
-import { db } from './firebase-init.js';
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { ref, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-// Elements
-const createNoteBtn = document.getElementById("createNote");
-const notesContainer = document.getElementById("notesContainer");
+const db = getDatabase();
+const auth = window.auth;
 
-onAuthStateChanged(window.auth, (user) => {
-  if (user) {
-    createNoteBtn.disabled = false;
-  } else {
-    createNoteBtn.disabled = true;
-  }
-});
-
-createNoteBtn.addEventListener("click", async () => {
-  const user = window.auth.currentUser;
+onAuthStateChanged(auth, (user) => {
   if (!user) return;
 
-  try {
-    const userRef = ref(db, `users/${user.uid}`);
-    const snapshot = await get(userRef);
-    const userData = snapshot.val();
+  // Show app, hide login
+  document.getElementById("auth-area").style.display = "none";
+  document.getElementById("app-container").style.display = "block";
 
-    if (!userData || !userData.displayName || userData.displayName === "NO DISPLAY NAME") {
-      alert("⚠️ You must set a display name before posting a sticky note!");
-      return;
-    }
+  const name = user.displayName || user.email.split("@")[0];
+  document.getElementById("welcomeMessage").innerText = `Hi there, ${name}!`;
 
-    const noteText = prompt("Write your sticky note:");
-    if (noteText) {
-      const note = document.createElement("div");
-      note.className = "note";
-      note.textContent = `${userData.displayName}: ${noteText}`;
-      notesContainer.appendChild(note);
-    }
-  } catch (error) {
-    console.error("Error creating note:", error);
-    alert("An error occurred. Please try again.");
-  }
+  // Save user to DB
+  set(ref(db, `users/${user.uid}`), {
+    displayName: name,
+    email: user.email
+  });
+
+  // Load users into recipient list
+  onValue(ref(db, "users"), (snapshot) => {
+    const select = document.getElementById("recipientList");
+    select.innerHTML = "";
+    snapshot.forEach(child => {
+      if (child.key !== user.uid) {
+        const opt = document.createElement("option");
+        opt.value = child.key;
+        opt.textContent = child.val().displayName || "Unnamed";
+        select.appendChild(opt);
+      }
+    });
+  });
+
+  // Load received notes
+  onValue(ref(db, "notes"), (snapshot) => {
+    const list = document.getElementById("receivedNotes");
+    list.innerHTML = "";
+    snapshot.forEach(noteSnap => {
+      const note = noteSnap.val();
+      if (note.to === user.uid) {
+        const li = document.createElement("li");
+        li.style.backgroundColor = note.color || "yellow";
+        li.textContent = `From ${note.fromName}: ${note.message}`;
+        list.appendChild(li);
+      }
+    });
+  });
+
+  // Send note
+  document.getElementById("sendNote").addEventListener("click", () => {
+    const to = document.getElementById("recipientList").value;
+    const message = document.getElementById("noteMessage").value;
+    const color = document.getElementById("noteColor").value;
+
+    if (!to || !message) return alert("Please complete the form!");
+
+    const newNote = {
+      from: user.uid,
+      fromName: name,
+      to,
+      message,
+      color,
+      timestamp: Date.now()
+    };
+
+    push(ref(db, "notes"), newNote).then(() => {
+      document.getElementById("noteMessage").value = "";
+      alert("Note sent!");
+    });
+  });
 });
