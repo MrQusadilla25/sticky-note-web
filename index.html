@@ -1,75 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sticky Notes</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme and Tab Example</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Auth Section -->
   <div id="auth-area">
-    <h2>Login or Sign Up</h2>
-    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
-    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
-  </div>
-
-  <!-- Main App -->
-  <div id="app-container" style="display: none;">
-    <!-- Sidebar Navigation -->
-    <div id="sidebar">
-      <button onclick="showTab('home')">Home</button>
-      <button onclick="showTab('public')">Public Note</button>
-      <button onclick="showTab('private')">Private Note</button>
-      <button onclick="showTab('display')">Display Name</button>
-      <button onclick="logout()">Log Out</button>
-    </div>
-
-    <!-- Tabbed Content -->
-    <div id="tab-content">
-      <!-- Home Tab -->
-      <section id="home" class="tab-section active-tab">
-        <h2 id="welcomeMessage">Welcome!</h2>
-        <h3>Your Mailbox</h3>
-        <ul id="receivedNotes"></ul>
-      </section>
-
-      <!-- Public Note Tab -->
-      <section id="public" class="tab-section">
-        <h3>Create a Public Sticky Note</h3>
-        <select id="recipientList"></select>
-        <textarea id="noteMessage" placeholder="Write your note..."></textarea>
-        <select id="noteColor">
-          <option value="yellow">Yellow</option>
-          <option value="pink">Pink</option>
-          <option value="lightblue">Blue</option>
-          <option value="lightgreen">Green</option>
-        </select>
-        <button id="sendNote">Send Note</button>
-      </section>
-
-      <!-- Private Note Tab -->
-      <section id="private" class="tab-section">
-        <h3>Send a Private Sticky Note</h3>
-        <select id="privateRecipientList"></select>
-        <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea>
-        <button id="sendPrivateNoteBtn">Send Private Note</button>
-      </section>
-
-      <!-- Display Name Tab -->
-      <section id="display" class="tab-section">
-        <h3>Change Your Display Name</h3>
-        <input type="text" id="displayNameInput" placeholder="Enter new name..." />
-        <button id="saveDisplayName">Save Name</button>
-      </section>
+    <button id="theme-toggle">Toggle Theme</button>
+    <div id="app-container">
+      <div id="sidebar">
+        <h2>Tabs</h2>
+        <button class="tab-btn" id="tab1-btn">Tab 1</button>
+        <button class="tab-btn" id="tab2-btn">Tab 2</button>
+        <button class="tab-btn" id="tab3-btn">Tab 3</button>
+      </div>
+      <div id="main-content">
+        <div class="tab-content" id="tab1-content">Content of Tab 1</div>
+        <div class="tab-content" id="tab2-content">Content of Tab 2</div>
+        <div class="tab-content" id="tab3-content">Content of Tab 3</div>
+      </div>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script type="module" src="firebase-init.js"></script>
-  <script type="module" src="auth.js"></script>
-  <script type="module" src="main.js"></script>
+  <script>
+    // Theme Switcher Logic
+    const themeToggleButton = document.getElementById('theme-toggle');
+
+    // Check localStorage for the current theme preference
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme) {
+      document.body.classList.add(currentTheme);
+    }
+
+    // Toggle theme on button click and save it in localStorage
+    themeToggleButton.addEventListener('click', () => {
+      if (document.body.classList.contains('dark')) {
+        document.body.classList.remove('dark');
+        document.body.classList.add('light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.remove('light');
+        document.body.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+
+    // Tab Logic
+    const tab1Btn = document.getElementById('tab1-btn');
+    const tab2Btn = document.getElementById('tab2-btn');
+    const tab3Btn = document.getElementById('tab3-btn');
+    const tab1Content = document.getElementById('tab1-content');
+    const tab2Content = document.getElementById('tab2-content');
+    const tab3Content = document.getElementById('tab3-content');
+
+    // Function to show the active tab and hide others
+    function showTabContent(tabToShow) {
+      const tabs = [tab1Content, tab2Content, tab3Content];
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabToShow.classList.add('active');
+    }
+
+    // Set the default tab to show on load
+    showTabContent(tab1Content);
+
+    // Event listeners for tab buttons
+    tab1Btn.addEventListener('click', () => showTabContent(tab1Content));
+    tab2Btn.addEventListener('click', () => showTabContent(tab2Content));
+    tab3Btn.addEventListener('click', () => showTabContent(tab3Content));
+  </script>
 </body>
 </html>
