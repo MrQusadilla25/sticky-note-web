@@ -1,74 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Theme and Tab Example</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Switcher</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="auth-area">
-    <button id="theme-toggle">Toggle Theme</button>
-    <div id="app-container">
-      <div id="sidebar">
-        <h2>Tabs</h2>
-        <button class="tab-btn" id="tab1-btn">Tab 1</button>
-        <button class="tab-btn" id="tab2-btn">Tab 2</button>
-        <button class="tab-btn" id="tab3-btn">Tab 3</button>
-      </div>
-      <div id="main-content">
-        <div class="tab-content" id="tab1-content">Content of Tab 1</div>
-        <div class="tab-content" id="tab2-content">Content of Tab 2</div>
-        <div class="tab-content" id="tab3-content">Content of Tab 3</div>
-      </div>
+    <div id="auth-area">
+        <div>
+            <label for="themeToggle">Dark Mode</label>
+            <input type="checkbox" id="themeToggle">
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Theme Switcher Logic
-    const themeToggleButton = document.getElementById('theme-toggle');
+    <div id="app-container">
+        <div id="sidebar">
+            <h2>Sidebar</h2>
+            <button class="tab-btn" data-tab="home">Home</button>
+            <button class="tab-btn" data-tab="profile">Profile</button>
+        </div>
 
-    // Check localStorage for the current theme preference
-    const currentTheme = localStorage.getItem('theme');
-    if (currentTheme) {
-      document.body.classList.add(currentTheme);
-    }
+        <div id="main-content">
+            <div id="home" class="tab-content active">
+                <h1>Home Tab</h1>
+                <p>This is the home content.</p>
+            </div>
+            <div id="profile" class="tab-content">
+                <h1>Profile Tab</h1>
+                <p>This is the profile content.</p>
+            </div>
+        </div>
+    </div>
 
-    // Toggle theme on button click and save it in localStorage
-    themeToggleButton.addEventListener('click', () => {
-      if (document.body.classList.contains('dark')) {
-        document.body.classList.remove('dark');
-        document.body.classList.add('light');
-        localStorage.setItem('theme', 'light');
-      } else {
-        document.body.classList.remove('light');
-        document.body.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      }
-    });
-
-    // Tab Logic
-    const tab1Btn = document.getElementById('tab1-btn');
-    const tab2Btn = document.getElementById('tab2-btn');
-    const tab3Btn = document.getElementById('tab3-btn');
-    const tab1Content = document.getElementById('tab1-content');
-    const tab2Content = document.getElementById('tab2-content');
-    const tab3Content = document.getElementById('tab3-content');
-
-    // Function to show the active tab and hide others
-    function showTabContent(tabToShow) {
-      const tabs = [tab1Content, tab2Content, tab3Content];
-      tabs.forEach(tab => tab.classList.remove('active'));
-      tabToShow.classList.add('active');
-    }
-
-    // Set the default tab to show on load
-    showTabContent(tab1Content);
-
-    // Event listeners for tab buttons
-    tab1Btn.addEventListener('click', () => showTabContent(tab1Content));
-    tab2Btn.addEventListener('click', () => showTabContent(tab2Content));
-    tab3Btn.addEventListener('click', () => showTabContent(tab3Content));
-  </script>
+    <script src="script.js"></script>
 </body>
 </html>
