@@ -6,7 +6,12 @@ import {
   set,
   update
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const db = getDatabase();
 const auth = getAuth();
@@ -46,7 +51,6 @@ function loadUsers() {
       const option = document.createElement("option");
       option.value = child.key;
       option.textContent = user.displayName || user.email;
-
       recipientList.appendChild(option.cloneNode(true));
       privateRecipientList.appendChild(option.cloneNode(true));
     });
@@ -121,6 +125,7 @@ document.getElementById("sendPrivateNoteBtn").addEventListener("click", () => {
     to,
     from,
     message,
+    color: "#ccc",
     private: true
   }).then(() => {
     alert("Private note sent!");
@@ -128,12 +133,14 @@ document.getElementById("sendPrivateNoteBtn").addEventListener("click", () => {
   });
 });
 
-// Display name
+// Update display name
 document.getElementById("saveDisplayName").addEventListener("click", () => {
-  const newName = document.getElementById("displayNameInput").value;
+  const newName = document.getElementById("displayNameInput").value.trim();
   const userId = auth.currentUser.uid;
-  const userRef = ref(db, `users/${userId}`);
 
+  if (!newName) return alert("Please enter a display name.");
+
+  const userRef = ref(db, `users/${userId}`);
   update(userRef, {
     displayName: newName
   }).then(() => {
@@ -142,6 +149,7 @@ document.getElementById("saveDisplayName").addEventListener("click", () => {
   });
 });
 
+// Update welcome message
 function updateWelcomeMessage(uid) {
   const userRef = ref(db, `users/${uid}`);
   onValue(userRef, (snapshot) => {
@@ -150,7 +158,7 @@ function updateWelcomeMessage(uid) {
   });
 }
 
-// Logout
+// Logout function
 window.logout = function () {
   signOut(auth).then(() => {
     alert("Logged out");
@@ -158,21 +166,13 @@ window.logout = function () {
   });
 };
 
-// Tab switching
-document.querySelectorAll('.tab-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const target = btn.dataset.tab;
-
-    document.querySelectorAll('.tab-section').forEach((section) => {
-      section.style.display = "none";
-    });
-
-    document.querySelector(`#${target}`).style.display = "block";
-
-    document.querySelectorAll('.tab-btn').forEach((b) => {
-      b.classList.remove("active-tab");
-    });
-
-    btn.classList.add("active-tab");
+// Tab switching using showTab()
+window.showTab = function (tabId) {
+  document.querySelectorAll(".tab-section").forEach((section) => {
+    section.style.display = "none";
   });
-});
+  const target = document.getElementById(tabId);
+  if (target) {
+    target.style.display = "block";
+  }
+};
