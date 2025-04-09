@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sticky Note App</title>
+  <title>Sticky Note Web</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <!-- Login/Register Form -->
+
   <div id="auth-area">
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Email" />
@@ -17,85 +16,31 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
-  <!-- App Container (Hidden until logged in) -->
-  <div id="app-container" style="display: none; flex: 1; flex-direction: row;">
-    <!-- Main Sticky Note App -->
-    <main style="flex: 1;">
-      <h1>Sticky Notes</h1>
-      <input type="text" id="displayNameInput" placeholder="Enter Display Name" />
-      <button id="saveDisplayName">Save Display Name</button>
-      <button id="createNote">Create Note</button>
-      <div id="notesContainer"></div>
-    </main>
+  <div id="app-container" style="display: none;">
+    <h2 id="welcomeMessage"></h2>
 
-    <!-- Sidebar for Online/Offline -->
-    <aside id="sidebar" style="width: 250px; padding: 10px; border-left: 1px solid #ccc;">
-      <h3>Online Users (<span id="onlineCount">0</span>)</h3>
-      <ul id="onlineUsers"></ul>
+    <section id="mailbox">
+      <h3>Your Mailbox</h3>
+      <ul id="receivedNotes"></ul>
+    </section>
 
-      <h3>Offline Users (<span id="offlineCount">0</span>)</h3>
-      <ul id="offlineUsers"></ul>
-
-      <h3>People with No Display Name:</h3>
-      <ul id="noDisplayUsers"></ul>
-    </aside>
+    <section id="createNoteSection">
+      <h3>Create a Sticky Note</h3>
+      <select id="recipientList"></select><br />
+      <textarea id="noteMessage" placeholder="Write your note here..."></textarea><br />
+      <select id="noteColor">
+        <option value="yellow">Yellow</option>
+        <option value="pink">Pink</option>
+        <option value="lightblue">Blue</option>
+        <option value="lightgreen">Green</option>
+      </select>
+      <button id="sendNote">Send Note</button>
+    </section>
   </div>
 
-  <!-- Firebase Init -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
-      authDomain: "stickynoteapp-883b8.firebaseapp.com",
-      projectId: "stickynoteapp-883b8",
-      storageBucket: "stickynoteapp-883b8.appspot.com",
-      messagingSenderId: "637398429722",
-      appId: "1:637398429722:web:e3f58a02328e68b75961a3",
-      measurementId: "G-D27CEZ4WJN"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase();
-
-    // Handle authentication state change
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("auth-area").style.display = "none"; // Hide login form
-        document.getElementById("app-container").style.display = "flex"; // Show app content
-      } else {
-        document.getElementById("auth-area").style.display = "block"; // Show login form
-        document.getElementById("app-container").style.display = "none"; // Hide app content
-      }
-    });
-
-    // Login function
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password).catch((error) => {
-        alert(error.message);
-      });
-    }
-
-    // Sign up function
-    function signup() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, password).catch((error) => {
-        alert(error.message);
-      });
-    }
-  </script>
-
-  <!-- Scripts -->
+  <!-- Firebase + Scripts -->
   <script type="module" src="firebase-init.js"></script>
-  <script type="module" src="auth.js"></script>
-  <script type="module" src="presence.js"></script>
+  <script src="auth.js"></script>
   <script type="module" src="main.js"></script>
 </body>
 </html>
