@@ -1,6 +1,21 @@
 // Initialize Firebase (your own config here)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn?.addEventListener("click", () => {
+  signOut(auth)
+    .then(() => {
+      alert("You have been logged out.");
+      window.location.reload(); // or redirect to login page if you have one
+    })
+    .catch((error) => {
+      console.error("Logout error:", error);
+      alert("Error logging out.");
+    });
+});
 
 // Firebase configuration
 const firebaseConfig = {
