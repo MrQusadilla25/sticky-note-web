@@ -9,34 +9,25 @@ import {
   getDatabase,
   ref,
   set,
-  get
+  update
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
+// Initialize Firebase services
 const auth = getAuth();
 const db = getDatabase();
-window.auth = auth;
 
-// Helper function for email validation
-function isValidEmail(email) {
-  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-  return re.test(email);
-}
+// Make available globally if needed elsewhere
+window.auth = auth;
+window.db = db;
 
 // Signup function
 window.signup = function () {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const email = document.getElementById("email")?.value.trim();
+  const password = document.getElementById("password")?.value.trim();
 
   if (!email || !password) {
     return alert("Please fill out both email and password fields.");
   }
-
-  if (!isValidEmail(email)) {
-    return alert("Please enter a valid email address.");
-  }
-
-  // Show loading spinner (optional)
-  document.getElementById("loading-spinner").style.display = "block";
 
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -52,55 +43,54 @@ window.signup = function () {
       alert("Account created successfully!");
       showApp();
     })
-    .catch((err) => {
-      alert("Signup Error: " + err.message);
-    })
-    .finally(() => {
-      document.getElementById("loading-spinner").style.display = "none"; // Hide loading spinner
-    });
+    .catch((err) => alert("Signup Error: " + err.message));
 };
 
 // Login function
 window.login = function () {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const email = document.getElementById("email")?.value.trim();
+  const password = document.getElementById("password")?.value.trim();
 
   if (!email || !password) {
     return alert("Please fill out both email and password fields.");
   }
 
-  if (!isValidEmail(email)) {
-    return alert("Please enter a valid email address.");
-  }
-
-  // Show loading spinner (optional)
-  document.getElementById("loading-spinner").style.display = "block";
-
   signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      return update(ref(db, `users/${user.uid}`), {
+        status: "online"
+      });
+    })
     .then(() => {
       alert("Logged in successfully!");
       showApp();
     })
-    .catch((err) => {
-      alert("Login Error: " + err.message);
-    })
-    .finally(() => {
-      document.getElementById("loading-spinner").style.display = "none"; // Hide loading spinner
-    });
+    .catch((err) => alert("Login Error: " + err.message));
 };
 
 // Logout function
 window.logout = function () {
-  signOut(auth)
-    .then(() => {
-      alert("Logged out!");
-      location.reload();
-    })
-    .catch((err) => alert("Logout Error: " + err.message));
+  const user = auth.currentUser;
+  if (user) {
+    update(ref(db, `users/${user.uid}`), {
+      status: "offline"
+    }).finally(() => {
+      signOut(auth)
+        .then(() => {
+          alert("Logged out!");
+          location.reload();
+        })
+        .catch((err) => alert("Logout Error: " + err.message));
+    });
+  }
 };
 
-// UI Switch Helper
+// Helper to switch to app view
 function showApp() {
-  document.getElementById("auth-area").style.display = "none";
-  document.getElementById("app-container").style.display = "flex";
+  const authArea = document.getElementById("auth-area");
+  const appContainer = document.getElementById("app-container");
+
+  if (authArea) authArea.style.display = "none";
+  if (appContainer) appContainer.style.display = "flex";
 }
