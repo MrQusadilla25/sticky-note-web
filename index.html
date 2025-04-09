@@ -1,38 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theme Switcher</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sticky Notes</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-    <div id="auth-area">
-        <div>
-            <label for="themeToggle">Dark Mode</label>
-            <input type="checkbox" id="themeToggle">
-        </div>
+  <!-- Auth Section -->
+  <div id="auth-area">
+    <h2>Login or Sign Up</h2>
+    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+  </div>
+
+  <!-- Main App (Initially hidden) -->
+  <div id="app-container" style="display: none;">
+    <!-- Sidebar Navigation -->
+    <div id="sidebar">
+      <button onclick="showTab('home')">Home</button>
+      <button onclick="showTab('public')">Public Note</button>
+      <button onclick="showTab('private')">Private Note</button>
+      <button onclick="showTab('display')">Display Name</button>
+      <button onclick="logout()">Log Out</button>
     </div>
 
-    <div id="app-container">
-        <div id="sidebar">
-            <h2>Sidebar</h2>
-            <button class="tab-btn" data-tab="home">Home</button>
-            <button class="tab-btn" data-tab="profile">Profile</button>
-        </div>
+    <!-- Tabbed Content -->
+    <div id="tab-content">
+      <!-- Home Tab -->
+      <section id="home" class="tab-section active-tab">
+        <h2 id="welcomeMessage">Welcome!</h2>
+        <h3>Your Mailbox</h3>
+        <ul id="receivedNotes"></ul>
+      </section>
 
-        <div id="main-content">
-            <div id="home" class="tab-content active">
-                <h1>Home Tab</h1>
-                <p>This is the home content.</p>
-            </div>
-            <div id="profile" class="tab-content">
-                <h1>Profile Tab</h1>
-                <p>This is the profile content.</p>
-            </div>
-        </div>
+      <!-- Public Note Tab -->
+      <section id="public" class="tab-section">
+        <h3>Create a Public Sticky Note</h3>
+        <select id="recipientList"></select>
+        <textarea id="noteMessage" placeholder="Write your note..."></textarea>
+        <select id="noteColor">
+          <option value="yellow">Yellow</option>
+          <option value="pink">Pink</option>
+          <option value="lightblue">Blue</option>
+          <option value="lightgreen">Green</option>
+        </select>
+        <button id="sendNote">Send Note</button>
+      </section>
+
+      <!-- Private Note Tab -->
+      <section id="private" class="tab-section">
+        <h3>Send a Private Sticky Note</h3>
+        <select id="privateRecipientList"></select>
+        <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea>
+        <button id="sendPrivateNoteBtn">Send Private Note</button>
+      </section>
+
+      <!-- Display Name Tab -->
+      <section id="display" class="tab-section">
+        <h3>Change Your Display Name</h3>
+        <input type="text" id="displayNameInput" placeholder="Enter new name..." />
+        <button id="saveDisplayName">Save Name</button>
+      </section>
     </div>
+  </div>
 
-    <script src="script.js"></script>
+  <!-- Scripts -->
+  <script type="module" src="firebase-init.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
+
 </html>
