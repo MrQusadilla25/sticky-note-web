@@ -1,46 +1,55 @@
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const auth = getAuth();
-window.auth = auth; // make it accessible globally for other files
+const db = getDatabase();
+window.auth = auth;
 
-const authArea = document.getElementById("auth-area");
-const appContainer = document.getElementById("app-container");
-
-// LOGIN
-window.login = function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      console.log("Logged in!");
-    })
-    .catch((error) => {
-      alert("Login failed: " + error.message);
-    });
-};
-
-// SIGN UP
 window.signup = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   createUserWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      alert("Account created! Now you can log in.");
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const userRef = ref(db, `users/${user.uid}`);
+      set(userRef, {
+        email: user.email,
+        displayName: "NO DISPLAY NAME",
+        status: "online"
+      }).then(() => {
+        alert("Account created successfully!");
+        // Redirect to app or show login screen
+      }).catch((error) => {
+        alert("Error saving user info: " + error.message);
+      });
     })
     .catch((error) => {
-      alert("Sign-up failed: " + error.message);
+      alert(error.message);
     });
 };
 
-// HANDLE LOGGED IN/OUT
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    authArea.style.display = "none";
-    appContainer.style.display = "flex";
-  } else {
-    authArea.style.display = "block";
-    appContainer.style.display = "none";
-  }
-});
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const userRef = ref(db, `users/${user.uid}`);
+      // Ensure user record is created if not exists
+      set(userRef, {
+        email: user.email,
+        displayName: "NO DISPLAY NAME",
+        status: "online"
+      }).then(() => {
+        alert("Login successful!");
+        // Redirect to app or show dashboard
+      }).catch((error) => {
+        alert("Error saving user info: " + error.message);
+      });
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+};
