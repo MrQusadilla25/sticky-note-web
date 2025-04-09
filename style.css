@@ -28,6 +28,16 @@ body {
   overflow: hidden;
 }
 
+body.light {
+  --bg: #fff;
+  --text: #111;
+  --card: #f9f9f9;
+  --accent: #444;
+  --accent-hover: #333;
+  --input-border: #ccc;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
 #auth-area {
   margin: auto;
   max-width: 400px;
@@ -129,25 +139,4 @@ button {
 
 button:hover {
   background-color: var(--accent-hover);
-}
-
-#receivedNotes li {
-  padding: 10px;
-  border-radius: 5px;
-  margin: 5px 0;
-  list-style: none;
-  background-color: var(--bg);
-  color: var(--text);
-}
-
-li[data-status="online"]::before {
-  content: "●";
-  color: limegreen;
-  margin-right: 5px;
-}
-
-li[data-status="offline"]::before {
-  content: "●";
-  color: gray;
-  margin-right: 5px;
 }
