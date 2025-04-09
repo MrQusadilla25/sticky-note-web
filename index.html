@@ -1,4 +1,3 @@
-<!-- v1.0.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +8,7 @@
 </head>
 <body>
 
+  <!-- AUTH AREA -->
   <div id="auth-area">
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Email" />
@@ -17,20 +17,24 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
-  <div id="app-container" style="display: none;">
+  <!-- APP AREA -->
+  <div id="app-container" style="display: none; flex-direction: column; gap: 20px;">
     <h2 id="welcomeMessage"></h2>
 
-    <section id="mailbox">
+    <div>
+      <label>Display Name:</label>
+      <input type="text" id="displayNameInput" placeholder="e.g. Dylan" />
+      <button id="saveDisplayName">Save</button>
+    </div>
+
+    <section>
       <h3>Your Mailbox</h3>
       <ul id="receivedNotes"></ul>
     </section>
 
-    <section id="createNoteSection">
+    <section>
       <h3>Create a Sticky Note</h3>
-      <select id="recipientList">
-        <option disabled selected>Select a recipient</option>
-      </select><br />
-      <textarea id="noteMessage" rows="5" cols="40" placeholder="Write your note here..."></textarea><br />
+      <textarea id="noteMessage" placeholder="Write your note here..."></textarea><br />
       <select id="noteColor">
         <option value="yellow">Yellow</option>
         <option value="pink">Pink</option>
@@ -39,12 +43,16 @@
       </select>
       <button id="sendNote">Send Note</button>
     </section>
+
+    <section>
+      <h3>All Notes</h3>
+      <div id="notesContainer"></div>
+    </section>
   </div>
 
   <!-- Firebase + Scripts -->
   <script type="module" src="firebase-init.js"></script>
-  <script type="module" src="auth.js"></script>
+  <script src="auth.js"></script>
   <script type="module" src="main.js"></script>
 </body>
 </html>
-
