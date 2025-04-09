@@ -1,8 +1,8 @@
-import { db, auth } from './firebase-init.js'; // Make sure `auth` is also exported from firebase-init.js
+import { db, auth } from './firebase-init.js'; // Make sure `auth` is exported from firebase-init.js
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-// Elements
+// DOM Elements
 const onlineList = document.getElementById("onlineUsers");
 const offlineList = document.getElementById("offlineUsers");
 const noDisplayList = document.getElementById("noDisplayUsers");
@@ -10,7 +10,7 @@ const onlineCount = document.getElementById("onlineCount");
 const offlineCount = document.getElementById("offlineCount");
 const sidebar = document.getElementById("sidebar");
 
-// Listen for auth state
+// Auth state listener
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     sidebar.style.display = "none";
@@ -18,11 +18,11 @@ onAuthStateChanged(auth, (user) => {
   }
 
   sidebar.style.display = "block";
-
   const usersRef = ref(db, "users");
 
-  // Get users data
+  // Realtime listener for users data
   onValue(usersRef, (snapshot) => {
+    // Reset lists
     onlineList.innerHTML = "";
     offlineList.innerHTML = "";
     noDisplayList.innerHTML = "";
@@ -32,19 +32,19 @@ onAuthStateChanged(auth, (user) => {
 
     const users = [];
 
-    // Loop through users in the database
+    // Build user list
     snapshot.forEach((childSnapshot) => {
       const data = childSnapshot.val();
       users.push({
-        displayName: data.displayName?.trim() || "NO DISPLAY NAME", // Handling missing displayName
-        status: data.status || "offline" // Default status is 'offline'
+        displayName: data.displayName?.trim() || "NO DISPLAY NAME",
+        status: data.status || "offline"
       });
     });
 
-    // Sort users alphabetically by displayName
+    // Sort alphabetically by display name
     users.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    // Loop through sorted users and populate the lists
+    // Categorize and render users
     users.forEach(({ displayName, status }) => {
       const li = document.createElement("li");
       li.textContent = `${displayName} - ${status}`;
@@ -61,7 +61,7 @@ onAuthStateChanged(auth, (user) => {
       }
     });
 
-    // Update online and offline count
+    // Update UI counters
     onlineCount.textContent = online;
     offlineCount.textContent = offline;
   });
