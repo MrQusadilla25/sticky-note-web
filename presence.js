@@ -1,4 +1,4 @@
-import { db } from './firebase-init.js';
+import { db, auth } from './firebase-init.js'; // Make sure `auth` is also exported from firebase-init.js
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
@@ -10,13 +10,14 @@ const onlineCount = document.getElementById("onlineCount");
 const offlineCount = document.getElementById("offlineCount");
 const sidebar = document.getElementById("sidebar");
 
-onAuthStateChanged(window.auth, (user) => {
+onAuthStateChanged(auth, (user) => {
   if (!user) {
     sidebar.style.display = "none";
     return;
   }
 
   sidebar.style.display = "block";
+
   const usersRef = ref(db, "users");
 
   onValue(usersRef, (snapshot) => {
@@ -32,12 +33,12 @@ onAuthStateChanged(window.auth, (user) => {
     snapshot.forEach((childSnapshot) => {
       const data = childSnapshot.val();
       users.push({
-        displayName: data.displayName || "NO DISPLAY NAME",
+        displayName: data.displayName?.trim() || "NO DISPLAY NAME",
         status: data.status || "offline"
       });
     });
 
-    // Optional: sort alphabetically by displayName
+    // Sort alphabetically by displayName
     users.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     users.forEach(({ displayName, status }) => {
