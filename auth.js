@@ -1,5 +1,5 @@
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const auth = getAuth();
 const db = getDatabase();
@@ -16,15 +16,20 @@ window.signup = function () {
     .then((userCredential) => {
       const user = userCredential.user;
       const userRef = ref(db, `users/${user.uid}`);
+      
+      // Save user information to the database
       set(userRef, {
         email: user.email,
         displayName: "NO DISPLAY NAME",
         status: "online"
       }).then(() => {
         alert("Account created successfully!");
-        // Hide the login area and show the app content
+        
+        // Hide the login screen and show the app content
         authArea.style.display = "none";
         appContainer.style.display = "block";
+        
+        // Load user data after sign-up
         loadUserData(user.uid);
       }).catch((error) => {
         alert("Error saving user info: " + error.message);
@@ -43,16 +48,20 @@ window.login = function () {
     .then((userCredential) => {
       const user = userCredential.user;
       const userRef = ref(db, `users/${user.uid}`);
-      // Ensure user record is created if not exists
+      
+      // Save user information (if it's not already created)
       set(userRef, {
         email: user.email,
         displayName: "NO DISPLAY NAME",
         status: "online"
       }).then(() => {
         alert("Login successful!");
-        // Hide the login area and show the app content
+        
+        // Hide the login screen and show the app content
         authArea.style.display = "none";
         appContainer.style.display = "block";
+        
+        // Load user data after login
         loadUserData(user.uid);
       }).catch((error) => {
         alert("Error saving user info: " + error.message);
@@ -63,8 +72,11 @@ window.login = function () {
     });
 };
 
+// Function to load user data after login or signup
 function loadUserData(userId) {
   const userRef = ref(db, `users/${userId}`);
+  
+  // Fetch user data and update UI
   get(userRef).then((snapshot) => {
     const userData = snapshot.val();
     if (userData) {
