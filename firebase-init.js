@@ -1,5 +1,6 @@
-// firebase-init.js
+// Initialize Firebase (your own config here)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
@@ -12,4 +13,6 @@ const firebaseConfig = {
   measurementId: "G-D27CEZ4WJN"
 };
 
-export const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+window.auth = auth;
