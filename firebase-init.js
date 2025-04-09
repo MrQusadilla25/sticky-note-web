@@ -1,7 +1,5 @@
-// Initialize Firebase (your own config here)
+// firebase-init.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
@@ -14,10 +12,4 @@ const firebaseConfig = {
   measurementId: "G-D27CEZ4WJN"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app); // <-- Add this line
-
-// Make globally accessible
-window.auth = auth;
-window.db = db;
+export const app = initializeApp(firebaseConfig);
