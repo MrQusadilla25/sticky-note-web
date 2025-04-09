@@ -1,99 +1,161 @@
-import { getDatabase, ref, get, push, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { getDatabase, ref, get, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const db = getDatabase();
 const auth = window.auth;
 
-const welcomeMessage = document.getElementById("welcomeMessage");
+const notesContainer = document.getElementById("notesContainer");
+const createNoteBtn = document.getElementById("createNote");
 const displayNameInput = document.getElementById("displayNameInput");
 const saveDisplayNameBtn = document.getElementById("saveDisplayName");
-const noteMessage = document.getElementById("noteMessage");
-const noteColor = document.getElementById("noteColor");
-const sendNote = document.getElementById("sendNote");
-const notesContainer = document.getElementById("notesContainer");
+const recipientList = document.getElementById("recipientList");
+const sendPrivateNoteBtn = document.getElementById("sendPrivateNoteBtn");
+const privateNoteMessage = document.getElementById("privateNoteMessage");
+const privateRecipientList = document.getElementById("privateRecipientList");
 
+// Show welcome message + load notes after auth
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   const userRef = ref(db, `users/${user.uid}`);
   const snapshot = await get(userRef);
-  const userData = snapshot.val() || {};
-  const name = userData.displayName || "User";
+  const userData = snapshot.val();
 
-  const isAdmin = user.email && user.email === "dylanfumn@gmail.com";
-  welcomeMessage.innerText = isAdmin
-    ? `Hello ${name}, you're an admin btw <3`
-    : `Hi there, ${name}!`;
+  const name = userData?.displayName || "User";
+  const isAdmin = user.email === "dylanfumn@gmail.com";
 
-  loadNotes(user.uid, isAdmin);
+  const welcomeDiv = document.createElement("div");
+  welcomeDiv.style.marginBottom = "20px";
+  welcomeDiv.innerHTML = isAdmin
+    ? `<h2>Hello ${name}, you're an admin btw <3</h2>`
+    : `<h2>Hi there, ${name}!</h2>`;
+  document.body.prepend(welcomeDiv);
+
+  loadNotes(user.uid, isAdmin); // Load all notes
+
+  loadUsersForPrivateNotes(isAdmin); // Load users for sending private notes
 });
 
+// Save display name
 saveDisplayNameBtn.addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) return;
-  const name = displayNameInput.value.trim();
-  if (!name) return alert("Enter a name first.");
-  await set(ref(db, `users/${user.uid}`), { displayName: name });
-  alert("Display name saved! Reload to see it.");
+  const newName = displayNameInput.value.trim();
+  if (!newName) return alert("Please enter a display name.");
+  await push(ref(db, `users/${user.uid}`), { displayName: newName });
+  alert("Display name saved! Reload to update.");
 });
 
-sendNote.addEventListener("click", async () => {
+// Create note
+createNoteBtn.addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) return;
 
-  const userSnapshot = await get(ref(db, `users/${user.uid}`));
-  const userData = userSnapshot.val();
-  if (!userData || !userData.displayName) {
-    return alert("Please set your display name first.");
+  const userRef = ref(db, `users/${user.uid}`);
+  const snapshot = await get(userRef);
+  const userData = snapshot.val();
+
+  if (!userData || !userData.displayName || userData.displayName === "NO DISPLAY NAME") {
+    alert("⚠️ You must set a display name in settings before posting a sticky note!");
+    return;
   }
 
-  const text = noteMessage.value.trim();
-  const color = noteColor.value;
-  if (!text) return alert("Write something!");
-
-  await push(ref(db, "notes"), {
-    text,
-    color,
-    author: user.uid,
-    authorName: userData.displayName,
-    timestamp: Date.now()
-  });
-
-  noteMessage.value = "";
+  const noteText = prompt("Write your sticky note:");
+  if (noteText) {
+    const noteRef = push(ref(db, "notes"));
+    await noteRef.set({
+      text: noteText,
+      author: user.uid,
+      authorName: userData.displayName,
+      timestamp: Date.now(),
+    });
+  }
 });
 
+// Send a private sticky note
+sendPrivateNoteBtn.addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const recipientUID = privateRecipientList.value;
+  const noteText = privateNoteMessage.value.trim();
+  if (!noteText) return alert("Please write a private note.");
+
+  const userRef = ref(db, `users/${recipientUID}`);
+  const snapshot = await get(userRef);
+  const recipientData = snapshot.val();
+  
+  if (!recipientData) {
+    alert("Recipient not found.");
+    return;
+  }
+
+  // Store private note
+  const privateNoteRef = push(ref(db, `privateNotes/${recipientUID}`));
+  await privateNoteRef.set({
+    text: noteText,
+    sender: user.uid,
+    senderName: user.displayName,
+    timestamp: Date.now(),
+  });
+  alert("Private note sent!");
+});
+
+// Load notes from database
 function loadNotes(currentUID, isAdmin) {
   const notesRef = ref(db, "notes");
   onValue(notesRef, (snapshot) => {
-    notesContainer.innerHTML = "";
+    notesContainer.innerHTML = ""; // Clear
+
     snapshot.forEach((child) => {
-      const note = child.val();
+      const noteData = child.val();
       const noteId = child.key;
 
-      const div = document.createElement("div");
-      div.className = "note";
-      div.style.backgroundColor = note.color || "yellow";
-      div.style.padding = "10px";
-      div.style.marginBottom = "10px";
-      div.style.borderRadius = "5px";
-
-      div.innerHTML = `
-        <p>${note.text}</p>
-        <small>By: ${note.authorName}</small>
+      const noteDiv = document.createElement("div");
+      noteDiv.className = "note";
+      noteDiv.innerHTML = `
+        <p>${noteData.text}</p>
+        <small>By: ${noteData.authorName}</small>
       `;
 
+      // Add delete button for admins
       if (isAdmin) {
-        const btn = document.createElement("button");
-        btn.textContent = "🗑️ Delete";
-        btn.onclick = () => {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "🗑️ Delete";
+        delBtn.style.marginLeft = "10px";
+        delBtn.onclick = () => {
           if (confirm("Delete this note?")) {
-            remove(ref(db, `notes/${noteId}`));
+            ref(db, `notes/${noteId}`).remove();
           }
         };
-        div.appendChild(btn);
+        noteDiv.appendChild(delBtn);
       }
 
-      notesContainer.appendChild(div);
+      notesContainer.appendChild(noteDiv);
+    });
+  });
+}
+
+// Load users for sending private notes (Admins see name + email, regular users see only names)
+function loadUsersForPrivateNotes(isAdmin) {
+  const usersRef = ref(db, "users");
+  onValue(usersRef, (snapshot) => {
+    privateRecipientList.innerHTML = ""; // Clear
+
+    snapshot.forEach((userChild) => {
+      const userData = userChild.val();
+      if (userData.displayName) {
+        const option = document.createElement("option");
+        option.value = userChild.key;
+
+        if (isAdmin) {
+          option.textContent = `${userData.displayName} (${userData.email})`;
+        } else {
+          option.textContent = userData.displayName;
+        }
+
+        privateRecipientList.appendChild(option);
+      }
     });
   });
 }
