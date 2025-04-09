@@ -49,6 +49,7 @@ body {
   padding: 20px;
   width: 220px;
   height: 100%;
+  overflow-y: auto;
   box-shadow: 2px 0 5px var(--shadow);
 }
 
@@ -71,6 +72,12 @@ body {
 
 .tab-btn:hover {
   background-color: var(--accent-hover);
+}
+
+.tab-btn.active-tab {
+  background-color: var(--accent-hover);
+  color: white;
+  font-weight: bold;
 }
 
 #main-content {
@@ -143,10 +150,4 @@ li[data-status="offline"]::before {
   content: "●";
   color: gray;
   margin-right: 5px;
-}
-
-.tab-btn.active-tab {
-  background-color: #222;
-  color: white;
-  font-weight: bold;
 }
