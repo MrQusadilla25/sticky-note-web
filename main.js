@@ -1,10 +1,9 @@
-import { getDatabase, ref, set, push, get, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { getDatabase, ref, set, push, get, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const db = getDatabase();
 const auth = window.auth;
 
-// UI Elements
 const recipientList = document.getElementById("recipientList");
 const sendPrivateNoteBtn = document.getElementById("sendPrivateNoteBtn");
 const privateNoteMessage = document.getElementById("privateNoteMessage");
@@ -27,16 +26,11 @@ onAuthStateChanged(auth, async (user) => {
   const userData = snapshot.val();
 
   const displayName = userData?.displayName || "NO DISPLAY NAME";
-  const isAdmin = user.email === "dylanfumn@gmail.com";
+  const isAdmin = user.email === "admin@example.com"; // Update the admin email as necessary
 
   document.getElementById("welcomeMessage").textContent = isAdmin
     ? `Welcome back, ${displayName} (Admin)`
     : `Welcome, ${displayName}!`;
-
-  // Pre-fill display name input
-  if (displayNameInput && displayName !== "NO DISPLAY NAME") {
-    displayNameInput.value = displayName;
-  }
 
   loadMailbox(user.uid);
   loadUsersForPrivateNotes(isAdmin);
@@ -50,16 +44,13 @@ saveDisplayNameBtn?.addEventListener("click", async () => {
   const newName = displayNameInput.value.trim();
   if (!newName) return alert("Please enter a display name.");
 
-  try {
-    await update(ref(db, `users/${user.uid}`), {
-      displayName: newName
-    });
+  await set(ref(db, `users/${user.uid}`), {
+    displayName: newName,
+    email: user.email,
+    status: "online"
+  });
 
-    alert("Display name updated! Reload the page to see changes.");
-  } catch (error) {
-    console.error("Error updating display name:", error);
-    alert("Something went wrong while saving your name.");
-  }
+  alert("Display name saved! Reload the page to see updates.");
 });
 
 // Send public sticky note
@@ -135,11 +126,23 @@ function loadUsersForPrivateNotes(isAdmin) {
     privateRecipientList.innerHTML = "";
     recipientList.innerHTML = "";
 
+    if (!snapshot.exists()) {
+      const opt = document.createElement("option");
+      opt.textContent = "No users available";
+      opt.disabled = true;
+      privateRecipientList.appendChild(opt);
+      recipientList.appendChild(opt.cloneNode(true));
+      return;
+    }
+
     snapshot.forEach((child) => {
       const user = child.val();
       const uid = child.key;
 
-      if (!user.displayName) return;
+      // Skip self
+      if (auth.currentUser.uid === uid) return;
+
+      if (!user.displayName || user.displayName === "NO DISPLAY NAME") return;
 
       const label = isAdmin
         ? `${user.displayName} (${user.email})`
@@ -152,5 +155,14 @@ function loadUsersForPrivateNotes(isAdmin) {
       privateRecipientList.appendChild(option);
       recipientList.appendChild(option.cloneNode(true));
     });
+
+    // If still empty, show "No users available"
+    if (privateRecipientList.children.length === 0) {
+      const opt = document.createElement("option");
+      opt.textContent = "No users available";
+      opt.disabled = true;
+      privateRecipientList.appendChild(opt);
+      recipientList.appendChild(opt.cloneNode(true));
+    }
   });
 }
