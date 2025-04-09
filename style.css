@@ -144,3 +144,9 @@ li[data-status="offline"]::before {
   color: gray;
   margin-right: 5px;
 }
+
+.tab-btn.active-tab {
+  background-color: #222;
+  color: white;
+  font-weight: bold;
+}
