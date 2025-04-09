@@ -8,7 +8,6 @@
 </head>
 <body>
 
-  <!-- Auth Area -->
   <div id="auth-area">
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Email" />
@@ -17,36 +16,30 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
-  <!-- App Container -->
   <div id="app-container" style="display: none;">
-    
-    <!-- Tab Navigation -->
-    <div id="tabNav">
-      <button class="tabBtn" data-tab="dashboardTab">Dashboard</button>
-      <button class="tabBtn" data-tab="publicNotesTab">Public Notes</button>
-      <button class="tabBtn" data-tab="privateNotesTab">Private Notes</button>
-      <button class="tabBtn" data-tab="settingsTab">Settings</button>
-      <button id="logoutBtn" class="tabBtn" style="float:right; background-color:#e74c3c;">Logout</button>
+    <div id="sidebar">
+      <h2>Sticky Note Web</h2>
+      <button class="tab-btn" onclick="showTab('tab-home')">Home</button>
+      <button class="tab-btn" onclick="showTab('tab-create')">Create Note</button>
+      <button class="tab-btn" onclick="showTab('tab-private')">Private Note</button>
+      <button class="tab-btn" onclick="showTab('tab-display')">Display Name</button>
+      <button id="logoutBtn" class="tab-btn">Log Out</button>
+      <button id="darkModeToggle" class="tab-btn">Toggle Dark Mode</button>
     </div>
 
-    <!-- Tabs Content -->
-    <div id="tabContent">
-      
-      <!-- Dashboard -->
-      <div id="dashboardTab" class="tabSection">
-        <h2>Welcome</h2>
-        <p id="welcomeMessage"></p>
+    <div id="main-content">
+      <div id="tab-home" class="tab-content active">
+        <h2 id="welcomeMessage">Welcome!</h2>
         <section id="mailbox">
           <h3>Your Mailbox</h3>
           <ul id="receivedNotes"></ul>
         </section>
       </div>
 
-      <!-- Public Notes -->
-      <div id="publicNotesTab" class="tabSection" style="display:none;">
-        <h2>Create a Public Note</h2>
-        <select id="recipientList"></select><br />
-        <textarea id="noteMessage" placeholder="Write your note here..."></textarea><br />
+      <div id="tab-create" class="tab-content">
+        <h3>Create a Sticky Note</h3>
+        <select id="recipientList"></select>
+        <textarea id="noteMessage" placeholder="Write your note here..."></textarea>
         <select id="noteColor">
           <option value="yellow">Yellow</option>
           <option value="pink">Pink</option>
@@ -56,37 +49,35 @@
         <button id="sendNote">Send Note</button>
       </div>
 
-      <!-- Private Notes -->
-      <div id="privateNotesTab" class="tabSection" style="display:none;">
-        <h2>Send a Private Note</h2>
-        <select id="privateRecipientList"></select><br />
-        <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea><br />
+      <div id="tab-private" class="tab-content">
+        <h3>Send a Private Sticky Note</h3>
+        <select id="privateRecipientList"></select>
+        <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea>
         <button id="sendPrivateNoteBtn">Send Private Note</button>
       </div>
 
-      <!-- Settings -->
-      <div id="settingsTab" class="tabSection" style="display:none;">
-        <h2>Settings</h2>
-        <h3>Change Display Name</h3>
+      <div id="tab-display" class="tab-content">
+        <h3>Change Your Display Name</h3>
         <input type="text" id="displayNameInput" placeholder="Enter new display name..." />
         <button id="saveDisplayName">Save Name</button>
       </div>
-
     </div>
   </div>
 
-  <!-- Firebase + Scripts -->
+  <!-- Scripts -->
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
   <script>
-    // Tab switching logic
-    document.querySelectorAll(".tabBtn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const target = btn.getAttribute("data-tab");
-        document.querySelectorAll(".tabSection").forEach(tab => tab.style.display = "none");
-        if (target) document.getElementById(target).style.display = "block";
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
       });
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    document.getElementById("darkModeToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
     });
   </script>
 </body>
