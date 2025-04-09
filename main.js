@@ -1,74 +1,54 @@
-import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const db = getDatabase();
 const auth = window.auth;
 
-onAuthStateChanged(auth, (user) => {
+document.getElementById("createNote").addEventListener("click", async () => {
+  const user = auth.currentUser;
   if (!user) return;
 
-  // Show app, hide login
-  document.getElementById("auth-area").style.display = "none";
-  document.getElementById("app-container").style.display = "block";
+  const userRef = ref(db, `users/${user.uid}`);
+  const snapshot = await get(userRef);
+  const userData = snapshot.val();
 
-  const name = user.displayName || user.email.split("@")[0];
-  document.getElementById("welcomeMessage").innerText = `Hi there, ${name}!`;
+  if (!userData || !userData.displayName || userData.displayName === "NO DISPLAY NAME") {
+    alert("⚠️ You must set a display name in settings before posting a sticky note!");
+    return;
+  }
 
-  // Save user to DB
-  set(ref(db, `users/${user.uid}`), {
-    displayName: name,
-    email: user.email
-  });
-
-  // Load users into recipient list
-  onValue(ref(db, "users"), (snapshot) => {
-    const select = document.getElementById("recipientList");
-    select.innerHTML = "";
-    snapshot.forEach(child => {
-      if (child.key !== user.uid) {
-        const opt = document.createElement("option");
-        opt.value = child.key;
-        opt.textContent = child.val().displayName || "Unnamed";
-        select.appendChild(opt);
-      }
-    });
-  });
-
-  // Load received notes
-  onValue(ref(db, "notes"), (snapshot) => {
-    const list = document.getElementById("receivedNotes");
-    list.innerHTML = "";
-    snapshot.forEach(noteSnap => {
-      const note = noteSnap.val();
-      if (note.to === user.uid) {
-        const li = document.createElement("li");
-        li.style.backgroundColor = note.color || "yellow";
-        li.textContent = `From ${note.fromName}: ${note.message}`;
-        list.appendChild(li);
-      }
-    });
-  });
-
-  // Send note
-  document.getElementById("sendNote").addEventListener("click", () => {
-    const to = document.getElementById("recipientList").value;
-    const message = document.getElementById("noteMessage").value;
-    const color = document.getElementById("noteColor").value;
-
-    if (!to || !message) return alert("Please complete the form!");
-
-    const newNote = {
-      from: user.uid,
-      fromName: name,
-      to,
-      message,
-      color,
-      timestamp: Date.now()
+  const noteText = prompt("Write your sticky note:");
+  if (noteText) {
+    const noteId = Date.now();
+    const note = {
+      id: noteId,
+      text: noteText,
+      from: userData.displayName,
+      uid: user.uid
     };
 
-    push(ref(db, "notes"), newNote).then(() => {
-      document.getElementById("noteMessage").value = "";
-      alert("Note sent!");
-    });
-  });
+    await set(ref(db, `notes/${noteId}`), note);
+    renderNote(note, user.email);
+  }
 });
+
+function renderNote(note, userEmail) {
+  const noteDiv = document.createElement("div");
+  noteDiv.className = "note";
+  noteDiv.innerHTML = `
+    <p><strong>${note.from}:</strong> ${note.text}</p>
+  `;
+
+  // Admin-only delete button
+  if (userEmail === "dylanfumn@gmail.com") {
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "🗑 Delete";
+    delBtn.onclick = () => {
+      remove(ref(db, `notes/${note.id}`));
+      noteDiv.remove();
+    };
+    noteDiv.appendChild(delBtn);
+  }
+
+  document.getElementById("notesContainer").appendChild(noteDiv);
+}
