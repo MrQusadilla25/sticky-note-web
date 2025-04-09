@@ -3,13 +3,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  databaseURL: "YOUR_DB_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
+  authDomain: "stickynoteapp-883b8.firebaseapp.com",
+  databaseURL: "https://stickynoteapp-883b8-default-rtdb.firebaseio.com",
+  projectId: "stickynoteapp-883b8",
+  storageBucket: "stickynoteapp-883b8.appspot.com",
+  messagingSenderId: "637398429722",
+  appId: "1:637398429722:web:e3f58a02328e68b75961a3",
+  measurementId: "G-D27CEZ4WJN"
 };
 
 const app = initializeApp(firebaseConfig);
