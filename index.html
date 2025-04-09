@@ -3,82 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sticky Note Web</title>
+  <title>Sticky Note App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- AUTH AREA -->
   <div id="auth-area">
-    <h2>Login</h2>
+    <h2>Sticky Notes Login</h2>
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
+    <div class="btn-group">
+      <button onclick="login()">Login</button>
+      <button onclick="signup()">Sign Up</button>
+    </div>
   </div>
 
+  <!-- APP CONTAINER -->
   <div id="app-container" style="display: none;">
-    <div id="sidebar">
-      <h2>Sticky Note Web</h2>
-      <button class="tab-btn" onclick="showTab('tab-home')">Home</button>
-      <button class="tab-btn" onclick="showTab('tab-create')">Create Note</button>
-      <button class="tab-btn" onclick="showTab('tab-private')">Private Note</button>
-      <button class="tab-btn" onclick="showTab('tab-display')">Display Name</button>
-      <button id="logoutBtn" class="tab-btn">Log Out</button>
-      <button id="darkModeToggle" class="tab-btn">Toggle Dark Mode</button>
-    </div>
+    <aside class="sidebar">
+      <h2>Menu</h2>
+      <ul>
+        <li data-tab="tab-welcome" class="active">Welcome</li>
+        <li data-tab="tab-mailbox">Mailbox</li>
+        <li data-tab="tab-create-note">Public Note</li>
+        <li data-tab="tab-private-note">Private Note</li>
+        <li data-tab="tab-display-name">Display Name</li>
+      </ul>
+      <button id="toggleTheme">Toggle Dark Mode</button>
+      <button id="logoutBtn">Log Out</button>
+    </aside>
 
-    <div id="main-content">
-      <div id="tab-home" class="tab-content active">
+    <main class="main-content">
+      <section id="tab-welcome" class="tab active">
         <h2 id="welcomeMessage">Welcome!</h2>
-        <section id="mailbox">
-          <h3>Your Mailbox</h3>
-          <ul id="receivedNotes"></ul>
-        </section>
-      </div>
+      </section>
 
-      <div id="tab-create" class="tab-content">
-        <h3>Create a Sticky Note</h3>
-        <select id="recipientList"></select>
-        <textarea id="noteMessage" placeholder="Write your note here..."></textarea>
+      <section id="tab-mailbox" class="tab">
+        <h3>Your Mailbox</h3>
+        <ul id="receivedNotes"></ul>
+      </section>
+
+      <section id="tab-create-note" class="tab">
+        <h3>Create Public Sticky Note</h3>
+        <select id="recipientList">
+          <option disabled selected>No users loaded</option>
+        </select>
+        <textarea id="noteMessage" placeholder="Write your message..."></textarea>
         <select id="noteColor">
           <option value="yellow">Yellow</option>
           <option value="pink">Pink</option>
           <option value="lightblue">Blue</option>
           <option value="lightgreen">Green</option>
         </select>
-        <button id="sendNote">Send Note</button>
-      </div>
+        <button id="sendNote">Send Public Note</button>
+      </section>
 
-      <div id="tab-private" class="tab-content">
-        <h3>Send a Private Sticky Note</h3>
-        <select id="privateRecipientList"></select>
+      <section id="tab-private-note" class="tab">
+        <h3>Send Private Note</h3>
+        <select id="privateRecipientList">
+          <option disabled selected>No users loaded</option>
+        </select>
         <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea>
         <button id="sendPrivateNoteBtn">Send Private Note</button>
-      </div>
+      </section>
 
-      <div id="tab-display" class="tab-content">
-        <h3>Change Your Display Name</h3>
+      <section id="tab-display-name" class="tab">
+        <h3>Change Display Name</h3>
         <input type="text" id="displayNameInput" placeholder="Enter new display name..." />
         <button id="saveDisplayName">Save Name</button>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 
   <!-- Scripts -->
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
-  <script>
-    function showTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      document.getElementById(tabId).classList.add('active');
-    }
-
-    document.getElementById("darkModeToggle").addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-    });
-  </script>
 </body>
 </html>
