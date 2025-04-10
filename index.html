@@ -30,6 +30,7 @@
                 <li id="historyTab">History</li>
                 <li id="writeNoteTab">Write a Note</li>
                 <li id="settingsTab">Settings</li>
+                <li id="stickyNoteWallTab">The Sticky Note Wall</li>
                 <li id="logoutTab">Log Out</li>
             </ul>
         </div>
@@ -39,25 +40,52 @@
             <div id="mailboxTabContent" class="tab-section active-tab">
                 <h2>Hello <span id="greetingText">User</span></h2>
                 <p>Welcome to your mailbox!</p>
-                <!-- Add the Mailbox content here -->
+                <!-- You can add Mailbox content here like a list of private messages -->
+                <div id="privateMessages">
+                    <h3>Your Private Messages</h3>
+                    <ul id="messageList"></ul>
+                </div>
             </div>
 
             <!-- History Tab -->
             <div id="historyTabContent" class="tab-section">
                 <h3>Your Notes History</h3>
                 <!-- Add the history content here -->
+                <p>Here you can track all your past notes.</p>
             </div>
 
             <!-- Write a Note Tab -->
             <div id="writeNoteTabContent" class="tab-section">
                 <h3>Write a Sticky Note</h3>
-                <!-- Add the note creation content here -->
+                <label for="noteContent">Note Content:</label>
+                <textarea id="noteContent" rows="4" placeholder="Write your note..."></textarea>
+                <br><br>
+                <label for="noteType">Choose the type of note:</label>
+                <select id="noteType">
+                    <option value="private">Private</option>
+                    <option value="public">Public</option>
+                    <option value="dm">Direct Message</option>
+                </select>
+                <br><br>
+                <label for="recipient">Recipient (for DM only):</label>
+                <input type="text" id="recipient" placeholder="Enter recipient's name (optional)">
+                <br><br>
+                <button id="saveNoteButton">Save Note</button>
             </div>
 
             <!-- Settings Tab -->
             <div id="settingsTabContent" class="tab-section">
                 <h3>Settings</h3>
-                <!-- Add the settings content here -->
+                <label for="displayName">Change Display Name:</label>
+                <input type="text" id="displayName" placeholder="Enter your new display name">
+                <button id="changeDisplayNameButton">Change Name</button>
+            </div>
+
+            <!-- Sticky Note Wall Tab -->
+            <div id="stickyNoteWallTabContent" class="tab-section">
+                <h3>The Sticky Note Wall</h3>
+                <p>Here you can see all the public notes posted by others.</p>
+                <ul id="publicNotesList"></ul>
             </div>
         </div>
     </div>
@@ -68,6 +96,13 @@
 
     <script>
         // JavaScript code
+
+        // Initialize Data (This would be connected to Firebase or local storage for a real app)
+        let user = { displayName: "User" }; // Example user object
+        let publicNotes = [];
+        let privateMessages = [];
+        let allNotes = [];
+
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
             const loginButton = document.getElementById('loginButton');
@@ -79,22 +114,29 @@
             const historyTab = document.getElementById('historyTab');
             const writeNoteTab = document.getElementById('writeNoteTab');
             const settingsTab = document.getElementById('settingsTab');
+            const stickyNoteWallTab = document.getElementById('stickyNoteWallTab');
             const logoutTab = document.getElementById('logoutTab');
             const tabContent = document.getElementById('tab-content');
+            const noteContent = document.getElementById('noteContent');
+            const noteType = document.getElementById('noteType');
+            const recipient = document.getElementById('recipient');
+            const saveNoteButton = document.getElementById('saveNoteButton');
+            const displayNameInput = document.getElementById('displayName');
+            const changeDisplayNameButton = document.getElementById('changeDisplayNameButton');
+            const messageList = document.getElementById('messageList');
+            const publicNotesList = document.getElementById('publicNotesList');
 
-            // Authentication
+            // Simulate login/signup (real authentication should be done here)
             loginButton.addEventListener('click', () => {
-                // Simulate login, change this to real authentication logic
                 authArea.style.display = 'none';
                 appContainer.style.display = 'block';
-                greetingText.textContent = 'User'; // Replace with actual user name
+                greetingText.textContent = user.displayName; 
             });
 
             signupButton.addEventListener('click', () => {
-                // Simulate sign up, change this to real signup logic
                 authArea.style.display = 'none';
                 appContainer.style.display = 'block';
-                greetingText.textContent = 'User'; // Replace with actual user name
+                greetingText.textContent = user.displayName;
             });
 
             // Sidebar Tab Switching
@@ -111,6 +153,7 @@
 
             mailboxTab.addEventListener('click', () => {
                 showTab('mailboxTabContent');
+                loadPrivateMessages();
             });
 
             historyTab.addEventListener('click', () => {
@@ -125,11 +168,65 @@
                 showTab('settingsTabContent');
             });
 
+            stickyNoteWallTab.addEventListener('click', () => {
+                showTab('stickyNoteWallTabContent');
+                loadPublicNotes();
+            });
+
             logoutTab.addEventListener('click', () => {
-                // Simulate logout, change this to real logout logic
                 authArea.style.display = 'block';
                 appContainer.style.display = 'none';
             });
+
+            // Save Note Functionality
+            saveNoteButton.addEventListener('click', () => {
+                const note = noteContent.value;
+                const type = noteType.value;
+                const recipientName = recipient.value.trim();
+                
+                if (type === 'private') {
+                    privateMessages.push({ note, type, recipient: 'Me' });
+                } else if (type === 'public') {
+                    publicNotes.push({ note, type, recipient: 'All' });
+                } else if (type === 'dm' && recipientName) {
+                    privateMessages.push({ note, type, recipient: recipientName });
+                }
+                loadPublicNotes();
+                loadPrivateMessages();
+            });
+
+            // Change Display Name
+            changeDisplayNameButton.addEventListener('click', () => {
+                const newDisplayName = displayNameInput.value.trim();
+                if (newDisplayName) {
+                    user.displayName = newDisplayName;
+                    greetingText.textContent = user.displayName;
+                }
+            });
+
+            // Load Public Notes
+            function loadPublicNotes() {
+                publicNotesList.innerHTML = '';
+                publicNotes.forEach(note => {
+                    const noteItem = document.createElement('li');
+                    noteItem.textContent = `${note.recipient}: ${note.note}`;
+                    publicNotesList.appendChild(noteItem);
+                });
+            }
+
+            // Load Private Messages
+            function loadPrivateMessages() {
+                messageList.innerHTML = '';
+                privateMessages.forEach(msg => {
+                    const msgItem = document.createElement('li');
+                    msgItem.textContent = `${msg.recipient}: ${msg.note}`;
+                    messageList.appendChild(msgItem);
+                });
+            }
+
+            // Initial Load
+            loadPublicNotes();
+            loadPrivateMessages();
         });
     </script>
 </body>
