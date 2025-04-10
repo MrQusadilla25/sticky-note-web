@@ -87,10 +87,11 @@ function loadWriteNote() {
     });
 }
 
-// Load Settings (theme, display name)
+
 function loadSettings() {
     const displayNameInput = document.getElementById('displayNameInput');
     const themeSelect = document.getElementById('themeSelect');
+    const notification = document.getElementById('notification'); // Assume there's a notification div
 
     const uid = auth.currentUser.uid;
     const userRef = ref(db, 'users/' + uid);
@@ -102,6 +103,13 @@ function loadSettings() {
             displayName: newDisplayName
         }).then(() => {
             setUserDisplayName(newDisplayName);
+
+            // Display notification message
+            notification.textContent = `Display name has been changed to ${newDisplayName}.`;
+            notification.style.display = 'block';  // Show the message
+            setTimeout(() => {
+                notification.style.display = 'none';  // Hide the message after 3 seconds
+            }, 3000);
         }).catch((error) => {
             console.error('Error updating display name:', error);
         });
@@ -118,5 +126,4 @@ function loadSettings() {
             console.error('Error updating theme:', error);
         });
     });
-    autoFitContent(); // Adjust content height when settings are loaded
 }
