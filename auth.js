@@ -1,110 +1,53 @@
+// auth.js
 import { auth, db } from './firebase-init.js';
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     signOut, 
-    setPersistence, 
-    browserLocalPersistence,
-    onAuthStateChanged 
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-// Set persistence for authentication state
-setPersistence(auth, browserLocalPersistence);
-
-// Sign up function
-window.signup = async function () {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
+// Sign up
+export async function signup(email, password) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
-
+        
         // Save user info in the database
         await set(ref(db, 'users/' + uid), {
             email: email,
-            displayName: "User"
+            displayName: "User",
+            status: "offline"  // Default status
         });
-
-        // Switch to the app area after successful sign-up
-        location.reload();  // Refresh the page to trigger auth state change
     } catch (error) {
         alert(error.message);
     }
-};
-
-// Log in function
-window.login = async function () {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        location.reload();  // Refresh the page after successful login
-    } catch (error) {
-        alert(error.message);
-    }
-};
-
-// Log out function
-window.logout = async function () {
-    await signOut(auth);
-    location.reload();  // Refresh the page after logging out
-};
-
-// Handle authentication state changes
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // User is signed in
-        document.getElementById("auth-area").style.display = "none";
-        document.getElementById("app-container").style.display = "block";
-
-        // Get user data from Firebase
-        const snapshot = await get(ref(db, 'users/' + user.uid));
-        const data = snapshot.val();
-        const displayName = data?.displayName || "User";
-        window.currentUser = user;
-        window.currentDisplayName = displayName;
-
-        window.setUserDisplayName(displayName);
-        loadNotes();  // Load user notes
-
-    } else {
-        // User is signed out
-        document.getElementById("auth-area").style.display = "block";
-        document.getElementById("app-container").style.display = "none";
-    }
-});
-
-// Change Display Name
-window.setUserDisplayName = function(displayName) {
-    const greetingText = document.getElementById("greetingText");
-    greetingText.textContent = displayName;  // Display user name on the UI
-};
-
-// Load user notes from Firebase
-function loadNotes() {
-    if (!auth.currentUser) {
-        return; // Return if no user is signed in
-    }
-
-    const uid = auth.currentUser.uid;
-    const historyList = document.getElementById("noteHistory");
-    historyList.innerHTML = "";  // Clear the list before appending new items
-
-    onValue(ref(db, "users/" + uid + "/notes"), (snapshot) => {
-        historyList.innerHTML = ""; // Clear the list again to ensure it's empty
-        snapshot.forEach((childSnapshot) => {
-            const note = childSnapshot.val();
-            const li = document.createElement("li");
-            li.textContent = `"${note.content}" to ${note.recipient} (${note.isPublic ? "Public" : "Private"})`;
-            historyList.appendChild(li);
-        });
-    });
 }
 
-// Event Listeners for login and signup buttons
-document.getElementById("loginButton").addEventListener("click", login);
-document.getElementById("signupButton").addEventListener("click", signup);
-document.getElementById("logoutButton").addEventListener("click", logout);
+// Log in
+export async function login(email, password) {
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+// Log out
+export async function logout() {
+    await signOut(auth);
+}
+
+// Monitor authentication state
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const snapshot = await get(ref(db, 'users/' + user.uid));
+        const data = snapshot.val();
+        window.currentUser = user;
+        window.currentDisplayName = data?.displayName || "User";
+    } else {
+        window.currentUser = null;
+        window.currentDisplayName = null;
+    }
+});
