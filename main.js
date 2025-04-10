@@ -1,5 +1,5 @@
 import { db, auth } from './firebase-init.js';
-import { ref, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { ref, push, onValue, get, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 // Set user greeting
 window.setUserDisplayName = function (name) {
@@ -17,23 +17,35 @@ window.showTab = function (tabId) {
 };
 
 // Fetch and set display name when the user logs in
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(async (user) => {
   if (user) {
+    // User is authenticated, so display their data and load notes
     const uid = user.uid;
     const userRef = ref(db, "users/" + uid);
 
-    get(userRef).then((snapshot) => {
+    // Fetch user data from the database
+    try {
+      const snapshot = await get(userRef);
       if (snapshot.exists()) {
         const userData = snapshot.val();
         setUserDisplayName(userData.displayName); // Set display name
       } else {
         setUserDisplayName("User");
       }
-    });
 
-    loadNotes(); // Load notes for the logged-in user
+      loadNotes(); // Load notes for the logged-in user
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+
+    // Ensure the user is shown the app view (in case they navigated directly to the app)
+    document.getElementById("auth-area").style.display = "none";
+    document.getElementById("app-container").style.display = "block";
+    
   } else {
-    window.location.href = "login.html"; 
+    // User is not authenticated, show the login screen
+    document.getElementById("auth-area").style.display = "block";
+    document.getElementById("app-container").style.display = "none";
   }
 });
 
@@ -54,7 +66,7 @@ document.getElementById("saveSettings").addEventListener("click", () => {
     .finally(() => loadingIndicator.style.display = "none");
 });
 
-// Send a note
+// Save new note
 document.getElementById("sendNote").addEventListener("click", () => {
   const content = document.getElementById("stickyContent").value;
   const recipient = document.getElementById("recipient").value || "Anonymous";
@@ -66,3 +78,20 @@ document.getElementById("sendNote").addEventListener("click", () => {
   push(ref(db, 'users/' + uid + '/notes'), note);
   alert("Note sent!");
 });
+
+// Load notes for the logged-in user
+function loadNotes() {
+  const uid = auth.currentUser.uid;
+  const historyList = document.getElementById("noteHistory");
+  historyList.innerHTML = "";  // Clear the list before appending new items
+
+  onValue(ref(db, "users/" + uid + "/notes"), (snapshot) => {
+    historyList.innerHTML = ""; // Clear the list again to ensure it's empty
+    snapshot.forEach((childSnapshot) => {
+      const note = childSnapshot.val();
+      const li = document.createElement("li");
+      li.textContent = `"${note.content}" to ${note.recipient} (${note.isPublic ? "Public" : "Private"})`;
+      historyList.appendChild(li);
+    });
+  });
+}
