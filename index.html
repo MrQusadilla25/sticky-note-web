@@ -1,255 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sticky Notes App</title>
+    <title>Sticky Notes</title>
     <link rel="stylesheet" href="main.css">
 </head>
+
 <body>
-    
-    <!-- Notification Element -->
-		<div id="notification" style="display:none; position: fixed; top: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
-	</div>
-    
+
     <!-- Authentication Area -->
     <div id="auth-area">
-        <h2>Login or Sign Up</h2>
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" required>
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" required>
-        </div>
-        <button id="loginButton">Log In</button>
+        <h2>Login / Sign Up</h2>
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button id="loginButton">Login</button>
         <button id="signupButton">Sign Up</button>
     </div>
 
-    <!-- Main App Area -->
+    <!-- Main App Area (Visible after login) -->
     <div id="app-container" style="display: none;">
+        <!-- Sidebar with user presence -->
         <div id="sidebar">
-            <ul>
-                <li id="mailboxTab">Mailbox</li>
-                <li id="historyTab">History</li>
-                <li id="writeNoteTab">Write a Note</li>
-                <li id="settingsTab">Settings</li>
-                <li id="stickyNoteWallTab">The Sticky Note Wall</li>
-                <li id="logoutTab">Log Out</li>
-            </ul>
+            <h3>Online Users: <span id="onlineCount">0</span></h3>
+            <ul id="onlineUsers"></ul>
+            <h3>Offline Users: <span id="offlineCount">0</span></h3>
+            <ul id="offlineUsers"></ul>
+            <h3>No Display Name Users</h3>
+            <ul id="noDisplayUsers"></ul>
         </div>
 
-        <div id="tab-content">
-            <!-- Mailbox Tab -->
-            <div id="mailboxTabContent" class="tab-section active-tab">
-                <h2>Hello <span id="greetingText">User</span></h2>
-                <p>Welcome to your mailbox!</p>
-                <!-- You can add Mailbox content here like a list of private messages -->
-                <div id="privateMessages">
-                    <h3>Your Private Messages</h3>
-                    <ul id="messageList"></ul>
-                </div>
+        <!-- Main Content -->
+        <div id="content">
+            <h2>Welcome, <span id="displayName">User</span></h2>
+            <button id="logoutButton">Log Out</button>
+
+            <!-- Theme Toggle -->
+            <label for="themeToggle">Dark Mode</label>
+            <input type="checkbox" id="themeToggle">
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn" data-tab="notesTab">Notes</button>
+                <button class="tab-btn" data-tab="settingsTab">Settings</button>
             </div>
 
-            <!-- History Tab -->
-            <div id="historyTabContent" class="tab-section">
-                <h3>Your Notes History</h3>
-                <!-- Add the history content here -->
-                <p>Here you can track all your past notes.</p>
-            </div>
-
-            <!-- Write a Note Tab -->
-            <div id="writeNoteTabContent" class="tab-section">
-                <h3>Write a Sticky Note</h3>
-                <label for="noteContent">Note Content:</label>
-                <textarea id="noteContent" rows="4" placeholder="Write your note..."></textarea>
-                <br><br>
-                <label for="noteType">Choose the type of note:</label>
-                <select id="noteType">
-                    <option value="private">Private</option>
-                    <option value="public">Public</option>
-                    <option value="dm">Direct Message</option>
-                </select>
-                <br><br>
-                <label for="recipient">Recipient (for DM only):</label>
-                <input type="text" id="recipient" placeholder="Enter recipient's name (optional)">
-                <br><br>
+            <div id="notesTab" class="tab-content">
+                <h3>Your Notes</h3>
+                <ul id="noteList"></ul>
+                <textarea id="newNoteContent" placeholder="Write a new note..."></textarea>
                 <button id="saveNoteButton">Save Note</button>
             </div>
 
-            <!-- Settings Tab -->
-            <div id="settingsTabContent" class="tab-section">
+            <div id="settingsTab" class="tab-content">
                 <h3>Settings</h3>
-                <label for="displayName">Change Display Name:</label>
-                <input type="text" id="displayName" placeholder="Enter your new display name">
-                <button id="changeDisplayNameButton">Change Name</button>
-            </div>
-
-            <!-- Sticky Note Wall Tab -->
-            <div id="stickyNoteWallTabContent" class="tab-section">
-                <h3>The Sticky Note Wall</h3>
-                <p>Here you can see all the public notes posted by others.</p>
-                <ul id="publicNotesList"></ul>
+                <!-- Add settings here -->
             </div>
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
+    <!-- Scripts -->
     <script type="module" src="firebase-init.js"></script>
     <script type="module" src="auth.js"></script>
+    <script type="module" src="main.js"></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="presence.js"></script>
 
-    <script>
-        // JavaScript code
-
-        // Initialize Data (This would be connected to Firebase or local storage for a real app)
-        let user = { displayName: "User" }; // Example user object
-        let publicNotes = [];
-        let privateMessages = [];
-        let allNotes = [];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements
-            const loginButton = document.getElementById('loginButton');
-            const signupButton = document.getElementById('signupButton');
-            const authArea = document.getElementById('auth-area');
-            const appContainer = document.getElementById('app-container');
-            const greetingText = document.getElementById('greetingText');
-            const mailboxTab = document.getElementById('mailboxTab');
-            const historyTab = document.getElementById('historyTab');
-            const writeNoteTab = document.getElementById('writeNoteTab');
-            const settingsTab = document.getElementById('settingsTab');
-            const stickyNoteWallTab = document.getElementById('stickyNoteWallTab');
-            const logoutTab = document.getElementById('logoutTab');
-            const tabContent = document.getElementById('tab-content');
-            const noteContent = document.getElementById('noteContent');
-            const noteType = document.getElementById('noteType');
-            const recipient = document.getElementById('recipient');
-            const saveNoteButton = document.getElementById('saveNoteButton');
-            const displayNameInput = document.getElementById('displayName');
-            const changeDisplayNameButton = document.getElementById('changeDisplayNameButton');
-            const messageList = document.getElementById('messageList');
-            const publicNotesList = document.getElementById('publicNotesList');
-
-            // Simulate login/signup (real authentication should be done here)
-            loginButton.addEventListener('click', () => {
-                authArea.style.display = 'none';
-                appContainer.style.display = 'block';
-                greetingText.textContent = user.displayName; 
-            });
-
-            signupButton.addEventListener('click', () => {
-                authArea.style.display = 'none';
-                appContainer.style.display = 'block';
-                greetingText.textContent = user.displayName;
-            });
-
-            // Sidebar Tab Switching
-            function showTab(tabId) {
-                const tabs = document.querySelectorAll('.tab-section');
-                tabs.forEach(tab => {
-                    tab.classList.remove('active-tab');
-                });
-                const activeTab = document.getElementById(tabId);
-                if (activeTab) {
-                    activeTab.classList.add('active-tab');
-                }
-            }
-
-            mailboxTab.addEventListener('click', () => {
-                showTab('mailboxTabContent');
-                loadPrivateMessages();
-            });
-
-            historyTab.addEventListener('click', () => {
-                showTab('historyTabContent');
-            });
-
-            writeNoteTab.addEventListener('click', () => {
-                showTab('writeNoteTabContent');
-            });
-
-            settingsTab.addEventListener('click', () => {
-                showTab('settingsTabContent');
-            });
-
-            stickyNoteWallTab.addEventListener('click', () => {
-                showTab('stickyNoteWallTabContent');
-                loadPublicNotes();
-            });
-
-            logoutTab.addEventListener('click', () => {
-                authArea.style.display = 'block';
-                appContainer.style.display = 'none';
-            });
-
-            // Save Note Functionality
-            saveNoteButton.addEventListener('click', () => {
-    				const note = noteContent.value;
-    				const type = noteType.value;
-    				const recipientName = recipient.value.trim();
-    
-    				// Validate input
-    				if (note.trim() === "") {
-        				alert("Please write something before sending.");
-        					return;
-    }
-
-    // Save the note based on type
-    if (type === 'private') {
-        privateMessages.push({ note, type, recipient: 'Me' });
-    } else if (type === 'public') {
-        publicNotes.push({ note, type, recipient: 'All' });
-    } else if (type === 'dm' && recipientName) {
-        privateMessages.push({ note, type, recipient: recipientName });
-    }
-
-    // Show confirmation message in notification element
-    const notification = document.getElementById('notification');
-    notification.textContent = `Your note has been ${type === 'public' ? 'posted on the Sticky Wall.' : `sent to ${recipientName || 'Me'}`}.`;
-    notification.style.display = 'block';
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000);
-
-    // Reload the list of public and private notes
-    loadPublicNotes();
-    loadPrivateMessages();
-});
-
-            // Change Display Name
-            changeDisplayNameButton.addEventListener('click', () => {
-                const newDisplayName = displayNameInput.value.trim();
-                if (newDisplayName) {
-                    user.displayName = newDisplayName;
-                    greetingText.textContent = user.displayName;
-                }
-            });
-
-            // Load Public Notes
-            function loadPublicNotes() {
-                publicNotesList.innerHTML = '';
-                publicNotes.forEach(note => {
-                    const noteItem = document.createElement('li');
-                    noteItem.textContent = `${note.recipient}: ${note.note}`;
-                    publicNotesList.appendChild(noteItem);
-                });
-            }
-
-            // Load Private Messages
-            function loadPrivateMessages() {
-                messageList.innerHTML = '';
-                privateMessages.forEach(msg => {
-                    const msgItem = document.createElement('li');
-                    msgItem.textContent = `${msg.recipient}: ${msg.note}`;
-                    messageList.appendChild(msgItem);
-                });
-            }
-
-            // Initial Load
-            loadPublicNotes();
-            loadPrivateMessages();
-        });
-    </script>
 </body>
+
 </html>
