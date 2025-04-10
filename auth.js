@@ -1,8 +1,8 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-// Firebase Auth instance
 const auth = getAuth();
+const db = getDatabase();
 
 // Handle Sign Up
 export function signup() {
@@ -14,11 +14,10 @@ export function signup() {
       .then((userCredential) => {
         const user = userCredential.user;
         alert("User signed up successfully!");
-        // Optionally set additional user data in Firebase Realtime Database
-        const db = getDatabase();
+        // Optionally, add user to Firebase Realtime Database
         set(ref(db, 'users/' + user.uid), {
           email: user.email,
-          displayName: "User", // Set default display name
+          displayName: "User", // Default display name
         });
       })
       .catch((error) => {
@@ -64,12 +63,12 @@ export function logout() {
     });
 }
 
-// Check if user is logged in
+// Monitor auth state
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("auth-area").style.display = "none";
     document.getElementById("app-container").style.display = "block";
-    setUserDisplayName(user.displayName || "User"); // Set display name if available
+    setUserDisplayName(user.displayName || "User");
   } else {
     document.getElementById("auth-area").style.display = "block";
     document.getElementById("app-container").style.display = "none";
