@@ -10,6 +10,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     display: flex;
+    flex-direction: column;  /* Ensure the body content flows vertically on mobile */
     height: 100vh;
     overflow: hidden;
 }
@@ -48,6 +49,7 @@ body {
 #app-container {
     display: flex;
     width: 100%;
+    flex-grow: 1;  /* Ensures the container fills the remaining screen space */
 }
 
 /* Sidebar */
@@ -59,10 +61,24 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    position: fixed;  /* Keep the sidebar fixed on the left */
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transition: all 0.3s ease;
 }
 
+/* Hide sidebar in mobile view */
+#sidebar.active {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Sidebar Links */
 #sidebar ul {
     list-style-type: none;
+    padding: 0;
 }
 
 #sidebar li {
@@ -81,6 +97,8 @@ body {
     background-color: #fff;
     padding: 20px;
     overflow-y: auto;
+    margin-left: 250px;  /* Create space for the sidebar */
+    transition: margin-left 0.3s ease;
 }
 
 /* Tab Section Styling */
@@ -106,20 +124,41 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
-        flex-direction: column;
+        flex-direction: column;  /* Make the body flow vertically on smaller screens */
     }
 
     #sidebar {
         width: 100%;
         height: auto;
+        position: relative;  /* Change sidebar to relative positioning on smaller screens */
+    }
+
+    #sidebar li {
+        margin: 10px 0;  /* Reduce spacing on smaller devices */
     }
 
     #tab-content {
-        margin-top: 20px;
+        margin-left: 0;  /* Remove the margin left when on mobile */
+        padding: 10px;  /* Adjust padding for mobile devices */
     }
 
     #auth-area input,
     #auth-area button {
-        width: 80%;
+        width: 80%;  /* Make form elements wider on smaller screens */
+    }
+
+    /* Fixing the Sidebar Toggle when active */
+    #sidebar.active {
+        width: 100%;  /* Make the sidebar take the full width in mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    #sidebar li {
+        font-size: 14px;  /* Reduce the font size on very small screens */
+    }
+
+    #mailboxTabContent h2 {
+        font-size: 1.5rem;  /* Adjust the header size for small screens */
     }
 }
