@@ -4,103 +4,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sticky Notes V9</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    @keyframes fadeInOut {
-      0% { opacity: 0; }
-      25% { opacity: 1; }
-      50% { opacity: 1; }
-      75% { opacity: 0; }
-      100% { opacity: 0; }
-    }
-
-    #greetingText {
-      animation: fadeInOut 5s infinite;
-      font-size: 2rem;
-      font-weight: bold;
-    }
-
-    .tab-section {
-      display: none;
-    }
-
-    .active-tab {
-      display: block;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sticky Note Web</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+
+  <!-- Authentication Area -->
   <div id="auth-area">
-    <h2>Login or Sign Up <33</h2>
-    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
-    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
     <button id="login-btn">Login</button>
     <button id="signup-btn">Sign Up</button>
   </div>
 
+  <!-- Main App Area -->
   <div id="app-container" style="display: none;">
-    <!-- Sidebar -->
-    <div id="sidebar">
-      <button onclick="showTab('mailbox')">Mailbox</button>
-      <button onclick="showTab('history')">History</button>
-      <button onclick="showTab('write-note')">Write a Note</button>
-      <button onclick="showTab('settings')">Settings</button>
-      <button onclick="logout()">Log Out</button>
+    <h1 id="greetingText">Hi!</h1>
+    <button onclick="logout()">Logout</button>
+
+    <!-- Tab Controls -->
+    <div class="tabs">
+      <button onclick="showTab('home-tab')">Home</button>
+      <button onclick="showTab('settings-tab')">Settings</button>
     </div>
 
-    <!-- Main Content Area -->
-    <div id="tab-content">
-      <!-- Mailbox Tab -->
-      <section id="mailbox" class="tab-section active-tab">
-        <h2 id="greetingText">Hello, User!</h2>
-        <h3>Your Mailbox</h3>
-        <ul id="receivedMails"></ul>
-      </section>
+    <!-- Tabs Content -->
+    <div class="tab-section active-tab" id="home-tab">
+      <h2>Send Sticky Note</h2>
+      <textarea id="stickyContent" placeholder="Write your note..."></textarea><br>
+      <input type="text" id="recipient" placeholder="To (Email or Name)" /><br>
+      <label><input type="checkbox" id="isPublic" /> Public Note</label><br>
+      <button id="sendNote">Send Note</button>
+      <button id="deleteAllNotes">Delete All Notes</button>
+    </div>
 
-      <!-- History Tab -->
-      <section id="history" class="tab-section">
-        <h3>Your Sticky Note History</h3>
-        <ul id="noteHistory"></ul>
-        <button id="deleteAllNotes">Delete All Notes</button>
-      </section>
-
-      <!-- Write a Note Tab -->
-      <section id="write-note" class="tab-section">
-        <h3>Write a Sticky Note</h3>
-        <textarea id="stickyContent" placeholder="Write your note..."></textarea>
-        <input type="text" id="recipient" placeholder="Recipient">
-        <label>
-          Public
-          <input type="checkbox" id="isPublic">
-        </label>
-        <button id="sendNote">Send Note</button>
-      </section>
-
-      <!-- Settings Tab -->
-      <section id="settings" class="tab-section">
-        <h3>Settings</h3>
-        <div>
-          <label>Theme:
-            <select id="themeSelector">
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <label>Display Name:
-            <input type="text" id="displayNameInput" placeholder="Enter new name..." />
-          </label>
-        </div>
-        <button id="saveSettings">Save Settings</button>
-      </section>
+    <div class="tab-section" id="settings-tab">
+      <h2>Settings</h2>
+      <input type="text" id="displayNameInput" placeholder="New display name" />
+      <button id="saveSettings">Save Settings</button>
     </div>
   </div>
 
+  <!-- Scripts -->
   <script type="module" src="firebase-init.js"></script>
-  <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
+  <script type="module" src="auth.js"></script>
+
 </body>
 </html>
