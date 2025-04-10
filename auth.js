@@ -1,67 +1,74 @@
-// auth.js
+import { auth, db } from './firebase-init.js';
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  updateProfile,
-  signOut
+  signOut,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { app } from './firebase-init.js';
-import { initializeGreeting, setupAppEvents, showTab } from './main.js';
+import { ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-const auth = getAuth(app);
+// Stay signed in
+setPersistence(auth, browserLocalPersistence);
 
-document.getElementById("signup-btn").addEventListener("click", async () => {
+// Sign up
+window.signup = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const uid = userCredential.user.uid;
 
-    const displayName = prompt("Enter a display name:");
-    if (displayName) {
-      await updateProfile(user, { displayName });
-    }
+    // Save user info in database
+    await set(ref(db, 'users/' + uid), {
+      email: email,
+      displayName: "User"
+    });
 
-    showApp(user);
+    location.reload();
   } catch (error) {
-    alert("Signup error: " + error.message);
+    alert(error.message);
   }
-});
+};
 
-document.getElementById("login-btn").addEventListener("click", async () => {
+// Log in
+window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    showApp(user);
-  } catch (error) {
-    alert("Login error: " + error.message);
-  }
-});
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    showApp(user);
-  }
-});
-
-function showApp(user) {
-  document.getElementById("auth-area").style.display = "none";
-  document.getElementById("app-container").style.display = "block";
-
-  const name = user.displayName || "User";
-  initializeGreeting(name);
-  setupAppEvents(user);
-  showTab("home-tab");
-}
-
-window.logout = () => {
-  signOut(auth).then(() => {
+    await signInWithEmailAndPassword(auth, email, password);
     location.reload();
-  });
+  } catch (error) {
+    alert(error.message);
+  }
 };
+
+// Log out
+window.logout = async function () {
+  await signOut(auth);
+  location.reload();
+};
+
+// Check auth state
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    document.getElementById("auth-area").style.display = "none";
+    document.getElementById("app-container").style.display = "block";
+
+    // Get user data
+    const snapshot = await get(ref(db, 'users/' + user.uid));
+    const data = snapshot.val();
+    const displayName = data?.displayName || "User";
+    window.currentUser = user;
+    window.currentDisplayName = displayName;
+
+    window.setUserDisplayName(displayName);
+    loadNotes();
+  } else {
+    document.getElementById("auth-area").style.display = "block";
+    document.getElementById("app-container").style.display = "none";
+  }
+});
