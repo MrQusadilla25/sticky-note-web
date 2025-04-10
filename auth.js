@@ -1,12 +1,14 @@
+// auth.js
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { app } from './firebase-init.js';
-import { initializeGreeting } from './main.js';
+import { initializeGreeting, setupAppEvents, showTab } from './main.js';
 
 const auth = getAuth(app);
 
@@ -42,7 +44,6 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   }
 });
 
-// Stay logged in after refresh
 onAuthStateChanged(auth, (user) => {
   if (user) {
     showApp(user);
@@ -55,4 +56,12 @@ function showApp(user) {
 
   const name = user.displayName || "User";
   initializeGreeting(name);
+  setupAppEvents(user);
+  showTab("home-tab");
 }
+
+window.logout = () => {
+  signOut(auth).then(() => {
+    location.reload();
+  });
+};
