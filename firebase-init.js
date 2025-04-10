@@ -1,10 +1,5 @@
-// Import the required Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-// Firebase configuration object
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
   authDomain: "stickynoteapp-883b8.firebaseapp.com",
@@ -16,8 +11,4 @@ const firebaseConfig = {
   measurementId: "G-D27CEZ4WJN"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getDatabase(app);
-const auth = getAuth(app);
+export const app = initializeApp(firebaseConfig);
