@@ -1,5 +1,6 @@
-// Import necessary Firebase modules
+// Import the required Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
@@ -17,10 +18,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize services
+const analytics = getAnalytics(app);
 const db = getDatabase(app);
 const auth = getAuth(app);
-
-// Export services
-export { db, auth };
