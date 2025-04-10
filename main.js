@@ -1,64 +1,76 @@
-// main.js
-let greetingTextElement = document.getElementById("greetingText");
+import { db, auth } from "./firebase-init.js";
+import { ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-export function initializeGreeting(displayName) {
-  const name = displayName || "User";
-  const greetings = [
-    `Hi ${name}!`,
-    `Hola ${name}!`,
-    `Salut ${name}!`,
-    `Ciao ${name}!`,
-    `Hallo ${name}!`,
-    `Olá ${name}!`,
-    `Hej ${name}!`,
-    `こんにちは ${name}！`,
-    `안녕 ${name}!`,
-    `你好 ${name}!`
-  ];
+// Set user greeting
+window.setUserDisplayName = function (name) {
+  const userDisplayName = name || "User";
+  const greetingText = document.getElementById("greetingText");
+  greetingText.innerHTML = `Hi ${userDisplayName}!`;
+};
 
-  let current = 0;
-  greetingTextElement.innerText = greetings[current];
-
-  setInterval(() => {
-    current = (current + 1) % greetings.length;
-    greetingTextElement.innerText = greetings[current];
-  }, 5000);
-}
-
-export function showTab(tabId) {
-  document.querySelectorAll(".tab-section").forEach(section => {
-    section.classList.remove("active-tab");
+// Switch tabs
+window.showTab = function (tabId) {
+  document.querySelectorAll(".tab-section").forEach(tab => {
+    tab.classList.remove("active-tab");
   });
   document.getElementById(tabId).classList.add("active-tab");
+};
+
+// Save display name
+document.getElementById("saveSettings").addEventListener("click", () => {
+  const nameInput = document.getElementById("displayNameInput").value;
+  const uid = auth.currentUser.uid;
+
+  update(ref(db, "users/" + uid), {
+    displayName: nameInput
+  }).then(() => {
+    setUserDisplayName(nameInput);
+    alert("Display name updated!");
+  });
+});
+
+// Send a note
+document.getElementById("sendNote").addEventListener("click", () => {
+  const content = document.getElementById("stickyContent").value;
+  const recipient = document.getElementById("recipient").value || "Anonymous";
+  const isPublic = document.getElementById("isPublic").checked;
+  const uid = auth.currentUser.uid;
+
+  const note = {
+    content,
+    recipient,
+    isPublic,
+    sender: window.currentDisplayName,
+    timestamp: new Date().toISOString()
+  };
+
+  push(ref(db, "users/" + uid + "/notes"), note);
+  alert("Note sent!");
+  document.getElementById("stickyContent").value = "";
+  document.getElementById("recipient").value = "";
+});
+
+// Load note history
+function loadNotes() {
+  const uid = auth.currentUser.uid;
+  const historyList = document.getElementById("noteHistory");
+  historyList.innerHTML = "";
+
+  onValue(ref(db, "users/" + uid + "/notes"), (snapshot) => {
+    historyList.innerHTML = "";
+    snapshot.forEach((childSnapshot) => {
+      const note = childSnapshot.val();
+      const li = document.createElement("li");
+      li.textContent = `"${note.content}" to ${note.recipient} (${note.isPublic ? "Public" : "Private"})`;
+      historyList.appendChild(li);
+    });
+  });
 }
 
-export function setupAppEvents(user) {
-  document.getElementById("saveSettings").addEventListener("click", async () => {
-    const newName = document.getElementById("displayNameInput").value;
-    if (newName) {
-      await user.updateProfile({ displayName: newName });
-      alert("Display name updated! Refresh to see the new greeting.");
-    } else {
-      alert("Please enter a name.");
-    }
+// Delete all notes
+document.getElementById("deleteAllNotes").addEventListener("click", () => {
+  const uid = auth.currentUser.uid;
+  remove(ref(db, "users/" + uid + "/notes")).then(() => {
+    alert("All notes deleted.");
   });
-
-  document.getElementById("sendNote").addEventListener("click", () => {
-    const content = document.getElementById("stickyContent").value;
-    const recipient = document.getElementById("recipient").value;
-    const isPublic = document.getElementById("isPublic").checked;
-
-    if (!content || !recipient) {
-      alert("Please fill in the note and recipient.");
-      return;
-    }
-
-    // Replace this with Firebase DB saving if needed
-    alert(`Note sent to ${recipient} (${isPublic ? "public" : "private"})`);
-  });
-
-  document.getElementById("deleteAllNotes").addEventListener("click", () => {
-    // Replace this with Firebase delete logic if needed
-    alert("All notes deleted (not yet connected to DB)");
-  });
-}
+});
