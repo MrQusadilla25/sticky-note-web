@@ -6,17 +6,16 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Updated font */
   background-color: #f4f4f4;
   color: #333;
   padding: 20px;
-  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Dark theme */
 body.dark {
-  background-color: #1e1e1e;
-  color: #f1f1f1;
+  background-color: #2c3e50;
+  color: #ecf0f1;
 }
 
 /* Sidebar */
@@ -40,20 +39,42 @@ body.dark {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s;
 }
 
 #sidebar button:hover {
   background-color: #2980b9;
 }
 
-/* User Lists */
+/* Input and Textarea Styling */
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Consistent font */
+  background-color: #fff;
+  color: #333;
+  transition: border 0.3s ease;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border: 1px solid #3498db;
+}
+
+textarea {
+  resize: none; /* Prevent resizing */
+  min-height: 120px;
+}
+
+/* User List */
 #onlineUsers,
 #offlineUsers,
 #noDisplayUsers {
-  list-style: none;
+  list-style-type: none;
   padding: 0;
-  margin-bottom: 10px;
 }
 
 li {
@@ -62,7 +83,6 @@ li {
   padding: 10px;
   border-radius: 5px;
   font-size: 14px;
-  transition: background-color 0.3s, color 0.3s;
 }
 
 li[data-status="online"] {
@@ -75,21 +95,45 @@ li[data-status="offline"] {
   color: white;
 }
 
-/* Handle display name missing (not status-related) */
-#noDisplayUsers li {
+li[data-status="NO DISPLAY NAME"] {
   background-color: #95a5a6;
   color: white;
 }
 
-/* Count displays */
-#onlineCount,
-#offlineCount {
+/* Counts */
+#onlineCount, #offlineCount {
   font-weight: bold;
   margin-top: 10px;
-  display: inline-block;
 }
 
-/* Responsive layout */
+/* Tabbed Content */
+.tab-section {
+  display: none;
+}
+
+.tab-section.active-tab {
+  display: block;
+}
+
+#tab-content {
+  margin-left: 270px;
+  padding: 20px;
+}
+
+button {
+  padding: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+/* Mobile responsiveness */
 @media (max-width: 600px) {
   body {
     padding: 10px;
@@ -106,5 +150,9 @@ li[data-status="offline"] {
 
   li {
     font-size: 12px;
+  }
+
+  #tab-content {
+    margin-left: 0;
   }
 }
