@@ -59,4 +59,17 @@ document.getElementById("deleteAllNotes").addEventListener("click", () => {
 });
 
 // Save settings (e.g., display name)
-document.getElementById("
+document.getElementById("saveSettings").addEventListener("click", () => {
+  const displayName = document.getElementById("displayNameInput").value;
+  const user = getAuth().currentUser;
+
+  if (user && displayName) {
+    user.updateProfile({ displayName: displayName })
+      .then(() => {
+        alert("Settings saved!");
+      })
+      .catch((error) => {
+        alert("Error updating settings: " + error.message);
+      });
+  }
+});
