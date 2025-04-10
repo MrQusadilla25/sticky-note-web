@@ -7,9 +7,9 @@ import {
   setPersistence,
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-// Stay signed in
+// Set persistence for the authentication state (call this once at the beginning)
 setPersistence(auth, browserLocalPersistence);
 
 // Sign up
@@ -27,7 +27,7 @@ window.signup = async function () {
       displayName: "User"
     });
 
-    location.reload();
+    location.reload();  // Reload the page after successful sign-up
   } catch (error) {
     alert(error.message);
   }
@@ -40,7 +40,7 @@ window.login = async function () {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    location.reload();
+    location.reload();  // Reload the page after successful login
   } catch (error) {
     alert(error.message);
   }
@@ -49,25 +49,49 @@ window.login = async function () {
 // Log out
 window.logout = async function () {
   await signOut(auth);
-  location.reload();
+  location.reload();  // Reload the page after logging out
 };
 
-// Check auth state
+// Load notes for the signed-in user
+function loadNotes() {
+  if (!auth.currentUser) {
+    return; // Return if no user is signed in
+  }
+
+  const uid = auth.currentUser.uid;
+  const historyList = document.getElementById("noteHistory");
+  historyList.innerHTML = "";  // Clear the list before appending new items
+
+  onValue(ref(db, "users/" + uid + "/notes"), (snapshot) => {
+    historyList.innerHTML = ""; // Clear the list again to ensure it's empty
+    snapshot.forEach((childSnapshot) => {
+      const note = childSnapshot.val();
+      const li = document.createElement("li");
+      li.textContent = `"${note.content}" to ${note.recipient} (${note.isPublic ? "Public" : "Private"})`;
+      historyList.appendChild(li);
+    });
+  });
+}
+
+// Check authentication state (to handle login/signup sessions)
 onAuthStateChanged(auth, async (user) => {
   if (user) {
+    // Show app and hide auth area if the user is logged in
     document.getElementById("auth-area").style.display = "none";
     document.getElementById("app-container").style.display = "block";
 
-    // Get user data
+    // Get user data from Firebase
     const snapshot = await get(ref(db, 'users/' + user.uid));
     const data = snapshot.val();
     const displayName = data?.displayName || "User";
     window.currentUser = user;
     window.currentDisplayName = displayName;
 
+    // Set the display name and load the user's notes
     window.setUserDisplayName(displayName);
     loadNotes();
   } else {
+    // Show login/signup area if no user is signed in
     document.getElementById("auth-area").style.display = "block";
     document.getElementById("app-container").style.display = "none";
   }
