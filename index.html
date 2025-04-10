@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sticky Notes</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <!-- Auth Section -->
   <div id="auth-area">
     <h2>Login or Sign Up</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
@@ -18,9 +15,7 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
-  <!-- Main App -->
   <div id="app-container" style="display: none;">
-    <!-- Sidebar Navigation -->
     <div id="sidebar">
       <button onclick="showTab('home')">Home</button>
       <button onclick="showTab('public')">Public Note</button>
@@ -29,16 +24,13 @@
       <button onclick="logout()">Log Out</button>
     </div>
 
-    <!-- Tabbed Content -->
     <div id="tab-content">
-      <!-- Home Tab -->
       <section id="home" class="tab-section active-tab">
         <h2 id="welcomeMessage">Welcome!</h2>
         <h3>Your Mailbox</h3>
         <ul id="receivedNotes"></ul>
       </section>
 
-      <!-- Public Note Tab -->
       <section id="public" class="tab-section">
         <h3>Create a Public Sticky Note</h3>
         <select id="recipientList"></select>
@@ -52,7 +44,6 @@
         <button id="sendNote">Send Note</button>
       </section>
 
-      <!-- Private Note Tab -->
       <section id="private" class="tab-section">
         <h3>Send a Private Sticky Note</h3>
         <select id="privateRecipientList"></select>
@@ -60,7 +51,6 @@
         <button id="sendPrivateNoteBtn">Send Private Note</button>
       </section>
 
-      <!-- Display Name Tab -->
       <section id="display" class="tab-section">
         <h3>Change Your Display Name</h3>
         <input type="text" id="displayNameInput" placeholder="Enter new name..." />
@@ -69,10 +59,8 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
 </body>
-
 </html>
