@@ -6,7 +6,7 @@
   <title>Sticky Notes V9</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Add some fade-in/out animations */
+    /* Fade-in/out animation */
     @keyframes fadeInOut {
       0% { opacity: 0; }
       25% { opacity: 1; }
@@ -20,9 +20,17 @@
       font-size: 2rem;
       font-weight: bold;
     }
+
+    .tab-section {
+      display: none;
+    }
+    .tab-section.active-tab {
+      display: block;
+    }
   </style>
 </head>
 <body>
+  <!-- Auth Area (Login/Sign Up) -->
   <div id="auth-area">
     <h2>Login or Sign Up <33</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
@@ -31,8 +39,8 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
+  <!-- App Container (After Login) -->
   <div id="app-container" style="display: none;">
-    <!-- Sidebar -->
     <div id="sidebar">
       <button onclick="showTab('mailbox')">Mailbox</button>
       <button onclick="showTab('history')">History</button>
@@ -41,7 +49,6 @@
       <button onclick="logout()">Log Out</button>
     </div>
 
-    <!-- Main Content Area -->
     <div id="tab-content">
       <!-- Mailbox Tab -->
       <section id="mailbox" class="tab-section active-tab">
@@ -90,11 +97,13 @@
     </div>
   </div>
 
+  <!-- Firebase and Scripts -->
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
 
   <script>
+    // Language greetings
     const languageGreetings = [
       "Hello, User!",
       "Bonjour, User!",
@@ -114,19 +123,35 @@
       }, 5000); // Change every 5 seconds
     }
 
-    // Call this function once user is logged in
+    // Function to set user display name
     function setUserDisplayName(name) {
       const userDisplayName = name || "User";  // Default to "User" if no name provided
-      // Update greetings with display name
       for (let i = 0; i < languageGreetings.length; i++) {
         languageGreetings[i] = languageGreetings[i].replace("User", userDisplayName);
       }
-      // Start cycling the greeting
-      cycleGreeting();
+      cycleGreeting(); // Start cycling the greeting
     }
 
     // Simulate login (use real data after login)
     setUserDisplayName("John Doe");
+
+    // Switch tabs
+    function showTab(tabId) {
+      const allTabs = document.querySelectorAll('.tab-section');
+      allTabs.forEach(tab => {
+        tab.style.display = 'none';
+      });
+
+      const selectedTab = document.getElementById(tabId);
+      if (selectedTab) {
+        selectedTab.style.display = 'block';
+      }
+    }
+
+    // Default to showing the mailbox tab
+    document.addEventListener('DOMContentLoaded', () => {
+      showTab('mailbox');
+    });
   </script>
 </body>
 </html>
