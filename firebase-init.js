@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
-// Your Firebase config
+// Your Firebase config (replace with your actual config)
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
   authDomain: "stickynoteapp-883b8.firebaseapp.com",
