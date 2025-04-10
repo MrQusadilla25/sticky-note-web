@@ -1,4 +1,4 @@
-import { db, auth } from './firebase-init.js'; // Make sure `auth` is exported from firebase-init.js
+import { db, auth } from './firebase-init.js'; // Ensure correct import path
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
@@ -64,5 +64,7 @@ onAuthStateChanged(auth, (user) => {
     // Update UI counters
     onlineCount.textContent = online;
     offlineCount.textContent = offline;
+  }, (error) => {
+    console.error("Error fetching users:", error);
   });
 });
