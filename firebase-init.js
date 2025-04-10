@@ -1,9 +1,9 @@
 // firebase-init.js
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set, get, child, push } from 'firebase/database';
+import { getDatabase } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
-// Your Firebase config (replace with your actual config)
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
   authDomain: "stickynoteapp-883b8.firebaseapp.com",
@@ -19,3 +19,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+
+export { db, auth };
