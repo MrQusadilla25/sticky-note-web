@@ -4,7 +4,10 @@ import {
   onValue,
   push,
   set,
-  update
+  update,
+  query,
+  orderByChild,
+  equalTo
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 import {
@@ -31,7 +34,6 @@ onAuthStateChanged(auth, (user) => {
     appContainer.style.display = "flex";
     loadUsers();
     loadNotes(user.uid);
-    loadPrivateNotes(user.uid);
     updateWelcomeMessage(user.uid);
   } else {
     authArea.style.display = "block";
@@ -58,33 +60,22 @@ function loadUsers() {
   });
 }
 
-// Load public notes
+// Load public and private notes (combined function)
 function loadNotes(currentUid) {
   const notesRef = ref(db, "notes");
   onValue(notesRef, (snapshot) => {
     receivedNotes.innerHTML = "";
     snapshot.forEach((child) => {
       const note = child.val();
-      if (note.to === currentUid && !note.private) {
-        const li = document.createElement("li");
-        li.textContent = note.message;
-        li.style.background = note.color || "yellow";
-        receivedNotes.appendChild(li);
-      }
-    });
-  });
-}
-
-// Load private notes
-function loadPrivateNotes(currentUid) {
-  const notesRef = ref(db, "notes");
-  onValue(notesRef, (snapshot) => {
-    snapshot.forEach((child) => {
-      const note = child.val();
-      if (note.to === currentUid && note.private) {
-        const li = document.createElement("li");
-        li.textContent = `(Private) ${note.message}`;
-        li.style.background = note.color || "#ccc";
+      const li = document.createElement("li");
+      if (note.to === currentUid) {
+        if (note.private) {
+          li.textContent = `(Private) ${note.message}`;
+          li.style.background = note.color || "#ccc";
+        } else {
+          li.textContent = note.message;
+          li.style.background = note.color || "yellow";
+        }
         receivedNotes.appendChild(li);
       }
     });
@@ -110,7 +101,7 @@ document.getElementById("sendNote").addEventListener("click", () => {
   }).then(() => {
     alert("Note sent!");
     document.getElementById("noteMessage").value = "";
-  });
+  }).catch(err => alert("Error sending public note: " + err.message));
 });
 
 // Send private note
@@ -131,7 +122,7 @@ document.getElementById("sendPrivateNoteBtn").addEventListener("click", () => {
   }).then(() => {
     alert("Private note sent!");
     document.getElementById("privateNoteMessage").value = "";
-  });
+  }).catch(err => alert("Error sending private note: " + err.message));
 });
 
 // Update display name
@@ -142,12 +133,12 @@ document.getElementById("saveDisplayName").addEventListener("click", () => {
   if (!newName) return alert("Please enter a display name.");
 
   const userRef = ref(db, `users/${userId}`);
-  update(userRef, {
-    displayName: newName
-  }).then(() => {
-    alert("Name updated!");
-    updateWelcomeMessage(userId);
-  });
+  update(userRef, { displayName: newName })
+    .then(() => {
+      alert("Name updated!");
+      updateWelcomeMessage(userId);
+    })
+    .catch(err => alert("Error updating display name: " + err.message));
 });
 
 // Update welcome message
@@ -161,10 +152,12 @@ function updateWelcomeMessage(uid) {
 
 // Logout
 window.logout = function () {
-  signOut(auth).then(() => {
-    alert("Logged out");
-    location.reload();
-  });
+  signOut(auth)
+    .then(() => {
+      alert("Logged out");
+      location.reload();
+    })
+    .catch(err => alert("Error logging out: " + err.message));
 };
 
 // Show tab by ID
