@@ -41,3 +41,8 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.classList.add("active-tab");
   });
 });
+
+// Set the first tab to be active by default
+if (document.querySelector(".tab-btn")) {
+  document.querySelector(".tab-btn").click();
+}
