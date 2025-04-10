@@ -32,6 +32,10 @@ auth.onAuthStateChanged((user) => {
         setUserDisplayName("User");
       }
     });
+    loadNotes(); // Load notes for the logged-in user
+  } else {
+    // If the user is not signed in, redirect to login page
+    window.location.href = "login.html"; // Adjust to your login page URL
   }
 });
 
@@ -40,12 +44,20 @@ document.getElementById("saveSettings").addEventListener("click", () => {
   const nameInput = document.getElementById("displayNameInput").value;
   const uid = auth.currentUser.uid;
 
+  // Show loading spinner
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  loadingIndicator.style.display = "block"; // Show loading indicator
+
   // Update the display name in Realtime Database
   update(ref(db, "users/" + uid), {
     displayName: nameInput
   }).then(() => {
     setUserDisplayName(nameInput);
     alert("Display name updated!");
+  }).catch((error) => {
+    alert("Error updating display name: " + error.message);
+  }).finally(() => {
+    loadingIndicator.style.display = "none"; // Hide loading indicator
   });
 });
 
@@ -64,18 +76,32 @@ document.getElementById("sendNote").addEventListener("click", () => {
     timestamp: new Date().toISOString()
   };
 
-  push(ref(db, "users/" + uid + "/notes"), note);
-  alert("Note sent!");
-  document.getElementById("stickyContent").value = "";
-  document.getElementById("recipient").value = "";
+  // Show loading spinner
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  loadingIndicator.style.display = "block"; // Show loading indicator
+
+  // Push the note to the database
+  push(ref(db, "users/" + uid + "/notes"), note)
+    .then(() => {
+      alert("Note sent!");
+      document.getElementById("stickyContent").value = "";
+      document.getElementById("recipient").value = "";
+    })
+    .catch((error) => {
+      alert("Error sending note: " + error.message);
+    })
+    .finally(() => {
+      loadingIndicator.style.display = "none"; // Hide loading indicator
+    });
 });
 
-// Load note history
+// Load note history in real-time
 function loadNotes() {
   const uid = auth.currentUser.uid;
   const historyList = document.getElementById("noteHistory");
   historyList.innerHTML = "";
 
+  // Listen for real-time updates in the user's notes
   onValue(ref(db, "users/" + uid + "/notes"), (snapshot) => {
     historyList.innerHTML = "";
     snapshot.forEach((childSnapshot) => {
@@ -87,28 +113,56 @@ function loadNotes() {
   });
 }
 
+// Delete a specific note
+document.getElementById("deleteNote").addEventListener("click", () => {
+  const noteId = document.getElementById("noteIdToDelete").value;
+  const uid = auth.currentUser.uid;
+
+  // Show loading spinner
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  loadingIndicator.style.display = "block"; // Show loading indicator
+
+  // Remove the note from the Realtime Database
+  remove(ref(db, "users/" + uid + "/notes/" + noteId))
+    .then(() => {
+      alert("Note deleted.");
+    })
+    .catch((error) => {
+      alert("Error deleting note: " + error.message);
+    })
+    .finally(() => {
+      loadingIndicator.style.display = "none"; // Hide loading indicator
+    });
+});
+
 // Delete all notes
 document.getElementById("deleteAllNotes").addEventListener("click", () => {
   const uid = auth.currentUser.uid;
-  remove(ref(db, "users/" + uid + "/notes")).then(() => {
-    alert("All notes deleted.");
-  });
+
+  // Show loading spinner
+  const loadingIndicator = document.getElementById("loadingIndicator");
+  loadingIndicator.style.display = "block"; // Show loading indicator
+
+  // Remove all notes from the Realtime Database
+  remove(ref(db, "users/" + uid + "/notes"))
+    .then(() => {
+      alert("All notes deleted.");
+    })
+    .catch((error) => {
+      alert("Error deleting notes: " + error.message);
+    })
+    .finally(() => {
+      loadingIndicator.style.display = "none"; // Hide loading indicator
+    });
 });
 
-// Fetch user data and set display name upon login
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    const uid = user.uid;
-    const userRef = ref(db, "users/" + uid);
-
-    // Fetch user data
-    get(userRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        const userData = snapshot.val();
-        setUserDisplayName(userData.displayName || "User");
-      } else {
-        setUserDisplayName("User"); // Default if no data found
-      }
-    });
-  }
+// Sign out user
+document.getElementById("signOutButton").addEventListener("click", () => {
+  auth.signOut().then(() => {
+    alert("Successfully signed out!");
+    // Redirect to login page after sign-out
+    window.location.href = "login.html"; // Adjust to your login page URL
+  }).catch((error) => {
+    alert("Error signing out: " + error.message);
+  });
 });
