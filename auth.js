@@ -1,5 +1,12 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { app } from './firebase-init.js';
+import { initializeGreeting } from './main.js';
 
 const auth = getAuth(app);
 
@@ -10,8 +17,13 @@ document.getElementById("signup-btn").addEventListener("click", async () => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log("Signed up:", user.email);
-    showApp();
+
+    const displayName = prompt("Enter a display name:");
+    if (displayName) {
+      await updateProfile(user, { displayName });
+    }
+
+    showApp(user);
   } catch (error) {
     alert("Signup error: " + error.message);
   }
@@ -24,14 +36,23 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log("Logged in:", user.email);
-    showApp();
+    showApp(user);
   } catch (error) {
     alert("Login error: " + error.message);
   }
 });
 
-function showApp() {
+// Stay logged in after refresh
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    showApp(user);
+  }
+});
+
+function showApp(user) {
   document.getElementById("auth-area").style.display = "none";
   document.getElementById("app-container").style.display = "block";
+
+  const name = user.displayName || "User";
+  initializeGreeting(name);
 }
