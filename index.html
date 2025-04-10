@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sticky Notes V9</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <style>
-    /* Add some fade-in/out animations */
     @keyframes fadeInOut {
       0% { opacity: 0; }
       25% { opacity: 1; }
@@ -20,15 +19,23 @@
       font-size: 2rem;
       font-weight: bold;
     }
+
+    .tab-section {
+      display: none;
+    }
+
+    .active-tab {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <div id="auth-area">
-    <h2>Login or Sign Up <333</h2>
+    <h2>Login or Sign Up <33</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
     <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
+    <button id="login-btn">Login</button>
+    <button id="signup-btn">Sign Up</button>
   </div>
 
   <div id="app-container" style="display: none;">
@@ -93,10 +100,5 @@
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
-
-  <script>
-    // Call to start the greeting cycle (language greetings and display name will be handled in auth.js)
-    setUserDisplayName("John Doe"); // Change to actual Firebase user display name after login
-  </script>
 </body>
 </html>
