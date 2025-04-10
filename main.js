@@ -1,41 +1,39 @@
-function showTab(tabId) {
+let greetingTextElement = document.getElementById("greetingText");
+
+export function initializeGreeting(displayName) {
+  const name = displayName || "User";
+  const greetings = [
+    `Hi ${name}!`,         // English
+    `Hola ${name}!`,       // Spanish
+    `Salut ${name}!`,      // French
+    `Ciao ${name}!`,       // Italian
+    `Hallo ${name}!`,      // German
+    `Olá ${name}!`,        // Portuguese
+    `Hej ${name}!`,        // Swedish
+    `こんにちは ${name}！`,  // Japanese
+    `안녕 ${name}!`,         // Korean
+    `你好 ${name}!`          // Chinese
+  ];
+
+  let current = 0;
+  greetingTextElement.innerText = greetings[current];
+
+  setInterval(() => {
+    current = (current + 1) % greetings.length;
+    greetingTextElement.innerText = greetings[current];
+  }, 5000);
+}
+
+export function showTab(tabId) {
   document.querySelectorAll(".tab-section").forEach(section => {
     section.classList.remove("active-tab");
   });
   document.getElementById(tabId).classList.add("active-tab");
 }
 
-function logout() {
-  location.reload(); // Quick way to "log out"
+export function logout() {
+  location.reload(); // Basic logout
 }
-
-const languageGreetings = [
-  "Hello, User!",
-  "Bonjour, User!",
-  "Hola, User!",
-  "Hallo, User!",
-  "Ciao, User!"
-];
-
-let currentLanguageIndex = 0;
-const greetingTextElement = document.getElementById("greetingText");
-
-function cycleGreeting() {
-  setInterval(() => {
-    currentLanguageIndex = (currentLanguageIndex + 1) % languageGreetings.length;
-    greetingTextElement.innerHTML = languageGreetings[currentLanguageIndex];
-  }, 5000);
-}
-
-function setUserDisplayName(name) {
-  const userDisplayName = name || "User";
-  for (let i = 0; i < languageGreetings.length; i++) {
-    languageGreetings[i] = languageGreetings[i].replace("User", userDisplayName);
-  }
-  cycleGreeting();
-}
-
-setUserDisplayName("John Doe"); // For now; you can hook it to user profile info later
 
 window.showTab = showTab;
 window.logout = logout;
