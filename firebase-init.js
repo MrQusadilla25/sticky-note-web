@@ -1,5 +1,8 @@
+// firebase-init.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
 
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDcnxp_iGUMTp4klEhiB5sCcCvh6IAxe9Y",
   authDomain: "stickynoteapp-883b8.firebaseapp.com",
@@ -12,3 +15,4 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
