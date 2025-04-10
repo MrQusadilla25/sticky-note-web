@@ -3,12 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sticky Notes V5</title>
+  <title>Sticky Notes V9</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Add some fade-in/out animations */
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      25% { opacity: 1; }
+      50% { opacity: 1; }
+      75% { opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    #greetingText {
+      animation: fadeInOut 5s infinite;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <div id="auth-area">
-    <h2>Login or Sign Up <33333</h2>
+    <h2>Login or Sign Up <33</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
     <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
     <button onclick="login()">Login</button>
@@ -70,19 +86,6 @@
           </label>
         </div>
         <button id="saveSettings">Save Settings</button>
-
-        <div>
-          <label>Language:
-            <select id="languageSelector" onchange="changeLanguage()">
-              <option value="en">English</option>
-              <option value="fr">French</option>
-              <option value="es">Spanish</option>
-              <option value="de">German</option>
-              <option value="it">Italian</option>
-              <!-- Add more languages here -->
-            </select>
-          </label>
-        </div>
       </section>
     </div>
   </div>
@@ -92,34 +95,38 @@
   <script type="module" src="main.js"></script>
 
   <script>
-    const languageGreetings = {
-      en: "Hello",
-      fr: "Bonjour",
-      es: "Hola",
-      de: "Hallo",
-      it: "Ciao"
-    };
+    const languageGreetings = [
+      "Hello, User!",
+      "Bonjour, User!",
+      "Hola, User!",
+      "Hallo, User!",
+      "Ciao, User!"
+    ];
 
-    let userDisplayName = "User"; // This will be dynamically set based on login data
-    let currentLanguage = "en"; // Default language
+    let currentLanguageIndex = 0;
+    const greetingTextElement = document.getElementById("greetingText");
 
-    // Function to update greeting based on selected language
-    function updateGreeting() {
-      const greetingText = document.getElementById("greetingText");
-      greetingText.innerHTML = `${languageGreetings[currentLanguage]} ${userDisplayName}!`;
+    // Function to change the greeting text every few seconds
+    function cycleGreeting() {
+      setInterval(() => {
+        currentLanguageIndex = (currentLanguageIndex + 1) % languageGreetings.length;
+        greetingTextElement.innerHTML = languageGreetings[currentLanguageIndex];
+      }, 5000); // Change every 5 seconds
     }
 
-    // Function to change language based on selection
-    function changeLanguage() {
-      currentLanguage = document.getElementById("languageSelector").value;
-      updateGreeting();
-    }
-
-    // Call this function once user is logged in and display name is available
+    // Call this function once user is logged in
     function setUserDisplayName(name) {
-      userDisplayName = name;
-      updateGreeting();
+      const userDisplayName = name || "User";  // Default to "User" if no name provided
+      // Update greetings with display name
+      for (let i = 0; i < languageGreetings.length; i++) {
+        languageGreetings[i] = languageGreetings[i].replace("User", userDisplayName);
+      }
+      // Start cycling the greeting
+      cycleGreeting();
     }
+
+    // Simulate login (use real data after login)
+    setUserDisplayName("John Doe");
   </script>
 </body>
 </html>
