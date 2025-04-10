@@ -1,129 +1,126 @@
-// Auto-fit for tab content
-function autoFitContent() {
-    const tabContent = document.getElementById('tab-content');
-    
-    // Adjust the height to fit the content inside the tab
-    tabContent.style.height = 'auto'; // Reset height to auto to allow natural growth
+import { auth, db } from './firebase-init.js';
+import { ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-    const activeTab = document.querySelector('.tab-section.active-tab');
-    if (activeTab) {
-        const contentHeight = activeTab.scrollHeight;
-        tabContent.style.height = contentHeight + 'px'; // Set the height based on the content height
+// DOM elements
+const noteContent = document.getElementById('noteContent');
+const noteType = document.getElementById('noteType');
+const recipient = document.getElementById('recipient');
+const saveNoteButton = document.getElementById('saveNoteButton');
+const publicNotesList = document.getElementById('publicNotesList');
+const messageList = document.getElementById('messageList');
+const notification = document.getElementById('notification');
+const greetingText = document.getElementById('greetingText');
+
+// Load notes for the signed-in user
+function loadNotes() {
+    if (!auth.currentUser) {
+        return; // Return if no user is signed in
     }
-}
-
-// Call autoFitContent after loading content in each tab
-function loadMailbox() {
-    const uid = auth.currentUser.uid;
-    const mailboxRef = ref(db, `mailbox/${uid}`);
-    get(mailboxRef).then(snapshot => {
-        if (snapshot.exists()) {
-            const mailData = snapshot.val();
-            // Populate the mailbox with email content
-            const mailList = document.getElementById('mailboxList');
-            mailList.innerHTML = ''; // Clear previous messages
-            mailData.forEach(mail => {
-                const li = document.createElement('li');
-                li.textContent = `From: ${mail.sender} - ${mail.message}`;
-                mailList.appendChild(li);
-            });
-        } else {
-            console.log('No new messages.');
-        }
-        autoFitContent(); // Adjust content height after loading mailbox
-    });
-}
-
-// Load History (user’s sent notes)
-function loadHistory() {
-    const uid = auth.currentUser.uid;
-    const historyRef = ref(db, `history/${uid}`);
-    get(historyRef).then(snapshot => {
-        if (snapshot.exists()) {
-            const historyData = snapshot.val();
-            // Populate history with the notes
-            const historyList = document.getElementById('historyList');
-            historyList.innerHTML = ''; // Clear previous history
-            historyData.forEach(note => {
-                const li = document.createElement('li');
-                li.textContent = `To: ${note.recipient} - ${note.message} - Public: ${note.isPublic}`;
-                historyList.appendChild(li);
-            });
-        } else {
-            console.log('No note history.');
-        }
-        autoFitContent(); // Adjust content height after loading history
-    });
-}
-
-// Load Write Note page
-function loadWriteNote() {
-    const noteInput = document.getElementById('stickyContent');
-    const recipientInput = document.getElementById('recipient');
-    const publicCheckbox = document.getElementById('isPublic');
-
-    const sendNoteButton = document.getElementById('sendNote');
-    sendNoteButton.addEventListener('click', () => {
-        const noteContent = noteInput.value;
-        const recipient = recipientInput.value;
-        const isPublic = publicCheckbox.checked;
-        const uid = auth.currentUser.uid;
-
-        // Send the note to the database
-        const noteRef = ref(db, `notes/${uid}`);
-        const newNoteKey = push(noteRef).key;
-
-        set(ref(db, 'notes/' + uid + '/' + newNoteKey), {
-            message: noteContent,
-            recipient: recipient,
-            isPublic: isPublic
-        }).then(() => {
-            alert('Note sent successfully!');
-            loadHistory(); // Reload history after sending note
-        }).catch((error) => {
-            console.error('Error sending note:', error);
-        });
-        autoFitContent(); // Adjust content height after sending note
-    });
-}
-
-
-function loadSettings() {
-    const displayNameInput = document.getElementById('displayNameInput');
-    const themeSelect = document.getElementById('themeSelect');
-    const notification = document.getElementById('notification'); // Assume there's a notification div
 
     const uid = auth.currentUser.uid;
-    const userRef = ref(db, 'users/' + uid);
+    loadPublicNotes(uid);
+    loadPrivateMessages(uid);
+}
 
-    // Save display name
-    displayNameInput.addEventListener('change', () => {
-        const newDisplayName = displayNameInput.value;
-        update(userRef, {
-            displayName: newDisplayName
-        }).then(() => {
-            setUserDisplayName(newDisplayName);
+// Load Public Notes
+function loadPublicNotes(uid) {
+    const publicNotesList = document.getElementById("publicNotesList");
+    publicNotesList.innerHTML = "";  // Clear the list before appending new items
 
-            // Display notification message
-            notification.textContent = `Display name has been changed to ${newDisplayName}.`;
-            notification.style.display = 'block';  // Show the message
-            setTimeout(() => {
-                notification.style.display = 'none';  // Hide the message after 3 seconds
-            }, 3000);
-        }).catch((error) => {
-            console.error('Error updating display name:', error);
-        });
-    });
-
-    // Save theme
-    themeSelect.addEventListener('change', () => {
-        const selectedTheme = themeSelect.value;
-        update(userRef, {
-            theme: selectedTheme
-        }).then(() => {
-            applyTheme(selectedTheme);
-        }).catch((error) => {
-            console.error('Error updating theme:', error);
+    onValue(ref(db, 'publicNotes'), (snapshot) => {
+        publicNotesList.innerHTML = "";  // Clear the list to ensure it's empty
+        snapshot.forEach((childSnapshot) => {
+            const note = childSnapshot.val();
+            const li = document.createElement('li');
+            li.textContent = `${note.recipient}: ${note.note}`;
+            publicNotesList.appendChild(li);
         });
     });
 }
+
+// Load Private Messages
+function loadPrivateMessages(uid) {
+    const messageList = document.getElementById("messageList");
+    messageList.innerHTML = "";  // Clear the list before appending new items
+
+    onValue(ref(db, `users/${uid}/privateMessages`), (snapshot) => {
+        messageList.innerHTML = "";  // Clear the list to ensure it's empty
+        snapshot.forEach((childSnapshot) => {
+            const msg = childSnapshot.val();
+            const li = document.createElement('li');
+            li.textContent = `${msg.recipient}: ${msg.note}`;
+            messageList.appendChild(li);
+        });
+    });
+}
+
+// Save Note Functionality
+saveNoteButton.addEventListener('click', async () => {
+    const note = noteContent.value;
+    const type = noteType.value;
+    const recipientName = recipient.value.trim();
+
+    // Validate input
+    if (note.trim() === "") {
+        alert("Please write something before saving.");
+        return;
+    }
+
+    // Get current user
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+        alert("Please log in first.");
+        return;
+    }
+
+    const noteData = {
+        note,
+        recipient: type === 'dm' ? recipientName : "All",  // Handle recipient for DM type
+        isPublic: type === 'public', // Determine if the note is public
+    };
+
+    // Save the note to Firebase based on type
+    if (type === 'private') {
+        // Private note saved under the user's privateMessages
+        await push(ref(db, `users/${uid}/privateMessages`), noteData);
+    } else if (type === 'public') {
+        // Public note saved under publicNotes
+        await push(ref(db, 'publicNotes'), noteData);
+    } else if (type === 'dm' && recipientName) {
+        // Direct message saved under the user's privateMessages
+        await push(ref(db, `users/${uid}/privateMessages`), noteData);
+    }
+
+    // Show confirmation message
+    notification.textContent = `Your note has been ${type === 'public' ? 'posted on the Sticky Wall.' : `sent to ${recipientName || 'Me'}`}.`;
+    notification.style.display = 'block';
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+
+    // Reload the list of public and private notes
+    loadNotes();
+});
+
+// Handle Authentication State Changes (To Load User Notes)
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const displayName = user.displayName || "User";
+        window.currentUser = user;
+        window.currentDisplayName = displayName;
+
+        greetingText.textContent = displayName;
+
+        loadNotes(); // Load the notes when the user is signed in
+    } else {
+        // Handle when user is logged out
+        greetingText.textContent = "User";
+        publicNotesList.innerHTML = "";
+        messageList.innerHTML = "";
+    }
+});
+
+// Initial Load (When the page is loaded or user logs in)
+document.addEventListener('DOMContentLoaded', () => {
+    loadNotes(); // Load notes after page is loaded
+});
