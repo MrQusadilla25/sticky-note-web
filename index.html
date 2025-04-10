@@ -16,45 +16,60 @@
   </div>
 
   <div id="app-container" style="display: none;">
+    <!-- Sidebar -->
     <div id="sidebar">
-      <button onclick="showTab('home')">Home</button>
-      <button onclick="showTab('public')">Public Note</button>
-      <button onclick="showTab('private')">Private Note</button>
-      <button onclick="showTab('display')">Display Name</button>
+      <button onclick="showTab('mailbox')">Mailbox</button>
+      <button onclick="showTab('history')">History</button>
+      <button onclick="showTab('write-note')">Write a Note</button>
+      <button onclick="showTab('settings')">Settings</button>
       <button onclick="logout()">Log Out</button>
     </div>
 
+    <!-- Main Content Area -->
     <div id="tab-content">
-      <section id="home" class="tab-section active-tab">
-        <h2 id="welcomeMessage">Welcome!</h2>
+      <!-- Mailbox Tab -->
+      <section id="mailbox" class="tab-section active-tab">
+        <h2 id="greetingText">Hello, User!</h2>
         <h3>Your Mailbox</h3>
-        <ul id="receivedNotes"></ul>
+        <ul id="receivedMails"></ul>
       </section>
 
-      <section id="public" class="tab-section">
-        <h3>Create a Public Sticky Note</h3>
-        <select id="recipientList"></select>
-        <textarea id="noteMessage" placeholder="Write your note..."></textarea>
-        <select id="noteColor">
-          <option value="yellow">Yellow</option>
-          <option value="pink">Pink</option>
-          <option value="lightblue">Blue</option>
-          <option value="lightgreen">Green</option>
-        </select>
+      <!-- History Tab -->
+      <section id="history" class="tab-section">
+        <h3>Your Sticky Note History</h3>
+        <ul id="noteHistory"></ul>
+        <button id="deleteAllNotes">Delete All Notes</button>
+      </section>
+
+      <!-- Write a Note Tab -->
+      <section id="write-note" class="tab-section">
+        <h3>Write a Sticky Note</h3>
+        <textarea id="stickyContent" placeholder="Write your note..."></textarea>
+        <input type="text" id="recipient" placeholder="Recipient">
+        <label>
+          Public
+          <input type="checkbox" id="isPublic">
+        </label>
         <button id="sendNote">Send Note</button>
       </section>
 
-      <section id="private" class="tab-section">
-        <h3>Send a Private Sticky Note</h3>
-        <select id="privateRecipientList"></select>
-        <textarea id="privateNoteMessage" placeholder="Write your private note..."></textarea>
-        <button id="sendPrivateNoteBtn">Send Private Note</button>
-      </section>
-
-      <section id="display" class="tab-section">
-        <h3>Change Your Display Name</h3>
-        <input type="text" id="displayNameInput" placeholder="Enter new name..." />
-        <button id="saveDisplayName">Save Name</button>
+      <!-- Settings Tab -->
+      <section id="settings" class="tab-section">
+        <h3>Settings</h3>
+        <div>
+          <label>Theme:
+            <select id="themeSelector">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>Display Name:
+            <input type="text" id="displayNameInput" placeholder="Enter new name..." />
+          </label>
+        </div>
+        <button id="saveSettings">Save Settings</button>
       </section>
     </div>
   </div>
