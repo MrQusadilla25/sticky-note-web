@@ -1,122 +1,18 @@
-import { db, auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, ref, set, get, update } from './firebase-init.js';
+// Auto-fit for tab content
+function autoFitContent() {
+    const tabContent = document.getElementById('tab-content');
+    
+    // Adjust the height to fit the content inside the tab
+    tabContent.style.height = 'auto'; // Reset height to auto to allow natural growth
 
-const loginButton = document.getElementById('loginButton');
-const signupButton = document.getElementById('signupButton');
-const logoutButton = document.getElementById('logoutButton');
-const greetingText = document.getElementById('greetingText');
-const tabContent = document.getElementById('tab-content');
-const sidebarTabs = document.querySelectorAll('#sidebar li');
-const authArea = document.getElementById('auth-area');
-const appContainer = document.getElementById('app-container');
-const themeSelect = document.getElementById('themeSelect');
-const displayNameInput = document.getElementById('displayNameInput');
-
-// User authentication state
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const uid = user.uid;
-        const userRef = ref(db, 'users/' + uid);
-        get(userRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                setUserDisplayName(userData.displayName);
-                setUserTheme(userData.theme);
-            } else {
-                setUserDisplayName('User');
-                setUserTheme('light');
-            }
-        });
-
-        // Show main app content
-        authArea.style.display = 'none';
-        appContainer.style.display = 'block';
-        loadMailbox(); // Load mailbox by default
-
-    } else {
-        // Show login screen
-        authArea.style.display = 'block';
-        appContainer.style.display = 'none';
-    }
-});
-
-// Log in functionality
-loginButton.addEventListener('click', () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    signInWithEmailAndPassword(auth, email, password)
-        .catch((error) => {
-            console.error('Login error:', error);
-        });
-});
-
-// Sign up functionality
-signupButton.addEventListener('click', () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    createUserWithEmailAndPassword(auth, email, password)
-        .catch((error) => {
-            console.error('Sign up error:', error);
-        });
-});
-
-// Logout functionality
-logoutButton.addEventListener('click', () => {
-    signOut(auth)
-        .then(() => {
-            console.log('Logged out successfully');
-        })
-        .catch((error) => {
-            console.error('Logout error:', error);
-        });
-});
-
-// Setting the greeting text with user's name
-function setUserDisplayName(displayName) {
-    greetingText.textContent = `Hello ${displayName}`;
-    animateGreeting();
-}
-
-// Animation for greeting message
-function animateGreeting() {
-    greetingText.classList.add('fadeIn');
-    setTimeout(() => {
-        greetingText.classList.remove('fadeIn');
-    }, 1000);
-}
-
-// Tab switching functionality
-sidebarTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        const targetTab = tab.textContent.trim().toLowerCase();
-        switchTab(targetTab);
-    });
-});
-
-// Switching between tabs
-function switchTab(tabName) {
     const activeTab = document.querySelector('.tab-section.active-tab');
     if (activeTab) {
-        activeTab.classList.remove('active-tab');
-    }
-
-    const newTabContent = document.getElementById(`${tabName}TabContent`);
-    newTabContent.classList.add('active-tab');
-
-    // Load appropriate content
-    if (tabName === 'mailbox') {
-        loadMailbox();
-    } else if (tabName === 'history') {
-        loadHistory();
-    } else if (tabName === 'write a note') {
-        loadWriteNote();
-    } else if (tabName === 'settings') {
-        loadSettings();
+        const contentHeight = activeTab.scrollHeight;
+        tabContent.style.height = contentHeight + 'px'; // Set the height based on the content height
     }
 }
 
-// Load Mailbox (home page)
+// Call autoFitContent after loading content in each tab
 function loadMailbox() {
     const uid = auth.currentUser.uid;
     const mailboxRef = ref(db, `mailbox/${uid}`);
@@ -134,6 +30,7 @@ function loadMailbox() {
         } else {
             console.log('No new messages.');
         }
+        autoFitContent(); // Adjust content height after loading mailbox
     });
 }
 
@@ -155,6 +52,7 @@ function loadHistory() {
         } else {
             console.log('No note history.');
         }
+        autoFitContent(); // Adjust content height after loading history
     });
 }
 
@@ -185,6 +83,7 @@ function loadWriteNote() {
         }).catch((error) => {
             console.error('Error sending note:', error);
         });
+        autoFitContent(); // Adjust content height after sending note
     });
 }
 
@@ -219,20 +118,5 @@ function loadSettings() {
             console.error('Error updating theme:', error);
         });
     });
-}
-
-// Apply theme to the site
-function applyTheme(theme) {
-    if (theme === 'dark') {
-        document.body.classList.add('dark-theme');
-        document.body.classList.remove('light-theme');
-    } else {
-        document.body.classList.add('light-theme');
-        document.body.classList.remove('dark-theme');
-    }
-}
-
-// Set user theme preference on load
-function setUserTheme(theme) {
-    applyTheme(theme);
+    autoFitContent(); // Adjust content height when settings are loaded
 }
