@@ -64,7 +64,73 @@
 
     <!-- Firebase Scripts -->
     <script type="module" src="firebase-init.js"></script>
-    <script type="module" src="main.js"></script>
     <script type="module" src="auth.js"></script>
+
+    <script>
+        // JavaScript code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const loginButton = document.getElementById('loginButton');
+            const signupButton = document.getElementById('signupButton');
+            const authArea = document.getElementById('auth-area');
+            const appContainer = document.getElementById('app-container');
+            const greetingText = document.getElementById('greetingText');
+            const mailboxTab = document.getElementById('mailboxTab');
+            const historyTab = document.getElementById('historyTab');
+            const writeNoteTab = document.getElementById('writeNoteTab');
+            const settingsTab = document.getElementById('settingsTab');
+            const logoutTab = document.getElementById('logoutTab');
+            const tabContent = document.getElementById('tab-content');
+
+            // Authentication
+            loginButton.addEventListener('click', () => {
+                // Simulate login, change this to real authentication logic
+                authArea.style.display = 'none';
+                appContainer.style.display = 'block';
+                greetingText.textContent = 'User'; // Replace with actual user name
+            });
+
+            signupButton.addEventListener('click', () => {
+                // Simulate sign up, change this to real signup logic
+                authArea.style.display = 'none';
+                appContainer.style.display = 'block';
+                greetingText.textContent = 'User'; // Replace with actual user name
+            });
+
+            // Sidebar Tab Switching
+            function showTab(tabId) {
+                const tabs = document.querySelectorAll('.tab-section');
+                tabs.forEach(tab => {
+                    tab.classList.remove('active-tab');
+                });
+                const activeTab = document.getElementById(tabId);
+                if (activeTab) {
+                    activeTab.classList.add('active-tab');
+                }
+            }
+
+            mailboxTab.addEventListener('click', () => {
+                showTab('mailboxTabContent');
+            });
+
+            historyTab.addEventListener('click', () => {
+                showTab('historyTabContent');
+            });
+
+            writeNoteTab.addEventListener('click', () => {
+                showTab('writeNoteTabContent');
+            });
+
+            settingsTab.addEventListener('click', () => {
+                showTab('settingsTabContent');
+            });
+
+            logoutTab.addEventListener('click', () => {
+                // Simulate logout, change this to real logout logic
+                authArea.style.display = 'block';
+                appContainer.style.display = 'none';
+            });
+        });
+    </script>
 </body>
 </html>
