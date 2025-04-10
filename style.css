@@ -6,16 +6,47 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Updated font */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f4f4;
   color: #333;
   padding: 20px;
+  margin: 0;
 }
 
-/* Dark theme */
-body.dark {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+/* Auth Section */
+#auth-area {
+  text-align: center;
+  margin-top: 50px;
+}
+
+#auth-area h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+input {
+  font-size: 16px;
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #2980b9;
 }
 
 /* Sidebar */
@@ -26,7 +57,9 @@ body.dark {
   background-color: #2c3e50;
   color: white;
   border-radius: 5px;
-  margin-bottom: 20px;
+  position: fixed;
+  top: 20px;
+  left: 20px;
 }
 
 #sidebar button {
@@ -38,75 +71,23 @@ body.dark {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
 }
 
 #sidebar button:hover {
   background-color: #2980b9;
 }
 
-/* Input and Textarea Styling */
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Consistent font */
-  background-color: #fff;
-  color: #333;
-  transition: border 0.3s ease;
+/* App container and tabs */
+#app-container {
+  margin-left: 270px; /* Account for sidebar width */
+  margin-top: 20px;
 }
 
-input:focus, textarea:focus {
-  outline: none;
-  border: 1px solid #3498db;
+#tab-content {
+  display: flex;
+  flex-direction: column;
 }
 
-textarea {
-  resize: none; /* Prevent resizing */
-  min-height: 120px;
-}
-
-/* User List */
-#onlineUsers,
-#offlineUsers,
-#noDisplayUsers {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  background-color: #ecf0f1;
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-li[data-status="online"] {
-  background-color: #2ecc71;
-  color: white;
-}
-
-li[data-status="offline"] {
-  background-color: #e74c3c;
-  color: white;
-}
-
-li[data-status="NO DISPLAY NAME"] {
-  background-color: #95a5a6;
-  color: white;
-}
-
-/* Counts */
-#onlineCount, #offlineCount {
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-/* Tabbed Content */
 .tab-section {
   display: none;
 }
@@ -115,22 +96,83 @@ li[data-status="NO DISPLAY NAME"] {
   display: block;
 }
 
-#tab-content {
-  margin-left: 270px;
-  padding: 20px;
+h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
 }
 
-button {
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* Textarea and Inputs */
+textarea, input[type="text"], select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  resize: none;
+}
+
+textarea {
+  min-height: 100px;
+  max-height: 200px;
+}
+
+select {
+  font-size: 16px;
   padding: 10px;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  cursor: pointer;
   border-radius: 5px;
 }
 
-button:hover {
+button {
+  width: auto;
+  margin: 20px auto;
+}
+
+/* Styling for Sticky Notes Section */
+#receivedNotes li, #noteList li {
+  background-color: #ecf0f1;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+#receivedNotes li[data-status="online"] {
+  background-color: #2ecc71;
+  color: white;
+}
+
+#receivedNotes li[data-status="offline"] {
+  background-color: #e74c3c;
+  color: white;
+}
+
+#receivedNotes li[data-status="NO DISPLAY NAME"] {
+  background-color: #95a5a6;
+  color: white;
+}
+
+/* Tab Styling */
+button.active-tab {
   background-color: #2980b9;
+}
+
+button.inactive-tab {
+  background-color: #3498db;
+}
+
+button:focus {
+  outline: none;
 }
 
 /* Mobile responsiveness */
@@ -140,19 +182,44 @@ button:hover {
   }
 
   #sidebar {
-    width: 100%;
+    width: 200px;
     padding: 10px;
+    position: fixed;
+    left: 0;
+    top: 20px;
   }
 
-  #sidebar button {
+  #app-container {
+    margin-left: 220px; /* Adjusted for smaller sidebar */
+  }
+
+  button {
     font-size: 14px;
   }
 
-  li {
-    font-size: 12px;
+  h2, h3 {
+    font-size: 18px;
   }
 
-  #tab-content {
-    margin-left: 0;
+  textarea, input[type="text"], select {
+    font-size: 14px;
   }
+}
+
+/* More Styling */
+#tab-content {
+  margin-top: 20px;
+}
+
+.tab-section {
+  margin-top: 20px;
+}
+
+button#sendNote, button#sendPrivateNoteBtn, button#saveDisplayName {
+  background-color: #27ae60;
+  width: 100%;
+}
+
+button#sendNote:hover, button#sendPrivateNoteBtn:hover, button#saveDisplayName:hover {
+  background-color: #2ecc71;
 }
