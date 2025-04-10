@@ -1,56 +1,51 @@
-<!-- hi theree -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sticky Note Web</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Note App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-  <!-- Authentication Area -->
-  <div id="auth-area">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button id="login-btn">Login</button>
-    <button id="signup-btn">Sign Up</button>
-  </div>
-
-  <!-- Main App Area -->
-  <div id="app-container" style="display: none;">
-    <h1 id="greetingText">Hi!</h1>
-    <button onclick="logout()">Logout</button>
-
-    <!-- Tab Controls -->
-    <div class="tabs">
-      <button onclick="showTab('home-tab')">Home</button>
-      <button onclick="showTab('settings-tab')">Settings</button>
+    <!-- Authentication Area (Visible when not logged in) -->
+    <div id="auth-area">
+        <h2>Login or Sign Up</h2>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+        </div>
+        <button id="loginButton">Log In</button>
+        <button id="signupButton">Sign Up</button>
     </div>
 
-    <!-- Tabs Content -->
-    <div class="tab-section active-tab" id="home-tab">
-      <h2>Send Sticky Note</h2>
-      <textarea id="stickyContent" placeholder="Write your note..."></textarea><br>
-      <input type="text" id="recipient" placeholder="To (Email or Name)" /><br>
-      <label><input type="checkbox" id="isPublic" /> Public Note</label><br>
-      <button id="sendNote">Send Note</button>
-      <button id="deleteAllNotes">Delete All Notes</button>
+    <!-- Main App Area (Visible when logged in) -->
+    <div id="app-container" style="display: none;">
+        <h2>Welcome <span id="greetingText"></span></h2>
+        <button id="logoutButton">Log Out</button>
+
+        <!-- Notes Section -->
+        <h3>Your Notes</h3>
+        <ul id="noteHistory"></ul>
+
+        <h3>Create a New Note</h3>
+        <textarea id="stickyContent" placeholder="Write your note here..."></textarea><br>
+        <input type="text" id="recipient" placeholder="Recipient (Optional)">
+        <label>
+            <input type="checkbox" id="isPublic"> Public
+        </label><br>
+        <button id="sendNote">Send Note</button>
+
+        <h3>Note History</h3>
+        <button id="deleteAllNotes">Delete All Notes</button>
     </div>
 
-    <div class="tab-section" id="settings-tab">
-      <h2>Settings</h2>
-      <input type="text" id="displayNameInput" placeholder="New display name" />
-      <button id="saveSettings">Save Settings</button>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script type="module" src="firebase-init.js"></script> <!-- Firebase Initialization -->
-  <script type="module" src="main.js"></script>         <!-- Main functionality -->
-  <script type="module" src="auth.js"></script>         <!-- Authentication functionality -->
-
-
+    <!-- Firebase Scripts -->
+    <script type="module" src="firebase-init.js"></script>
+    <script type="module" src="main.js"></script>
+    <script type="module" src="auth.js"></script>
 </body>
 </html>
