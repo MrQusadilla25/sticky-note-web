@@ -6,7 +6,7 @@
   <title>Sticky Notes V9</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Fade-in/out animation */
+    /* Add some fade-in/out animations */
     @keyframes fadeInOut {
       0% { opacity: 0; }
       25% { opacity: 1; }
@@ -20,17 +20,9 @@
       font-size: 2rem;
       font-weight: bold;
     }
-
-    .tab-section {
-      display: none;
-    }
-    .tab-section.active-tab {
-      display: block;
-    }
   </style>
 </head>
 <body>
-  <!-- Auth Area (Login/Sign Up) -->
   <div id="auth-area">
     <h2>Login or Sign Up <33</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="email" required />
@@ -39,8 +31,8 @@
     <button onclick="signup()">Sign Up</button>
   </div>
 
-  <!-- App Container (After Login) -->
   <div id="app-container" style="display: none;">
+    <!-- Sidebar -->
     <div id="sidebar">
       <button onclick="showTab('mailbox')">Mailbox</button>
       <button onclick="showTab('history')">History</button>
@@ -49,6 +41,7 @@
       <button onclick="logout()">Log Out</button>
     </div>
 
+    <!-- Main Content Area -->
     <div id="tab-content">
       <!-- Mailbox Tab -->
       <section id="mailbox" class="tab-section active-tab">
@@ -97,61 +90,13 @@
     </div>
   </div>
 
-  <!-- Firebase and Scripts -->
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth.js"></script>
   <script type="module" src="main.js"></script>
 
   <script>
-    // Language greetings
-    const languageGreetings = [
-      "Hello, User!",
-      "Bonjour, User!",
-      "Hola, User!",
-      "Hallo, User!",
-      "Ciao, User!"
-    ];
-
-    let currentLanguageIndex = 0;
-    const greetingTextElement = document.getElementById("greetingText");
-
-    // Function to change the greeting text every few seconds
-    function cycleGreeting() {
-      setInterval(() => {
-        currentLanguageIndex = (currentLanguageIndex + 1) % languageGreetings.length;
-        greetingTextElement.innerHTML = languageGreetings[currentLanguageIndex];
-      }, 5000); // Change every 5 seconds
-    }
-
-    // Function to set user display name
-    function setUserDisplayName(name) {
-      const userDisplayName = name || "User";  // Default to "User" if no name provided
-      for (let i = 0; i < languageGreetings.length; i++) {
-        languageGreetings[i] = languageGreetings[i].replace("User", userDisplayName);
-      }
-      cycleGreeting(); // Start cycling the greeting
-    }
-
-    // Simulate login (use real data after login)
-    setUserDisplayName("John Doe");
-
-    // Switch tabs
-    function showTab(tabId) {
-      const allTabs = document.querySelectorAll('.tab-section');
-      allTabs.forEach(tab => {
-        tab.style.display = 'none';
-      });
-
-      const selectedTab = document.getElementById(tabId);
-      if (selectedTab) {
-        selectedTab.style.display = 'block';
-      }
-    }
-
-    // Default to showing the mailbox tab
-    document.addEventListener('DOMContentLoaded', () => {
-      showTab('mailbox');
-    });
+    // Call to start the greeting cycle (language greetings and display name will be handled in auth.js)
+    setUserDisplayName("John Doe"); // Change to actual Firebase user display name after login
   </script>
 </body>
 </html>
