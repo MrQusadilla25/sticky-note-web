@@ -146,7 +146,8 @@ function updateWelcomeMessage(uid) {
   const userRef = ref(db, `users/${uid}`);
   onValue(userRef, (snapshot) => {
     const user = snapshot.val();
-    welcomeMessage.textContent = `Welcome, ${user.displayName || user.email}!`;
+    const displayName = user.displayName || "John Doe";  // Use "John Doe" if no display name is set
+    welcomeMessage.textContent = `Welcome, ${displayName}!`;
   });
 }
 
