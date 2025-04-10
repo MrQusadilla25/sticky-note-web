@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sticky Note App</title>
+    <title>Sticky Notes App</title>
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-    <!-- Authentication Area (Visible when not logged in) -->
+    <!-- Authentication Area -->
     <div id="auth-area">
         <h2>Login or Sign Up</h2>
         <div>
@@ -22,25 +22,44 @@
         <button id="signupButton">Sign Up</button>
     </div>
 
-    <!-- Main App Area (Visible when logged in) -->
+    <!-- Main App Area -->
     <div id="app-container" style="display: none;">
-        <h2>Welcome <span id="greetingText"></span></h2>
-        <button id="logoutButton">Log Out</button>
+        <div id="sidebar">
+            <ul>
+                <li id="mailboxTab">Mailbox</li>
+                <li id="historyTab">History</li>
+                <li id="writeNoteTab">Write a Note</li>
+                <li id="settingsTab">Settings</li>
+                <li id="logoutTab">Log Out</li>
+            </ul>
+        </div>
 
-        <!-- Notes Section -->
-        <h3>Your Notes</h3>
-        <ul id="noteHistory"></ul>
+        <div id="tab-content">
+            <!-- Mailbox Tab -->
+            <div id="mailboxTabContent" class="tab-section active-tab">
+                <h2>Hello <span id="greetingText">User</span></h2>
+                <p>Welcome to your mailbox!</p>
+                <!-- Add the Mailbox content here -->
+            </div>
 
-        <h3>Create a New Note</h3>
-        <textarea id="stickyContent" placeholder="Write your note here..."></textarea><br>
-        <input type="text" id="recipient" placeholder="Recipient (Optional)">
-        <label>
-            <input type="checkbox" id="isPublic"> Public
-        </label><br>
-        <button id="sendNote">Send Note</button>
+            <!-- History Tab -->
+            <div id="historyTabContent" class="tab-section">
+                <h3>Your Notes History</h3>
+                <!-- Add the history content here -->
+            </div>
 
-        <h3>Note History</h3>
-        <button id="deleteAllNotes">Delete All Notes</button>
+            <!-- Write a Note Tab -->
+            <div id="writeNoteTabContent" class="tab-section">
+                <h3>Write a Sticky Note</h3>
+                <!-- Add the note creation content here -->
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTabContent" class="tab-section">
+                <h3>Settings</h3>
+                <!-- Add the settings content here -->
+            </div>
+        </div>
     </div>
 
     <!-- Firebase Scripts -->
