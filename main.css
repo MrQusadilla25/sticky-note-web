@@ -1,94 +1,125 @@
-/* Reset and base styles */
+/* General Reset */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: #f4f4f4;
-  -webkit-font-smoothing: antialiased;
-  -webkit-appearance: none;
+/* Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* Container styles */
-#auth-area,
+/* Authentication Area */
+#auth-area {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #fff;
+}
+
+#auth-area input {
+    margin: 5px 0;
+    padding: 10px;
+    width: 200px;
+}
+
+#auth-area button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#auth-area button:hover {
+    background-color: #3f51b5;
+}
+
+/* Main App Area */
 #app-container {
-  padding: 20px;
+    display: flex;
+    width: 100%;
 }
 
-/* Sidebar styles */
+/* Sidebar */
 #sidebar {
-  float: left;
-  width: 200px;
-  background-color: #fff;
-  border-right: 1px solid #ccc;
-  min-height: 100vh;
-  padding: 20px;
+    background-color: #303f9f;
+    color: white;
+    width: 250px;
+    padding: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Tab content styles */
+#sidebar ul {
+    list-style-type: none;
+}
+
+#sidebar li {
+    margin: 20px 0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#sidebar li:hover {
+    color: #c5cae9;
+}
+
+/* Tab Content */
 #tab-content {
-  margin-left: 220px;
-  padding: 20px;
-  background-color: #fff;
-  min-height: 100vh;
+    flex-grow: 1;
+    background-color: #fff;
+    padding: 20px;
+    overflow-y: auto;
 }
 
-/* Tabs visibility */
+/* Tab Section Styling */
 .tab-section {
-  display: none;
+    display: none;
 }
 
 .tab-section.active-tab {
-  display: block;
+    display: block;
 }
 
-/* Buttons */
-button {
-  font-family: inherit;
-  font-size: 16px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+/* Animation for Greeting */
+#mailboxTabContent h2 {
+    font-size: 2rem;
+    animation: fadeIn 1s ease-in-out;
 }
 
-button:hover {
-  background-color: #0056b3;
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
-button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
-}
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
 
-/* Input fields */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-  font-family: inherit;
-  font-size: 16px;
-  padding: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+    #sidebar {
+        width: 100%;
+        height: auto;
+    }
 
-/* Headings and spacing */
-h1, h2, h3 {
-  margin-bottom: 20px;
-  color: #333;
-}
+    #tab-content {
+        margin-top: 20px;
+    }
 
-/* Utility spacing */
-.mb-20 {
-  margin-bottom: 20px;
+    #auth-area input,
+    #auth-area button {
+        width: 80%;
+    }
 }
