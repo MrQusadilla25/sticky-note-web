@@ -1,171 +1,121 @@
-/* General Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Body Styling */
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    display: flex;
-    flex-direction: column;  /* Ensure the body content flows vertically on mobile */
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* Authentication Area */
-#auth-area {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    margin: 0;
+    padding: 0;
     background-color: #fff;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-#auth-area input {
-    margin: 5px 0;
+.dark {
+    background-color: #121212;
+    color: #fff;
+}
+
+h1, h2, h3 {
+    margin: 0;
     padding: 10px;
-    width: 200px;
 }
 
-#auth-area button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #5c6bc0;
-    color: white;
-    border: none;
+input, button, textarea {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
     cursor: pointer;
 }
 
-#auth-area button:hover {
-    background-color: #3f51b5;
+button:hover {
+    background-color: #f0f0f0;
 }
 
-/* Main App Area */
+/* Layout */
+#auth-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
 #app-container {
     display: flex;
-    width: 100%;
-    flex-grow: 1;  /* Ensures the container fills the remaining screen space */
 }
 
-/* Sidebar */
 #sidebar {
-    background-color: #303f9f;
-    color: white;
-    width: 250px;
+    width: 200px;
+    background-color: #f4f4f4;
     padding: 20px;
-    height: 100vh;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#sidebar h3 {
+    margin-top: 0;
+}
+
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+#sidebar ul li {
+    padding: 5px 0;
+}
+
+#content {
+    padding: 20px;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    position: fixed;  /* Keep the sidebar fixed on the left */
-    left: 0;
-    top: 0;
-    bottom: 0;
-    transition: all 0.3s ease;
+    justify-content: flex-start;
 }
 
-/* Hide sidebar in mobile view */
-#sidebar.active {
-    width: 0;
-    padding: 0;
-    overflow: hidden;
+.tabs {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
 }
 
-/* Sidebar Links */
-#sidebar ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-#sidebar li {
-    margin: 20px 0;
+.tab-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-right: 5px;
     cursor: pointer;
+}
+
+.tab-btn.active-tab {
+    background-color: #ddd;
     font-weight: bold;
 }
 
-#sidebar li:hover {
-    color: #c5cae9;
-}
-
-/* Tab Content */
-#tab-content {
-    flex-grow: 1;
-    background-color: #fff;
-    padding: 20px;
-    overflow-y: auto;
-    margin-left: 250px;  /* Create space for the sidebar */
-    transition: margin-left 0.3s ease;
-}
-
-/* Tab Section Styling */
-.tab-section {
+.tab-content {
     display: none;
 }
 
-.tab-section.active-tab {
+.tab-content.active {
     display: block;
 }
 
-/* Animation for Greeting */
-#mailboxTabContent h2 {
-    font-size: 2rem;
-    animation: fadeIn 1s ease-in-out;
+/* Notes */
+#noteList {
+    list-style: none;
+    padding: 0;
 }
 
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+#noteList li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    body {
-        flex-direction: column;  /* Make the body flow vertically on smaller screens */
-    }
-
-    #sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;  /* Change sidebar to relative positioning on smaller screens */
-    }
-
-    #sidebar li {
-        margin: 10px 0;  /* Reduce spacing on smaller devices */
-    }
-
-    #tab-content {
-        margin-left: 0;  /* Remove the margin left when on mobile */
-        padding: 10px;  /* Adjust padding for mobile devices */
-    }
-
-    #auth-area input,
-    #auth-area button {
-        width: 80%;  /* Make form elements wider on smaller screens */
-    }
-
-    /* Fixing the Sidebar Toggle when active */
-    #sidebar.active {
-        width: 100%;  /* Make the sidebar take the full width in mobile */
-    }
-}
-
-@media (max-width: 480px) {
-    #sidebar li {
-        font-size: 14px;  /* Reduce the font size on very small screens */
-    }
-
-    #mailboxTabContent h2 {
-        font-size: 1.5rem;  /* Adjust the header size for small screens */
-    }
-
-    /* Adjust button and input sizes for very small screens */
-    #auth-area input,
-    #auth-area button {
-        width: 90%;  /* Make the input and button elements wider */
-        font-size: 14px;  /* Reduce font size on very small screens */
-    }
+/* Theme Toggle */
+#themeToggle {
+    margin-left: 10px;
 }
