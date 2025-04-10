@@ -185,20 +185,37 @@
 
             // Save Note Functionality
             saveNoteButton.addEventListener('click', () => {
-                const note = noteContent.value;
-                const type = noteType.value;
-                const recipientName = recipient.value.trim();
-                
-                if (type === 'private') {
-                    privateMessages.push({ note, type, recipient: 'Me' });
-                } else if (type === 'public') {
-                    publicNotes.push({ note, type, recipient: 'All' });
-                } else if (type === 'dm' && recipientName) {
-                    privateMessages.push({ note, type, recipient: recipientName });
-                }
-                loadPublicNotes();
-                loadPrivateMessages();
-            });
+    				const note = noteContent.value;
+    				const type = noteType.value;
+    				const recipientName = recipient.value.trim();
+    
+    				// Validate input
+    				if (note.trim() === "") {
+        				alert("Please write something before sending.");
+        					return;
+    }
+
+    // Save the note based on type
+    if (type === 'private') {
+        privateMessages.push({ note, type, recipient: 'Me' });
+    } else if (type === 'public') {
+        publicNotes.push({ note, type, recipient: 'All' });
+    } else if (type === 'dm' && recipientName) {
+        privateMessages.push({ note, type, recipient: recipientName });
+    }
+
+    // Show confirmation message in notification element
+    const notification = document.getElementById('notification');
+    notification.textContent = `Your note has been ${type === 'public' ? 'posted on the Sticky Wall.' : `sent to ${recipientName || 'Me'}`}.`;
+    notification.style.display = 'block';
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+
+    // Reload the list of public and private notes
+    loadPublicNotes();
+    loadPrivateMessages();
+});
 
             // Change Display Name
             changeDisplayNameButton.addEventListener('click', () => {
