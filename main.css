@@ -161,4 +161,11 @@ body {
     #mailboxTabContent h2 {
         font-size: 1.5rem;  /* Adjust the header size for small screens */
     }
+
+    /* Adjust button and input sizes for very small screens */
+    #auth-area input,
+    #auth-area button {
+        width: 90%;  /* Make the input and button elements wider */
+        font-size: 14px;  /* Reduce font size on very small screens */
+    }
 }
