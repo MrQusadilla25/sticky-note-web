@@ -12,7 +12,7 @@ import { ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs
 // Set persistence for authentication state
 setPersistence(auth, browserLocalPersistence);
 
-// Sign up
+// Sign up function
 window.signup = async function () {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -34,7 +34,7 @@ window.signup = async function () {
     }
 };
 
-// Log in
+// Log in function
 window.login = async function () {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -47,7 +47,7 @@ window.login = async function () {
     }
 };
 
-// Log out
+// Log out function
 window.logout = async function () {
     await signOut(auth);
     location.reload();  // Refresh the page after logging out
@@ -56,10 +56,11 @@ window.logout = async function () {
 // Handle authentication state changes
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        // User is signed in
         document.getElementById("auth-area").style.display = "none";
         document.getElementById("app-container").style.display = "block";
 
-        // Get user data
+        // Get user data from Firebase
         const snapshot = await get(ref(db, 'users/' + user.uid));
         const data = snapshot.val();
         const displayName = data?.displayName || "User";
@@ -67,14 +68,22 @@ onAuthStateChanged(auth, async (user) => {
         window.currentDisplayName = displayName;
 
         window.setUserDisplayName(displayName);
-        loadNotes();
+        loadNotes();  // Load user notes
+
     } else {
+        // User is signed out
         document.getElementById("auth-area").style.display = "block";
         document.getElementById("app-container").style.display = "none";
     }
 });
 
-// Load notes for the signed-in user
+// Change Display Name
+window.setUserDisplayName = function(displayName) {
+    const greetingText = document.getElementById("greetingText");
+    greetingText.textContent = displayName;  // Display user name on the UI
+};
+
+// Load user notes from Firebase
 function loadNotes() {
     if (!auth.currentUser) {
         return; // Return if no user is signed in
@@ -95,7 +104,7 @@ function loadNotes() {
     });
 }
 
-// Event Listeners for login and signup
+// Event Listeners for login and signup buttons
 document.getElementById("loginButton").addEventListener("click", login);
 document.getElementById("signupButton").addEventListener("click", signup);
 document.getElementById("logoutButton").addEventListener("click", logout);
