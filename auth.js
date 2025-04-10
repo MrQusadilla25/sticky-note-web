@@ -42,6 +42,7 @@ window.signup = function () {
     .then(() => {
       alert("Account created successfully!");
       showApp();
+      clearInputs(); // Clear input fields after successful signup
     })
     .catch((err) => alert("Signup Error: " + err.message));
 };
@@ -65,6 +66,7 @@ window.login = function () {
     .then(() => {
       alert("Logged in successfully!");
       showApp();
+      clearInputs(); // Clear input fields after successful login
     })
     .catch((err) => alert("Login Error: " + err.message));
 };
@@ -93,4 +95,18 @@ function showApp() {
 
   if (authArea) authArea.style.display = "none";
   if (appContainer) appContainer.style.display = "flex";
+}
+
+// Check if user is already logged in when the page loads
+window.onload = function () {
+  const user = auth.currentUser;
+  if (user) {
+    showApp(); // Show the app if a user is logged in
+  }
+};
+
+// Clear input fields after login or signup
+function clearInputs() {
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
 }
