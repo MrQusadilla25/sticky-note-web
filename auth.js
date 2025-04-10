@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-// Set persistence for the authentication state (call this once at the beginning)
+// Set persistence for authentication state
 setPersistence(auth, browserLocalPersistence);
 
 // Sign up
@@ -21,13 +21,14 @@ window.signup = async function () {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
-    // Save user info in database
+    // Save user info in the database
     await set(ref(db, 'users/' + uid), {
       email: email,
       displayName: "User"
     });
 
-    location.reload();  // Reload the page after successful sign-up
+    // Switch to the app area after successful sign-up
+    location.reload();  // Refresh the page to trigger auth state change
   } catch (error) {
     alert(error.message);
   }
@@ -40,7 +41,7 @@ window.login = async function () {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    location.reload();  // Reload the page after successful login
+    location.reload();  // Refresh the page after successful login
   } catch (error) {
     alert(error.message);
   }
@@ -49,7 +50,7 @@ window.login = async function () {
 // Log out
 window.logout = async function () {
   await signOut(auth);
-  location.reload();  // Reload the page after logging out
+  location.reload();  // Refresh the page after logging out
 };
 
 // Load notes for the signed-in user
@@ -73,26 +74,28 @@ function loadNotes() {
   });
 }
 
-// Check authentication state (to handle login/signup sessions)
+// Handle authentication state changes
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // Show app and hide auth area if the user is logged in
     document.getElementById("auth-area").style.display = "none";
     document.getElementById("app-container").style.display = "block";
 
-    // Get user data from Firebase
+    // Get user data
     const snapshot = await get(ref(db, 'users/' + user.uid));
     const data = snapshot.val();
     const displayName = data?.displayName || "User";
     window.currentUser = user;
     window.currentDisplayName = displayName;
 
-    // Set the display name and load the user's notes
     window.setUserDisplayName(displayName);
     loadNotes();
   } else {
-    // Show login/signup area if no user is signed in
     document.getElementById("auth-area").style.display = "block";
     document.getElementById("app-container").style.display = "none";
   }
 });
+
+// Event Listeners for login and signup
+document.getElementById("loginButton").addEventListener("click", login);
+document.getElementById("signupButton").addEventListener("click", signup);
+document.getElementById("logoutButton").addEventListener("click", logout);
