@@ -1,9 +1,9 @@
 import { db, auth } from "./firebase-init.js";
-import { ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { ref, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
 // Set user greeting
 window.setUserDisplayName = function (name) {
-  const userDisplayName = name || "User";
+  const userDisplayName = name || "User"; // Default to 'User' if no display name is set
   const greetingText = document.getElementById("greetingText");
   greetingText.innerHTML = `Hi ${userDisplayName}!`;
 };
@@ -16,11 +16,31 @@ window.showTab = function (tabId) {
   document.getElementById(tabId).classList.add("active-tab");
 };
 
+// Fetch and set display name when the user logs in
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    const uid = user.uid;
+
+    // Check if the user has a display name in the database
+    const userRef = ref(db, "users/" + uid);
+    get(userRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        setUserDisplayName(userData.displayName); // Set display name
+      } else {
+        // If no display name is set, default to "User"
+        setUserDisplayName("User");
+      }
+    });
+  }
+});
+
 // Save display name
 document.getElementById("saveSettings").addEventListener("click", () => {
   const nameInput = document.getElementById("displayNameInput").value;
   const uid = auth.currentUser.uid;
 
+  // Update the display name in Realtime Database
   update(ref(db, "users/" + uid), {
     displayName: nameInput
   }).then(() => {
@@ -40,7 +60,7 @@ document.getElementById("sendNote").addEventListener("click", () => {
     content,
     recipient,
     isPublic,
-    sender: window.currentDisplayName,
+    sender: window.currentDisplayName,  // Using the current display name
     timestamp: new Date().toISOString()
   };
 
@@ -73,4 +93,22 @@ document.getElementById("deleteAllNotes").addEventListener("click", () => {
   remove(ref(db, "users/" + uid + "/notes")).then(() => {
     alert("All notes deleted.");
   });
+});
+
+// Fetch user data and set display name upon login
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    const uid = user.uid;
+    const userRef = ref(db, "users/" + uid);
+
+    // Fetch user data
+    get(userRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        setUserDisplayName(userData.displayName || "User");
+      } else {
+        setUserDisplayName("User"); // Default if no data found
+      }
+    });
+  }
 });
