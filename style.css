@@ -1,150 +1,27 @@
-/* Reset and Base Styles */
-* {
-  box-sizing: border-box;
+body {
+  font-family: sans-serif;
+  background: #f4f4f4;
   margin: 0;
   padding: 0;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f5f5;
-  color: #333;
+#auth-area, #app-container {
   padding: 20px;
 }
 
-/* Auth Area */
-#auth-area {
-  max-width: 400px;
-  margin: 40px auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+#sidebar {
+  float: left;
+  width: 200px;
 }
 
-#auth-area input,
-#auth-area button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  font-size: 16px;
+#tab-content {
+  margin-left: 220px;
 }
 
-/* App Container */
-#app-container {
-  max-width: 600px;
-  margin: 30px auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-#greetingText {
-  font-size: 24px;
-  margin-bottom: 20px;
-  font-weight: 600;
-  text-align: center;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tabs button {
-  padding: 10px 20px;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.tabs button:hover {
-  background-color: #0056b3;
-}
-
-/* Tab Content */
 .tab-section {
   display: none;
 }
 
 .tab-section.active-tab {
   display: block;
-}
-
-.tab-section h2 {
-  margin-bottom: 15px;
-}
-
-/* Inputs & Buttons */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-textarea {
-  height: 100px;
-  resize: vertical;
-}
-
-button {
-  background-color: #28a745;
-  color: white;
-  padding: 10px 14px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.2s ease;
-}
-
-button:hover {
-  background-color: #218838;
-}
-
-/* Logout button */
-button[onclick="logout()"] {
-  background-color: #dc3545;
-}
-
-button[onclick="logout()"]:hover {
-  background-color: #c82333;
-}
-
-/* Checkbox styling */
-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  #auth-area, #app-container {
-    padding: 20px;
-    margin: 20px 10px;
-  }
-
-  .tabs {
-    flex-direction: column;
-  }
-
-  .tabs button {
-    width: 100%;
-  }
 }
