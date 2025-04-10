@@ -1,75 +1,41 @@
-let activeTab = 'mailbox';
-
-// Show tab content based on selected tab
-function showTab(tabName) {
-  document.querySelectorAll('.tab-section').forEach((section) => {
-    section.style.display = 'none';
+function showTab(tabId) {
+  document.querySelectorAll(".tab-section").forEach(section => {
+    section.classList.remove("active-tab");
   });
-
-  document.getElementById(tabName).style.display = 'block';
-  activeTab = tabName;
+  document.getElementById(tabId).classList.add("active-tab");
 }
 
-// Send a new sticky note
-document.getElementById("sendNote").addEventListener("click", () => {
-  const stickyContent = document.getElementById("stickyContent").value;
-  const recipient = document.getElementById("recipient").value;
-  const isPublic = document.getElementById("isPublic").checked;
+function logout() {
+  location.reload(); // Quick way to "log out"
+}
 
-  if (stickyContent && recipient) {
-    // Send the sticky note logic (e.g., storing in Firebase Database)
-    const noteData = {
-      content: stickyContent,
-      recipient: recipient,
-      isPublic: isPublic,
-      timestamp: new Date().toISOString(),
-    };
+const languageGreetings = [
+  "Hello, User!",
+  "Bonjour, User!",
+  "Hola, User!",
+  "Hallo, User!",
+  "Ciao, User!"
+];
 
-    // Example: Save note to Firebase Realtime Database
-    const db = getDatabase();
-    const user = getAuth().currentUser;
-    set(ref(db, 'notes/' + user.uid), noteData)
-      .then(() => {
-        alert("Note sent!");
-        document.getElementById("stickyContent").value = '';
-        document.getElementById("recipient").value = '';
-      })
-      .catch((error) => {
-        alert("Error sending note: " + error.message);
-      });
-  } else {
-    alert("Please fill in all fields!");
+let currentLanguageIndex = 0;
+const greetingTextElement = document.getElementById("greetingText");
+
+function cycleGreeting() {
+  setInterval(() => {
+    currentLanguageIndex = (currentLanguageIndex + 1) % languageGreetings.length;
+    greetingTextElement.innerHTML = languageGreetings[currentLanguageIndex];
+  }, 5000);
+}
+
+function setUserDisplayName(name) {
+  const userDisplayName = name || "User";
+  for (let i = 0; i < languageGreetings.length; i++) {
+    languageGreetings[i] = languageGreetings[i].replace("User", userDisplayName);
   }
-});
+  cycleGreeting();
+}
 
-// Delete all notes from history (just a mock example, replace with real data deletion)
-document.getElementById("deleteAllNotes").addEventListener("click", () => {
-  const user = getAuth().currentUser;
-  if (user) {
-    const db = getDatabase();
-    const userNotesRef = ref(db, 'notes/' + user.uid);
-    set(userNotesRef, null)
-      .then(() => {
-        alert("All notes deleted!");
-      })
-      .catch((error) => {
-        alert("Error deleting notes: " + error.message);
-      });
-  }
-});
+setUserDisplayName("John Doe"); // For now; you can hook it to user profile info later
 
-// Save settings (e.g., display name)
-document.getElementById("saveSettings").addEventListener("click", () => {
-  const displayName = document.getElementById("displayNameInput").value;
-  const user = getAuth().currentUser;
-
-  if (user && displayName) {
-    user.updateProfile({ displayName: displayName })
-      .then(() => {
-        alert("Settings saved!");
-      })
-      .catch((error) => {
-        alert("Error updating settings: " + error.message);
-      });
-  }
-});
+window.showTab = showTab;
+window.logout = logout;
