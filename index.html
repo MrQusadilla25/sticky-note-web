@@ -8,12 +8,24 @@
 </head>
 <body>
   <h1>SendMeANote <span class="gradient-text">Remastered</span></h1>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-  <div>
-    <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Log In</button>
+
+  <div id="auth-section">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <div>
+      <button id="signupBtn">Sign Up</button>
+      <button id="loginBtn">Log In</button>
+    </div>
+    <p id="status"></p>
   </div>
-  <p id="status"></p>
+
+  <div id="user-section" style="display: none;">
+    <h2>Welcome, <span id="display-name"></span></h2>
+    <p><strong>Bio:</strong> <span id="bio"></span></p>
+    <div id="note" style="width: 200px; height: 200px; margin: 1rem auto; padding: 1rem; border-radius: 10px;">
+      (Empty Note)
+    </div>
+    <button id="logoutBtn">Log Out</button>
+  </div>
 </body>
 </html>
