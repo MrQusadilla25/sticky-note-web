@@ -1,76 +1,97 @@
 import { auth, db } from './firebase-init.js';
-import { signUpUser, loginUser } from './auth.js';
+import { signUpUser, loginUser, sendNote } from './auth.js';
 import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import {
-  ref,
-  get
+  ref, get, update, onValue
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
+// DOM elements
+const email = document.getElementById("email");
+const password = document.getElementById("password");
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const status = document.getElementById("status");
 const authSection = document.getElementById("auth-section");
 const userSection = document.getElementById("user-section");
+const tabs = document.getElementById("tabs");
+const displayName = document.getElementById("display-name");
+const bio = document.getElementById("bio");
+const noteBox = document.getElementById("note");
 
-// Sign up
-signupBtn.addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  if (!email || !password) return (status.textContent = "Enter email and password.");
+// Auth actions
+signupBtn.onclick = () => signUpUser(email.value, password.value);
+loginBtn.onclick = () => loginUser(email.value, password.value);
+logoutBtn.onclick = () => signOut(auth);
+
+// Show tab
+window.showTab = (name) => {
+  ["profile", "settings", "send", "inbox"].forEach(id => {
+    document.getElementById(`${id}-tab`).style.display = "none";
+  });
+  document.getElementById(`${name}-tab`).style.display = "block";
+};
+
+document.getElementById("saveSettingsBtn").onclick = async () => {
+  const uid = auth.currentUser.uid;
+  await update(ref(db, `users/${uid}`), {
+    displayName: document.getElementById("nameInput").value,
+    bio: document.getElementById("bioInput").value,
+    color: document.getElementById("colorInput").value
+  });
+  alert("Updated!");
+};
+
+document.getElementById("sendNoteBtn").onclick = async () => {
   try {
-    await signUpUser(email, password);
-    status.textContent = "Signed up!";
-  } catch (error) {
-    status.textContent = "Sign-up error: " + error.message;
+    await sendNote(
+      auth.currentUser.uid,
+      document.getElementById("targetEmail").value,
+      document.getElementById("noteText").value
+    );
+    document.getElementById("sendStatus").textContent = "Note sent!";
+  } catch (e) {
+    document.getElementById("sendStatus").textContent = e.message;
   }
-});
+};
 
-// Log in
-loginBtn.addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  if (!email || !password) return (status.textContent = "Enter email and password.");
-  try {
-    await loginUser(email, password);
-    status.textContent = "Logged in!";
-  } catch (error) {
-    status.textContent = "Login error: " + error.message;
-  }
-});
-
-// Log out
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  userSection.style.display = "none";
-  authSection.style.display = "block";
-  status.textContent = "Logged out.";
-});
-
-// Auto-login and show data
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    const snapshot = await get(ref(db, `users/${user.uid}`));
-    const data = snapshot.val();
-
-    if (data?.suspended) {
-      alert(`You are suspended. Reason: ${data.suspendReason || "No reason provided"}`);
-      await signOut(auth);
-      return;
-    }
-
-    document.getElementById("display-name").textContent = data.displayName || "No name";
-    document.getElementById("bio").textContent = data.bio || "";
-    document.getElementById("note").textContent = data.note || "";
-    document.getElementById("note").style.backgroundColor = data.color || "#ffff88";
-
-    userSection.style.display = "block";
     authSection.style.display = "none";
+    userSection.style.display = "block";
+    tabs.style.display = "block";
+
+    const snap = await get(ref(db, `users/${user.uid}`));
+    const data = snap.val();
+
+    displayName.textContent = data.displayName;
+    bio.textContent = data.bio;
+    noteBox.style.background = data.color;
+
+    // Load inbox
+    const inboxRef = ref(db, `users/${user.uid}/inbox`);
+    onValue(inboxRef, (snapshot) => {
+      const inboxDiv = document.getElementById("inboxMessages");
+      inboxDiv.innerHTML = "";
+      snapshot.forEach((child) => {
+        const msg = child.val();
+        const div = document.createElement("div");
+        div.textContent = `${new Date(msg.timestamp).toLocaleString()} — ${msg.message}`;
+        inboxDiv.appendChild(div);
+      });
+    });
+
+    showTab("profile");
   } else {
-    userSection.style.display = "none";
     authSection.style.display = "block";
+    userSection.style.display = "none";
+    tabs.style.display = "none";
   }
 });
+
+// Dark mode
+document.getElementById("darkToggle").onclick = () => {
+  document.body.classList.toggle("dark-mode");
+};
