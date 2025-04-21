@@ -1,91 +1,50 @@
-// Auth Handling (Login and Sign Up)
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { set, ref, get } from "firebase/database";
-import { auth, db } from './firebase-init.js';
+import { auth } from "./firebase-init.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
-// Handle Sign Up
-document.getElementById("signup-btn").addEventListener("click", () => {
-    const email = prompt("Enter email:");
-    const password = prompt("Enter password:");
-    const name = prompt("Enter display name:");
-    const bio = prompt("Enter bio:");
+const signupForm = document.getElementById('signup-form');
+const loginForm = document.getElementById('login-form');
+const logoutButton = document.getElementById('logout-button');
 
-    createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            // Save user info to Firebase Realtime Database
-            set(ref(db, 'users/' + user.uid), {
-                name: name,
-                email: email,
-                bio: bio,
-                suspended: false
-            });
-            alert("Sign-up successful!");
-        })
-        .catch((error) => {
-            alert(error.message);
-        });
-});
+signupForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = signupForm.email.value;
+  const password = signupForm.password.value;
 
-// Handle Login
-document.getElementById("login-btn").addEventListener("click", () => {
-    const email = prompt("Enter email:");
-    const password = prompt("Enter password:");
-
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            // Check if the user is suspended
-            get(ref(db, 'users/' + user.uid))
-                .then(snapshot => {
-                    if (snapshot.exists() && snapshot.val().suspended) {
-                        alert("Your account is suspended.");
-                        signOut(auth);
-                    } else {
-                        alert("Login successful!");
-                    }
-                });
-        })
-        .catch((error) => {
-            alert(error.message);
-        });
-});
-
-// Handle Log Out
-document.getElementById("logout-btn").addEventListener("click", () => {
-    signOut(auth).then(() => {
-        alert("Logged out successfully!");
-    }).catch((error) => {
-        alert(error.message);
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      alert('Signed up successfully');
+      signupForm.reset();
+    })
+    .catch((error) => {
+      alert(error.message);
     });
 });
 
-// Check User Authentication Status
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Show user profile and their notes
-        document.getElementById("user-info").innerHTML = `Welcome ${user.displayName}`;
-        loadNotes(user.uid);
-    } else {
-        document.getElementById("user-info").innerHTML = `Please log in to see your notes.`;
-    }
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = loginForm.email.value;
+  const password = loginForm.password.value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      alert('Logged in successfully');
+      loginForm.reset();
+      window.location.reload();
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 });
 
-// Load notes after login
-function loadNotes(userId) {
-    get(ref(db, 'notes/' + userId)).then((snapshot) => {
-        if (snapshot.exists()) {
-            const notes = snapshot.val();
-            let notesHTML = '';
-            for (let noteId in notes) {
-                notesHTML += `<div class="note">
-                    <p><strong>Note:</strong> ${notes[noteId].content}</p>
-                    <button class="delete-note" data-note-id="${noteId}">Delete</button>
-                </div>`;
-            }
-            document.getElementById("notes-list").innerHTML = notesHTML;
-        } else {
-            document.getElementById("notes-list").innerHTML = 'No notes found.';
-        }
+logoutButton.addEventListener('click', () => {
+  signOut(auth)
+    .then(() => {
+      alert('Logged out successfully');
+      window.location.reload();
+    })
+    .catch((error) => {
+      alert(error.message);
     });
-}
+});
