@@ -5,7 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
-// Sign up function
+// Sign Up
 export function signUpUser(email, password) {
   return createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -22,4 +22,9 @@ export function signUpUser(email, password) {
         suspended: false
       });
     });
+}
+
+// Log In
+export function loginUser(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
 }
