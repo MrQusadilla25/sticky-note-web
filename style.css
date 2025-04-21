@@ -1,110 +1,49 @@
-/* Global Styles */
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   margin: 0;
-  padding: 0;
-  background-color: #f4f4f9;
-  color: #333;
-  transition: all 0.3s ease;
+  padding: 2rem;
+  background: white;
+  color: black;
+  transition: background 0.4s, color 0.4s;
 }
 
-h2, h3 {
-  font-family: 'Arial', sans-serif;
-  color: #333;
-  text-align: center;
+.dark-mode {
+  background: #121212;
+  color: white;
 }
 
-#dark-mode-toggle {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: transparent;
+h1 .gradient-text, #remastered {
+  background: linear-gradient(90deg, #ff3cac, #2b86c5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fadeGradient 3s ease-in-out forwards;
+}
+
+@keyframes fadeGradient {
+  0% {
+    -webkit-text-fill-color: transparent;
+  }
+  100% {
+    -webkit-text-fill-color: initial;
+  }
+}
+
+#tabs button {
+  margin: 0.3rem;
+  padding: 0.5rem 1rem;
   border: none;
-  font-size: 20px;
+  background: linear-gradient(90deg, #ff3cac, #2b86c5);
+  color: white;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-#login-form, #signup-form, #user-section, #settings-page {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-input {
-  margin: 10px 0;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  padding: 10px;
-  font-size: 16px;
-  background-color: #5c6bc0;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #3949ab;
-}
-
-textarea {
-  width: 100%;
-  height: 150px;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-#recentEmails, #inboxMessages {
-  margin: 20px 0;
-}
-
-#recentEmails div, #inboxMessages div {
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #f1f1f1;
-  border-radius: 4px;
-}
-
-button#sendButton {
-  margin-bottom: 20px;
-}
-
-#settings-page input {
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-#settings-page button {
-  width: 100%;
-}
-
-body.dark-mode {
-  background-color: #121212;
-  color: #fff;
-}
-
-body.dark-mode button {
-  background-color: #424242;
-}
-
-body.dark-mode input {
-  background-color: #424242;
-  color: #fff;
-}
-
-body.dark-mode #recentEmails div, body.dark-mode #inboxMessages div {
-  background-color: #333;
+.sticky-note {
+  width: 200px;
+  height: 200px;
+  margin: 1rem auto;
+  padding: 1rem;
+  border-radius: 10px;
+  background-color: #fffaa8;
+  transition: background 0.5s;
 }
