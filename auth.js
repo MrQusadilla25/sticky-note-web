@@ -1,43 +1,50 @@
-import { db } from "./firebase-init.js";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import {
-  ref,
-  set,
-  push,
-  get,
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { auth } from "./firebase-init.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
-export async function signUpUser(email, password) {
-  const { user } = await createUserWithEmailAndPassword(auth, email, password);
-  await set(ref(db, `users/${user.uid}`), {
-    email,
-    displayName: email.split("@")[0],
-    bio: "",
-    color: "#fffaa8",
-  });
-}
+const signupForm = document.getElementById('signup-form');
+const loginForm = document.getElementById('login-form');
+const logoutButton = document.getElementById('logout-button');
 
-export async function loginUser(email, password) {
-  await signInWithEmailAndPassword(auth, email, password);
-}
+signupForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = signupForm.email.value;
+  const password = signupForm.password.value;
 
-export async function sendNote(fromUID, toEmail, message) {
-  const snapshot = await get(ref(db, "users"));
-  let targetUID = null;
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      alert('Signed up successfully');
+      signupForm.reset();
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+});
 
-  snapshot.forEach((child) => {
-    if (child.val().email === toEmail) targetUID = child.key;
-  });
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = loginForm.email.value;
+  const password = loginForm.password.value;
 
-  if (!targetUID) throw new Error("User not found");
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      alert('Logged in successfully');
+      loginForm.reset();
+      window.location.reload();
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+});
 
-  const noteRef = push(ref(db, `users/${targetUID}/inbox`));
-  await set(noteRef, {
-    from: fromUID,
-    message,
-    timestamp: Date.now(),
-  });
-}
+logoutButton.addEventListener('click', () => {
+  signOut(auth)
+    .then(() => {
+      alert('Logged out successfully');
+      window.location.reload();
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+});
