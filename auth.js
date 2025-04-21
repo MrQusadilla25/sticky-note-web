@@ -1,30 +1,26 @@
-import { auth, db } from './firebase-init.js';
+import { auth, db } from "./firebase-init.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { ref, set } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
-// Sign Up
-export function signUpUser(email, password) {
-  return createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      const deviceName = navigator.userAgent;
+import {
+  ref,
+  set
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
-      return set(ref(db, `users/${user.uid}`), {
-        email: user.email,
-        displayName: "New User",
-        bio: "",
-        note: "",
-        color: "#ffff88",
-        device: deviceName,
-        suspended: false
-      });
-    });
+export async function signUpUser(email, password) {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  await set(ref(db, "users/" + cred.user.uid), {
+    email: email,
+    displayName: "New User",
+    bio: "This is my bio.",
+    note: "Hello world!",
+    color: "#ffff88",
+    suspended: false
+  });
 }
 
-// Log In
-export function loginUser(email, password) {
-  return signInWithEmailAndPassword(auth, email, password);
+export async function loginUser(email, password) {
+  await signInWithEmailAndPassword(auth, email, password);
 }
