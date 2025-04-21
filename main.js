@@ -1,26 +1,23 @@
-import { auth, db } from './firebase-init.js';
-import { ref, update } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { signUpUser } from './auth.js';
 
-document.getElementById('updateDisplayName').addEventListener('click', () => {
-  const newName = document.getElementById('newDisplayName').value;
-  update(ref(db, `users/${auth.currentUser.uid}`), {
-    displayName: newName
-  });
-  document.getElementById('displayName').innerText = newName;
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const signupBtn = document.getElementById("signupBtn");
+  signupBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const status = document.getElementById("status");
 
-document.getElementById('updateBio').addEventListener('click', () => {
-  const bio = document.getElementById('bio').value;
-  update(ref(db, `users/${auth.currentUser.uid}`), {
-    bio
-  });
-});
+    if (!email || !password) {
+      status.textContent = "Please enter email and password.";
+      return;
+    }
 
-document.getElementById('sendNote').addEventListener('click', () => {
-  const note = document.getElementById('note').value;
-  const color = document.getElementById('noteColor').value;
-  update(ref(db, `users/${auth.currentUser.uid}`), {
-    note,
-    color
+    try {
+      await signUpUser(email, password);
+      status.textContent = "Signed up successfully!";
+    } catch (error) {
+      console.error(error);
+      status.textContent = "Error: " + error.message;
+    }
   });
 });
