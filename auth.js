@@ -1,26 +1,43 @@
-import { auth, db } from "./firebase-init.js";
+import { db } from "./firebase-init.js";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-
 import {
   ref,
-  set
+  set,
+  push,
+  get,
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
 export async function signUpUser(email, password) {
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  await set(ref(db, "users/" + cred.user.uid), {
-    email: email,
-    displayName: "New User",
-    bio: "This is my bio.",
-    note: "Hello world!",
-    color: "#ffff88",
-    suspended: false
+  const { user } = await createUserWithEmailAndPassword(auth, email, password);
+  await set(ref(db, `users/${user.uid}`), {
+    email,
+    displayName: email.split("@")[0],
+    bio: "",
+    color: "#fffaa8",
   });
 }
 
 export async function loginUser(email, password) {
   await signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function sendNote(fromUID, toEmail, message) {
+  const snapshot = await get(ref(db, "users"));
+  let targetUID = null;
+
+  snapshot.forEach((child) => {
+    if (child.val().email === toEmail) targetUID = child.key;
+  });
+
+  if (!targetUID) throw new Error("User not found");
+
+  const noteRef = push(ref(db, `users/${targetUID}/inbox`));
+  await set(noteRef, {
+    from: fromUID,
+    message,
+    timestamp: Date.now(),
+  });
 }
