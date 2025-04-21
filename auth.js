@@ -1,155 +1,43 @@
-:root {
-  --background-light: #f9f9f9;
-  --text-light: #1c1c1e;
-  --background-dark: #1c1c1e;
-  --text-dark: #f9f9f9;
-  --accent: linear-gradient(90deg, #ff3cac, #2b86c5);
-  --card-bg-light: #ffffff;
-  --card-bg-dark: #2c2c2e;
-  --border-radius: 12px;
-  --transition: 0.3s ease;
-  --shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+import { db } from "./firebase-init.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import {
+  ref,
+  set,
+  push,
+  get,
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+export async function signUpUser(email, password) {
+  const { user } = await createUserWithEmailAndPassword(auth, email, password);
+  await set(ref(db, `users/${user.uid}`), {
+    email,
+    displayName: email.split("@")[0],
+    bio: "",
+    color: "#fffaa8",
+  });
 }
 
-body {
-  margin: 0;
-  padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--background-light);
-  color: var(--text-light);
-  transition: background var(--transition), color var(--transition);
+export async function loginUser(email, password) {
+  await signInWithEmailAndPassword(auth, email, password);
 }
 
-.dark-mode {
-  background: var(--background-dark);
-  color: var(--text-dark);
-}
+export async function sendNote(fromUID, toEmail, message) {
+  const snapshot = await get(ref(db, "users"));
+  let targetUID = null;
 
-h1 {
-  text-align: center;
-  font-size: 2.8rem;
-  margin-bottom: 2rem;
-}
+  snapshot.forEach((child) => {
+    if (child.val().email === toEmail) targetUID = child.key;
+  });
 
-#remastered {
-  background: var(--accent);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: fadeGradient 2s ease forwards;
-}
+  if (!targetUID) throw new Error("User not found");
 
-@keyframes fadeGradient {
-  0% {
-    -webkit-text-fill-color: transparent;
-  }
-  100% {
-    -webkit-text-fill-color: initial;
-  }
-}
-
-#app {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-button {
-  background: var(--accent);
-  color: white;
-  padding: 0.6rem 1.2rem;
-  margin: 0.3rem;
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
-}
-
-button:hover {
-  transform: translateY(-2px);
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  margin: 0.4rem 0;
-  border: 1px solid #ccc;
-  border-radius: var(--border-radius);
-  box-sizing: border-box;
-  background: inherit;
-  color: inherit;
-}
-
-input[type="color"] {
-  padding: 0.4rem;
-  height: 45px;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-#tabs {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-#tabs button {
-  flex: 1;
-  margin: 0.3rem;
-}
-
-#tab-content > div {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: var(--card-bg-light);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  transition: background var(--transition), color var(--transition);
-}
-
-.dark-mode #tab-content > div {
-  background: var(--card-bg-dark);
-}
-
-#note {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: var(--border-radius);
-  min-height: 100px;
-  text-align: center;
-  font-weight: 600;
-  background-color: #fffaa8;
-  transition: background-color var(--transition);
-}
-
-#inboxMessages > div {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: #e6e6e6;
-  border-radius: var(--border-radius);
-  font-size: 0.95rem;
-}
-
-.dark-mode #inboxMessages > div {
-  background: #3a3a3c;
-}
-
-#auth-section, #user-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#darkToggle {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  color: inherit;
-  font-size: 0.9rem;
-  border: 1px solid currentColor;
-  padding: 0.5rem 0.8rem;
+  const noteRef = push(ref(db, `users/${targetUID}/inbox`));
+  await set(noteRef, {
+    from: fromUID,
+    message,
+    timestamp: Date.now(),
+  });
 }
