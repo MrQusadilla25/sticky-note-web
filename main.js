@@ -1,89 +1,61 @@
-import { db, auth } from "./firebase-init.js";
-import { ref, get, push, set, onValue, remove } from "firebase/database";
+import { db, auth } from './firebase-init.js';
+import { ref, set, push, get, update } from 'firebase/database';
 
-const noteText = document.getElementById('noteText');
-const sendButton = document.getElementById('sendButton');
-const inboxContainer = document.getElementById('inboxMessages');
-const recentEmailsContainer = document.getElementById('recentEmails');
-const cooldownTime = 3000; // Cooldown time in milliseconds (3 seconds)
-let lastSentTime = 0;
-
-const user = auth.currentUser;
-
-function checkSuspension() {
-  const userRef = ref(db, 'users/' + user.uid);
-  get(userRef).then((snapshot) => {
-    if (snapshot.exists()) {
-      const userData = snapshot.val();
-      if (userData.suspended) {
-        alert(`You are suspended! Reason: ${userData.suspendReason}`);
-        signOut(auth);
-      }
+// Function to send a note
+function sendNote() {
+    const content = prompt("Enter your note content:");
+    const user = auth.currentUser;
+    if (user) {
+        const noteRef = push(ref(db, 'notes/' + user.uid));
+        set(noteRef, {
+            content: content,
+            timestamp: Date.now()
+        }).then(() => {
+            alert("Note sent successfully!");
+            loadNotes(user.uid);
+        }).catch(error => {
+            alert("Failed to send note: " + error.message);
+        });
+    } else {
+        alert("Please log in first.");
     }
-  });
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    checkSuspension();
-    displayInbox();
-    displayRecentEmails();
-  }
+// Add event listener for sending notes
+document.getElementById("send-note-btn").addEventListener("click", sendNote);
+
+// Delete note from user
+document.getElementById("notes-list").addEventListener("click", (event) => {
+    if (event.target.classList.contains("delete-note")) {
+        const noteId = event.target.getAttribute("data-note-id");
+        const user = auth.currentUser;
+        if (user) {
+            const noteRef = ref(db, 'notes/' + user.uid + '/' + noteId);
+            set(noteRef, null).then(() => {
+                alert("Note deleted.");
+                loadNotes(user.uid);
+            }).catch(error => {
+                alert("Failed to delete note: " + error.message);
+            });
+        }
+    }
 });
 
-function sendNote() {
-  const currentTime = new Date().getTime();
-  if (currentTime - lastSentTime < cooldownTime) {
-    alert('Please wait before sending another note.');
-    return;
-  }
-
-  lastSentTime = currentTime;
-  const note = {
-    text: noteText.value,
-    sender: user.displayName,
-    timestamp: currentTime,
-  };
-
-  const notesRef = ref(db, 'notes/');
-  push(notesRef, note);
-  updateRecentEmails(note);
-
-  noteText.value = ''; // Clear note input field
-}
-
-function updateRecentEmails(note) {
-  const recentEmailsRef = ref(db, 'users/' + user.uid + '/sentEmails/');
-  push(recentEmailsRef, note);
-
-  const newEmailElement = document.createElement('div');
-  newEmailElement.innerText = `To: ${note.text} | Sent at: ${new Date(note.timestamp).toLocaleString()}`;
-  recentEmailsContainer.prepend(newEmailElement);
-}
-
-function displayInbox() {
-  const inboxRef = ref(db, 'users/' + user.uid + '/inbox');
-  onValue(inboxRef, (snapshot) => {
-    inboxContainer.innerHTML = ''; // Clear inbox before displaying new data
-    snapshot.forEach((childSnapshot) => {
-      const message = childSnapshot.val();
-      const messageElement = document.createElement('div');
-      messageElement.innerHTML = `<strong>From:</strong> ${message.sender} <br> <strong>Message:</strong> ${message.text} <button onclick="removeMessage('${childSnapshot.key}')">Remove</button>`;
-      inboxContainer.appendChild(messageElement);
+// Function to load notes
+function loadNotes(userId) {
+    get(ref(db, 'notes/' + userId)).then((snapshot) => {
+        if (snapshot.exists()) {
+            const notes = snapshot.val();
+            let notesHTML = '';
+            for (let noteId in notes) {
+                notesHTML += `<div class="note">
+                    <p><strong>Note:</strong> ${notes[noteId].content}</p>
+                    <button class="delete-note" data-note-id="${noteId}">Delete</button>
+                </div>`;
+            }
+            document.getElementById("notes-list").innerHTML = notesHTML;
+        } else {
+            document.getElementById("notes-list").innerHTML = 'No notes found.';
+        }
     });
-  });
 }
-
-function clearInbox() {
-  const inboxRef = ref(db, 'users/' + user.uid + '/inbox');
-  set(inboxRef, null); // Clear all inbox messages
-  alert('Inbox cleared!');
-}
-
-function removeMessage(messageId) {
-  const messageRef = ref(db, 'users/' + user.uid + '/inbox/' + messageId);
-  remove(messageRef);
-  alert('Message removed!');
-}
-
-sendButton.addEventListener('click', sendNote);
