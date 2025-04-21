@@ -2,30 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SendMeANote Remastered</title>
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="main.js"></script>
 </head>
 <body>
-  <h1>SendMeANote <span class="gradient-text">Remastered</span></h1>
+  <div id="app">
+    <h1 class="gradient-text">SendMeANote <span id="remastered">Remastered</span></h1>
 
-  <div id="auth-section">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <div>
+    <button id="darkToggle">Toggle Dark Mode</button>
+
+    <div id="auth-section">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
       <button id="signupBtn">Sign Up</button>
-      <button id="loginBtn">Log In</button>
+      <button id="loginBtn">Login</button>
     </div>
-    <p id="status"></p>
+
+    <div id="user-section" style="display: none;">
+      <p>Signed in as: <span id="display-name"></span></p>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <div id="tabs" style="display:none;">
+      <button onclick="showTab('profile')">Profile</button>
+      <button onclick="showTab('settings')">Settings</button>
+      <button onclick="showTab('send')">Send Note</button>
+      <button onclick="showTab('inbox')">Inbox</button>
+    </div>
+
+    <div id="tab-content">
+      <div id="profile-tab" style="display:none;">
+        <h2>Your Profile</h2>
+        <p><strong>Bio:</strong> <span id="bio"></span></p>
+        <div id="note" class="sticky-note">Empty Note</div>
+      </div>
+
+      <div id="settings-tab" style="display:none;">
+        <h3>Update Profile</h3>
+        <input id="nameInput" placeholder="New Display Name" /><br />
+        <input id="bioInput" placeholder="New Bio" /><br />
+        <input id="colorInput" type="color" /><br />
+        <button id="saveSettingsBtn">Save</button>
+      </div>
+
+      <div id="send-tab" style="display:none;">
+        <h3>Send a Note</h3>
+        <input id="targetEmail" placeholder="Recipient Email" /><br />
+        <textarea id="noteText" placeholder="Your note"></textarea><br />
+        <button id="sendNoteBtn">Send Note</button>
+        <p id="sendStatus"></p>
+      </div>
+
+      <div id="inbox-tab" style="display:none;">
+        <h3>Your Inbox</h3>
+        <div id="inboxMessages"></div>
+      </div>
+    </div>
   </div>
 
-  <div id="user-section" style="display: none;">
-    <h2>Welcome, <span id="display-name"></span></h2>
-    <p><strong>Bio:</strong> <span id="bio"></span></p>
-    <div id="note" style="width: 200px; height: 200px; margin: 1rem auto; padding: 1rem; border-radius: 10px;">
-      (Empty Note)
-    </div>
-    <button id="logoutBtn">Log Out</button>
-  </div>
+  <script type="module" src="firebase-init.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
