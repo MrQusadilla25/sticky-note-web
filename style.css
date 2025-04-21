@@ -3,7 +3,7 @@
   --text-light: #1c1c1e;
   --background-dark: #1c1c1e;
   --text-dark: #f9f9f9;
-  --accent: linear-gradient(90deg, #ff3cac, #2b86c5);
+  --accent: linear-gradient(270deg, #ff3cac, #784ba0, #2b86c5);
   --card-bg-light: #ffffff;
   --card-bg-dark: #2c2c2e;
   --border-radius: 12px;
@@ -32,19 +32,18 @@ h1 {
 }
 
 #remastered {
+  font-weight: bold;
   background: var(--accent);
+  background-size: 600% 600%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: fadeGradient 2s ease forwards;
+  animation: gradientShift 8s ease infinite;
 }
 
-@keyframes fadeGradient {
-  0% {
-    -webkit-text-fill-color: transparent;
-  }
-  100% {
-    -webkit-text-fill-color: initial;
-  }
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 #app {
@@ -137,7 +136,8 @@ textarea {
   background: #3a3a3c;
 }
 
-#auth-section, #user-section {
+#auth-section,
+#user-section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -152,4 +152,14 @@ textarea {
   font-size: 0.9rem;
   border: 1px solid currentColor;
   padding: 0.5rem 0.8rem;
+  border-radius: var(--border-radius);
+  transition: all var(--transition);
+}
+
+#darkToggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hidden {
+  display: none;
 }
