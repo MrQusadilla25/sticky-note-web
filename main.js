@@ -1,97 +1,89 @@
-import { auth, db } from './firebase-init.js';
-import { signUpUser, loginUser, sendNote } from './auth.js';
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import {
-  ref, get, update, onValue
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { db, auth } from "./firebase-init.js";
+import { ref, get, push, set, onValue, remove } from "firebase/database";
 
-// DOM elements
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const signupBtn = document.getElementById("signupBtn");
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const authSection = document.getElementById("auth-section");
-const userSection = document.getElementById("user-section");
-const tabs = document.getElementById("tabs");
-const displayName = document.getElementById("display-name");
-const bio = document.getElementById("bio");
-const noteBox = document.getElementById("note");
+const noteText = document.getElementById('noteText');
+const sendButton = document.getElementById('sendButton');
+const inboxContainer = document.getElementById('inboxMessages');
+const recentEmailsContainer = document.getElementById('recentEmails');
+const cooldownTime = 3000; // Cooldown time in milliseconds (3 seconds)
+let lastSentTime = 0;
 
-// Auth actions
-signupBtn.onclick = () => signUpUser(email.value, password.value);
-loginBtn.onclick = () => loginUser(email.value, password.value);
-logoutBtn.onclick = () => signOut(auth);
+const user = auth.currentUser;
 
-// Show tab
-window.showTab = (name) => {
-  ["profile", "settings", "send", "inbox"].forEach(id => {
-    document.getElementById(`${id}-tab`).style.display = "none";
+function checkSuspension() {
+  const userRef = ref(db, 'users/' + user.uid);
+  get(userRef).then((snapshot) => {
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      if (userData.suspended) {
+        alert(`You are suspended! Reason: ${userData.suspendReason}`);
+        signOut(auth);
+      }
+    }
   });
-  document.getElementById(`${name}-tab`).style.display = "block";
-};
+}
 
-document.getElementById("saveSettingsBtn").onclick = async () => {
-  const uid = auth.currentUser.uid;
-  await update(ref(db, `users/${uid}`), {
-    displayName: document.getElementById("nameInput").value,
-    bio: document.getElementById("bioInput").value,
-    color: document.getElementById("colorInput").value
-  });
-  alert("Updated!");
-};
-
-document.getElementById("sendNoteBtn").onclick = async () => {
-  try {
-    await sendNote(
-      auth.currentUser.uid,
-      document.getElementById("targetEmail").value,
-      document.getElementById("noteText").value
-    );
-    document.getElementById("sendStatus").textContent = "Note sent!";
-  } catch (e) {
-    document.getElementById("sendStatus").textContent = e.message;
-  }
-};
-
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    authSection.style.display = "none";
-    userSection.style.display = "block";
-    tabs.style.display = "block";
-
-    const snap = await get(ref(db, `users/${user.uid}`));
-    const data = snap.val();
-
-    displayName.textContent = data.displayName;
-    bio.textContent = data.bio;
-    noteBox.style.background = data.color;
-
-    // Load inbox
-    const inboxRef = ref(db, `users/${user.uid}/inbox`);
-    onValue(inboxRef, (snapshot) => {
-      const inboxDiv = document.getElementById("inboxMessages");
-      inboxDiv.innerHTML = "";
-      snapshot.forEach((child) => {
-        const msg = child.val();
-        const div = document.createElement("div");
-        div.textContent = `${new Date(msg.timestamp).toLocaleString()} — ${msg.message}`;
-        inboxDiv.appendChild(div);
-      });
-    });
-
-    showTab("profile");
-  } else {
-    authSection.style.display = "block";
-    userSection.style.display = "none";
-    tabs.style.display = "none";
+    checkSuspension();
+    displayInbox();
+    displayRecentEmails();
   }
 });
 
-// Dark mode
-document.getElementById("darkToggle").onclick = () => {
-  document.body.classList.toggle("dark-mode");
-};
+function sendNote() {
+  const currentTime = new Date().getTime();
+  if (currentTime - lastSentTime < cooldownTime) {
+    alert('Please wait before sending another note.');
+    return;
+  }
+
+  lastSentTime = currentTime;
+  const note = {
+    text: noteText.value,
+    sender: user.displayName,
+    timestamp: currentTime,
+  };
+
+  const notesRef = ref(db, 'notes/');
+  push(notesRef, note);
+  updateRecentEmails(note);
+
+  noteText.value = ''; // Clear note input field
+}
+
+function updateRecentEmails(note) {
+  const recentEmailsRef = ref(db, 'users/' + user.uid + '/sentEmails/');
+  push(recentEmailsRef, note);
+
+  const newEmailElement = document.createElement('div');
+  newEmailElement.innerText = `To: ${note.text} | Sent at: ${new Date(note.timestamp).toLocaleString()}`;
+  recentEmailsContainer.prepend(newEmailElement);
+}
+
+function displayInbox() {
+  const inboxRef = ref(db, 'users/' + user.uid + '/inbox');
+  onValue(inboxRef, (snapshot) => {
+    inboxContainer.innerHTML = ''; // Clear inbox before displaying new data
+    snapshot.forEach((childSnapshot) => {
+      const message = childSnapshot.val();
+      const messageElement = document.createElement('div');
+      messageElement.innerHTML = `<strong>From:</strong> ${message.sender} <br> <strong>Message:</strong> ${message.text} <button onclick="removeMessage('${childSnapshot.key}')">Remove</button>`;
+      inboxContainer.appendChild(messageElement);
+    });
+  });
+}
+
+function clearInbox() {
+  const inboxRef = ref(db, 'users/' + user.uid + '/inbox');
+  set(inboxRef, null); // Clear all inbox messages
+  alert('Inbox cleared!');
+}
+
+function removeMessage(messageId) {
+  const messageRef = ref(db, 'users/' + user.uid + '/inbox/' + messageId);
+  remove(messageRef);
+  alert('Message removed!');
+}
+
+sendButton.addEventListener('click', sendNote);
