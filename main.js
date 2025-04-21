@@ -1,7 +1,13 @@
 import { auth, db } from './firebase-init.js';
 import { signUpUser, loginUser } from './auth.js';
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import {
+  ref,
+  get
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
@@ -39,27 +45,28 @@ loginBtn.addEventListener("click", async () => {
 // Log out
 logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
-  status.textContent = "Logged out.";
   userSection.style.display = "none";
   authSection.style.display = "block";
+  status.textContent = "Logged out.";
 });
 
-// Auto-login + show user data
+// Auto-login and show data
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     const snapshot = await get(ref(db, `users/${user.uid}`));
     const data = snapshot.val();
 
-    if (data.suspended) {
+    if (data?.suspended) {
       alert(`You are suspended. Reason: ${data.suspendReason || "No reason provided"}`);
       await signOut(auth);
       return;
     }
 
-    document.getElementById("display-name").textContent = data.displayName;
-    document.getElementById("bio").textContent = data.bio;
-    document.getElementById("note").style.backgroundColor = data.color;
-    document.getElementById("note").textContent = data.note || "(Empty note)";
+    document.getElementById("display-name").textContent = data.displayName || "No name";
+    document.getElementById("bio").textContent = data.bio || "";
+    document.getElementById("note").textContent = data.note || "";
+    document.getElementById("note").style.backgroundColor = data.color || "#ffff88";
+
     userSection.style.display = "block";
     authSection.style.display = "none";
   } else {
