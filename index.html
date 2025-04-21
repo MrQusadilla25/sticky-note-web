@@ -1,37 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SendMeANote Remastered</title>
-    <link rel="stylesheet" href="style.css">
-    <script type="module" src="main.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SendMeANote Remastered</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="main.js" defer></script>
 </head>
 <body>
-    <!-- Gradient Text -->
-    <header>
-        <h1 class="gradient-text">SendMeANote Remastered</h1>
-        <p>Connecting You With Others, One Note At A Time</p>
-    </header>
 
-    <div id="auth-container">
-        <button id="login-btn">Login</button>
-        <button id="signup-btn">Sign Up</button>
+  <!-- Dark Mode Toggle -->
+  <button id="dark-mode-toggle">🌙</button>
+
+  <!-- Login Form -->
+  <div id="login-form">
+    <h2>Login</h2>
+    <input type="email" id="login-email" placeholder="Email" required>
+    <input type="password" id="login-password" placeholder="Password" required>
+    <button id="login-button">Login</button>
+  </div>
+
+  <!-- Signup Form -->
+  <div id="signup-form">
+    <h2>Signup</h2>
+    <input type="email" id="signup-email" placeholder="Email" required>
+    <input type="password" id="signup-password" placeholder="Password" required>
+    <button id="signup-button">Signup</button>
+  </div>
+
+  <!-- User Section -->
+  <div id="user-section" style="display: none;">
+    <button id="logout-button">Logout</button>
+
+    <!-- Send Note -->
+    <textarea id="noteText" placeholder="Write your note here..." required></textarea>
+    <button id="sendButton">Send Note</button>
+
+    <!-- Recent Emails Sent -->
+    <div id="recentEmails">
+      <h3>Recent Emails Sent</h3>
+      <!-- List of recent emails will appear here -->
     </div>
 
-    <div id="note-section">
-        <h2>Your Notes</h2>
-        <div id="notes-list"></div>
+    <!-- Inbox Messages -->
+    <div id="inboxMessages">
+      <h3>Inbox</h3>
+      <!-- List of received emails will appear here -->
+      <button onclick="clearInbox()">Clear All Mail</button>
     </div>
 
-    <div id="settings-section">
-        <button id="settings-btn">Settings</button>
+    <!-- Settings Page -->
+    <div id="settings-page">
+      <h3>Settings</h3>
+      <input type="text" id="display-name" placeholder="Display Name" />
+      <input type="text" id="bio" placeholder="Bio" />
+      <input type="color" id="sticky-color" />
+      <button onclick="saveSettings()">Save Settings</button>
     </div>
+  </div>
 
-    <div id="inbox-section">
-        <button id="inbox-btn">Inbox</button>
-    </div>
-
-    <div id="user-info"></div>
 </body>
 </html>
