@@ -1,43 +1,46 @@
-import { db } from "./firebase-init.js";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import {
-  ref,
-  set,
-  push,
-  get,
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-export async function signUpUser(email, password) {
-  const { user } = await createUserWithEmailAndPassword(auth, email, password);
-  await set(ref(db, `users/${user.uid}`), {
-    email,
-    displayName: email.split("@")[0],
-    bio: "",
-    color: "#fffaa8",
-  });
-}
+const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
 
-export async function loginUser(email, password) {
-  await signInWithEmailAndPassword(auth, email, password);
-}
+const showToast = (message) => {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+};
 
-export async function sendNote(fromUID, toEmail, message) {
-  const snapshot = await get(ref(db, "users"));
-  let targetUID = null;
+const showLoading = (show) => {
+  const loading = document.getElementById("loading");
+  loading.style.display = show ? "flex" : "none";
+};
 
-  snapshot.forEach((child) => {
-    if (child.val().email === toEmail) targetUID = child.key;
-  });
+// Sign Up functionality
+signupBtn.onclick = async () => {
+  try {
+    showLoading(true);
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    showToast("Account created successfully!");
+  } catch (e) {
+    showToast(e.message);
+  } finally {
+    showLoading(false);
+  }
+};
 
-  if (!targetUID) throw new Error("User not found");
-
-  const noteRef = push(ref(db, `users/${targetUID}/inbox`));
-  await set(noteRef, {
-    from: fromUID,
-    message,
-    timestamp: Date.now(),
-  });
-}
+// Log In functionality
+loginBtn.onclick = async () => {
+  try {
+    showLoading(true);
+    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+    showToast("Logged in successfully!");
+    document.getElementById("auth-container").style.display = "none"; // Hide login form
+    document.getElementById("main-content").style.display = "block"; // Show main content
+  } catch (e) {
+    showToast(e.message);
+  } finally {
+    showLoading(false);
+  }
+};
