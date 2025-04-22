@@ -21,6 +21,8 @@ loginBtn.addEventListener("click", async () => {
   try {
     await login(email, password);
     showToast("Successfully logged in!");
+    // Optional: redirect to app dashboard
+    // window.location.href = "dashboard.html";
   } catch (error) {
     showToast(getFriendlyErrorMessage(error.code));
   } finally {
@@ -51,7 +53,8 @@ signupBtn.addEventListener("click", async () => {
 watchAuthState(user => {
   if (user) {
     showToast("Welcome back, " + user.email);
-    // Optionally redirect to main app: window.location.href = "dashboard.html";
+    // Optional: redirect to dashboard
+    // window.location.href = "dashboard.html";
   }
 });
 
