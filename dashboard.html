@@ -1,20 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - SendMeANote Remastered</title>
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-  <div id="loading" class="loading-overlay">Loading...</div>
+  <!-- Header -->
+  <header>
+    <h1>SendMeANote <span>Remastered</span></h1>
+  </header>
 
+  <!-- Navigation Tabs -->
+  <nav>
+    <button id="settingsTab" class="active">Settings</button>
+    <button id="sendNoteTab">Send a Note</button>
+    <button id="noteboxTab">Notebox</button>
+    <button id="profileTab">Profile</button>
+  </nav>
+
+  <!-- Main Content -->
   <main>
-    <h1>Welcome to Your Dashboard</h1>
-    <p id="userEmail"></p>
-    <button id="logoutBtn">Log Out</button>
+    <div id="settings" class="tab-content active">
+      <h2>Settings</h2>
+      <form id="settingsForm">
+        <label for="displayName">Display Name:</label>
+        <input type="text" id="displayName" name="displayName" required>
+
+        <label for="bio">Bio:</label>
+        <textarea id="bio" name="bio" rows="4"></textarea>
+
+        <label for="stickyColor">Sticky Note Color:</label>
+        <input type="color" id="stickyColor" name="stickyColor" value="#ffcc00">
+
+        <button type="submit" class="action">Save Settings</button>
+      </form>
+    </div>
+
+    <div id="sendNote" class="tab-content">
+      <h2>Send a Note</h2>
+      <form id="sendNoteForm">
+        <label for="email">Recipient Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="noteColor">Choose Note Color:</label>
+        <input type="color" id="noteColor" name="noteColor" value="#ffcc00">
+
+        <button type="submit" class="action">Send Note</button>
+      </form>
+    </div>
+
+    <div id="notebox" class="tab-content">
+      <h2>Your Inbox</h2>
+      <div id="messageContainer"></div>
+      <button id="clearInbox" class="action">Clear All Messages</button>
+    </div>
+
+    <div id="profile" class="tab-content">
+      <h2>Profile</h2>
+      <p><strong>Display Name:</strong> <span id="profileName"></span></p>
+      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+      <p><strong>Bio:</strong> <span id="profileBio"></span></p>
+    </div>
   </main>
 
-  <script type="module" src="dashboard.js"></script>
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Message Sent!</div>
+
+  <script src="firebase-init.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
