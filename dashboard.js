@@ -103,6 +103,42 @@ document.getElementById('clearInbox').addEventListener('click', () => {
   });
 });
 
+function renderInbox(messages) {
+  inboxContainer.innerHTML = ""; // Clear existing messages
+
+  if (!messages || Object.keys(messages).length === 0) {
+    inboxContainer.innerHTML = "<p>No messages yet.</p>";
+    return;
+  }
+
+  Object.entries(messages).forEach(([msgId, msg]) => {
+    const timeSent = new Date(msg.timestamp).toLocaleString(); // Format timestamp
+
+    const note = document.createElement("div");
+    note.className = "note";
+    note.style.backgroundColor = msg.color || "#4a90e2";
+    note.innerHTML = `
+      <div class="note-header">
+        <strong>From:</strong> ${msg.from || "Unknown"}<br>
+        <small>Sent: ${timeSent}</small>
+      </div>
+      <div class="note-body">${msg.text}</div>
+      <button class="delete-note" data-id="${msgId}">Delete</button>
+    `;
+    inboxContainer.appendChild(note);
+  });
+
+  // Set up delete button handlers
+  document.querySelectorAll(".delete-note").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const msgId = btn.dataset.id;
+      const userId = auth.currentUser.uid;
+      await remove(ref(db, `users/${userId}/inbox/${msgId}`));
+      showToast("Message deleted.");
+    });
+  });
+}
+
 // Display inbox messages
 db.ref('notes').on('child_added', snapshot => {
   const message = snapshot.val();
