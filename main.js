@@ -9,31 +9,31 @@ const loadingOverlay = document.getElementById("loading");
 const toast = document.getElementById("toast");
 
 loginBtn.addEventListener("click", async () => {
-  const email = emailInput.value;
+  const email = emailInput.value.trim();
   const password = passwordInput.value;
 
   if (!email || !password) {
-    showToast("Please enter email and password.");
+    showToast("Please enter both email and password.");
     return;
   }
 
   showLoading(true);
   try {
     await login(email, password);
-    showToast("Logged in successfully!");
+    showToast("Successfully logged in!");
   } catch (error) {
-    showToast("Login failed: " + error.message);
+    showToast(getFriendlyErrorMessage(error.code));
   } finally {
     showLoading(false);
   }
 });
 
 signupBtn.addEventListener("click", async () => {
-  const email = emailInput.value;
+  const email = emailInput.value.trim();
   const password = passwordInput.value;
 
   if (!email || !password) {
-    showToast("Please enter email and password.");
+    showToast("Please enter both email and password.");
     return;
   }
 
@@ -42,7 +42,7 @@ signupBtn.addEventListener("click", async () => {
     await signup(email, password);
     showToast("Account created! You can now log in.");
   } catch (error) {
-    showToast("Signup failed: " + error.message);
+    showToast(getFriendlyErrorMessage(error.code));
   } finally {
     showLoading(false);
   }
@@ -50,9 +50,8 @@ signupBtn.addEventListener("click", async () => {
 
 watchAuthState(user => {
   if (user) {
-    // Redirect or load main content
     showToast("Welcome back, " + user.email);
-    // window.location.href = "dashboard.html"; // Example
+    // Optionally redirect to main app: window.location.href = "dashboard.html";
   }
 });
 
@@ -66,4 +65,24 @@ function showToast(message) {
   setTimeout(() => {
     toast.className = "toast";
   }, 3000);
+}
+
+function getFriendlyErrorMessage(code) {
+  switch (code) {
+    case "auth/invalid-email":
+      return "The email address is not valid.";
+    case "auth/user-disabled":
+      return "This account has been disabled.";
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+      return "Email or password is incorrect.";
+    case "auth/email-already-in-use":
+      return "This email is already registered.";
+    case "auth/weak-password":
+      return "Password should be at least 6 characters.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Try again later.";
+    default:
+      return "An unexpected error occurred. Please try again.";
+  }
 }
