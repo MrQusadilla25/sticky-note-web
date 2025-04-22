@@ -21,8 +21,11 @@ loginBtn.addEventListener("click", async () => {
   try {
     await login(email, password);
     showToast("Successfully logged in!");
-    // Optional: redirect to app dashboard
-    // window.location.href = "dashboard.html";
+
+    // Redirect to dashboard after short delay
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1000); // slight delay to show toast
   } catch (error) {
     showToast(getFriendlyErrorMessage(error.code));
   } finally {
