@@ -12,6 +12,12 @@
 
     <button id="darkToggle">Toggle Dark Mode</button>
 
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" style="display: none;" class="spinner-overlay">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Authentication Section -->
     <div id="auth-section">
       <input type="email" id="email" placeholder="Email" />
       <input type="password" id="password" placeholder="Password" />
@@ -19,11 +25,13 @@
       <button id="loginBtn">Login</button>
     </div>
 
+    <!-- User Section -->
     <div id="user-section" style="display: none;">
       <p>Signed in as: <span id="display-name"></span></p>
       <button id="logoutBtn">Logout</button>
     </div>
 
+    <!-- Tabs -->
     <div id="tabs" style="display:none;">
       <button onclick="showTab('profile')">Profile</button>
       <button onclick="showTab('settings')">Settings</button>
@@ -31,6 +39,7 @@
       <button onclick="showTab('inbox')">Inbox</button>
     </div>
 
+    <!-- Tab Content -->
     <div id="tab-content">
       <div id="profile-tab" style="display:none;">
         <h2>Your Profile</h2>
@@ -59,12 +68,6 @@
         <div id="inboxMessages"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Toast and Spinner -->
-  <div id="toast" class="toast">This is a toast!</div>
-  <div id="loading-spinner" class="spinner-overlay" style="display:none;">
-    <div class="spinner"></div>
   </div>
 
   <script type="module" src="firebase-init.js"></script>
