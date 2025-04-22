@@ -20,28 +20,72 @@ const tabs = document.getElementById("tabs");
 const displayName = document.getElementById("display-name");
 const bio = document.getElementById("bio");
 const noteBox = document.getElementById("note");
+const toast = document.getElementById("toast");
+const loading = document.getElementById("loading");
+
+// Helpers
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+function showLoading(show) {
+  loading.style.display = show ? "flex" : "none";
+}
 
 // Auth actions
-signupBtn.onclick = () => signUpUser(email.value, password.value);
-loginBtn.onclick = () => loginUser(email.value, password.value);
+signupBtn.onclick = async () => {
+  try {
+    showLoading(true);
+    await signUpUser(email.value, password.value);
+    showToast("Account created successfully!");
+  } catch (e) {
+    showToast(e.message);
+  } finally {
+    showLoading(false);
+  }
+};
+
+loginBtn.onclick = async () => {
+  try {
+    showLoading(true);
+    await loginUser(email.value, password.value);
+    showToast("Logged in successfully!");
+  } catch (e) {
+    showToast(e.message);
+  } finally {
+    showLoading(false);
+  }
+};
+
 logoutBtn.onclick = () => signOut(auth);
 
 // Show tab
 window.showTab = (name) => {
   ["profile", "settings", "send", "inbox"].forEach(id => {
-    document.getElementById(`${id}-tab`).style.display = "none";
+    const tab = document.getElementById(`${id}-tab`);
+    tab.classList.remove("tab-visible");
+    setTimeout(() => tab.style.display = "none", 300);
   });
-  document.getElementById(`${name}-tab`).style.display = "block";
+
+  const newTab = document.getElementById(`${name}-tab`);
+  newTab.style.display = "block";
+  setTimeout(() => newTab.classList.add("tab-visible"), 10);
 };
 
 document.getElementById("saveSettingsBtn").onclick = async () => {
-  const uid = auth.currentUser.uid;
-  await update(ref(db, `users/${uid}`), {
-    displayName: document.getElementById("nameInput").value,
-    bio: document.getElementById("bioInput").value,
-    color: document.getElementById("colorInput").value
-  });
-  alert("Updated!");
+  try {
+    const uid = auth.currentUser.uid;
+    await update(ref(db, `users/${uid}`), {
+      displayName: document.getElementById("nameInput").value,
+      bio: document.getElementById("bioInput").value,
+      color: document.getElementById("colorInput").value
+    });
+    showToast("Settings updated!");
+  } catch (e) {
+    showToast(e.message);
+  }
 };
 
 document.getElementById("sendNoteBtn").onclick = async () => {
@@ -51,9 +95,9 @@ document.getElementById("sendNoteBtn").onclick = async () => {
       document.getElementById("targetEmail").value,
       document.getElementById("noteText").value
     );
-    document.getElementById("sendStatus").textContent = "Note sent!";
+    showToast("Note sent!");
   } catch (e) {
-    document.getElementById("sendStatus").textContent = e.message;
+    showToast(e.message);
   }
 };
 
@@ -61,7 +105,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     authSection.style.display = "none";
     userSection.style.display = "block";
-    tabs.style.display = "block";
+    tabs.style.display = "flex";
 
     const snap = await get(ref(db, `users/${user.uid}`));
     const data = snap.val();
