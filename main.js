@@ -57,7 +57,7 @@ watchAuthState(user => {
   if (user) {
     showToast("Welcome back, " + user.email);
     // Optional: redirect to dashboard
-    // window.location.href = "dashboard.html";
+    window.location.href = "dashboard.html";
   }
 });
 
