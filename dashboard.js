@@ -1,162 +1,156 @@
-// Initialize Firebase Auth and Database
-const auth = firebase.auth();
-const db = firebase.database();
+// dashboard.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { firebaseConfig } from './firebase-init.js';
 
-// Check if user is logged in
-auth.onAuthStateChanged(user => {
+// Init Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Elements
+const tabs = document.querySelectorAll('nav button[data-tab]');
+const panels = document.querySelectorAll('.tab-panel');
+const logoutBtn = document.getElementById('logoutBtn');
+const toast = document.getElementById('toast');
+const spinner = document.getElementById('loading');
+
+// User state
+onAuthStateChanged(auth, user => {
   if (!user) {
-    window.location.href = 'login.html'; // Redirect to login if not signed in
+    location.href = "login.html";
   } else {
-    document.getElementById('profileName').textContent = user.displayName || 'No name set';
-    document.getElementById('profileEmail').textContent = user.email;
-    loadSettings(user.uid);
+    loadUserSettings(user.uid);
+    loadInbox(user.email);
+    updateProfile(user);
   }
 });
 
-// Load user settings from database
-function loadSettings(uid) {
-  const settingsRef = db.ref('users/' + uid + '/settings');
-  settingsRef.once('value', snapshot => {
-    const data = snapshot.val();
-    if (data) {
-      document.getElementById('displayName').value = data.displayName || '';
-      document.getElementById('bio').value = data.bio || '';
-      document.getElementById('stickyColor').value = data.stickyColor || '#ffcc00';
-    }
+// Tab switching
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    panels.forEach(p => p.classList.add('hidden'));
+    document.getElementById(btn.dataset.tab).classList.remove('hidden');
   });
-}
+});
 
-// Save settings to database
-document.getElementById('settingsForm').addEventListener('submit', e => {
-  e.preventDefault();
+// Logout
+logoutBtn.addEventListener('click', () => {
+  signOut(auth).then(() => {
+    location.href = 'login.html';
+  });
+});
+
+// SETTINGS
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
   const user = auth.currentUser;
+  if (!user) return;
+
   const displayName = document.getElementById('displayName').value;
   const bio = document.getElementById('bio').value;
-  const stickyColor = document.getElementById('stickyColor').value;
+  const stickyColor = document.getElementById('noteColor').value;
 
-  db.ref('users/' + user.uid + '/settings').set({
-    displayName,
-    bio,
-    stickyColor
-  }).then(() => {
-    showToast('Settings saved!');
-  });
+  await set(ref(db, `users/${user.uid}/settings`), { displayName, bio, stickyColor });
+  showToast("Settings saved!");
 });
 
-// Send note form
-document.getElementById('sendNoteForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const email = document.getElementById('email').value;
-  const noteColor = document.getElementById('noteColor').value;
-  
-  // Check cooldown to prevent spam
-  const cooldown = 5000; // 5 seconds cooldown
-  const lastSent = localStorage.getItem('lastSent');
+async function loadUserSettings(uid) {
+  const snap = await get(ref(db, `users/${uid}/settings`));
+  const data = snap.val();
+  if (data) {
+    document.getElementById('displayName').value = data.displayName || '';
+    document.getElementById('bio').value = data.bio || '';
+    document.getElementById('noteColor').value = data.stickyColor || '#ffcc00';
+  }
+}
+
+// SEND NOTE
+document.getElementById('sendNoteBtn').addEventListener('click', async () => {
+  const to = document.getElementById('sendTo').value.trim();
+  const message = document.getElementById('noteMessage').value.trim();
+  const noteColor = document.getElementById('noteColorPicker').value;
+  const sender = auth.currentUser;
+
+  if (!to || !message) return showToast("Please fill in all fields.");
+
   const now = Date.now();
+  const lastSent = parseInt(localStorage.getItem('lastSent')) || 0;
 
-  if (lastSent && now - lastSent < cooldown) {
-    showToast('Please wait before sending another note.');
+  if (now - lastSent < 5000) {
+    document.getElementById('cooldownNotice').classList.remove('hidden');
     return;
   }
 
-  // Send the note
-  db.ref('notes').push({
-    email,
-    noteColor,
-    sender: auth.currentUser.email,
+  const note = {
+    email: to,
+    sender: sender.email,
+    text: message,
+    color: noteColor,
     timestamp: now
-  }).then(() => {
-    localStorage.setItem('lastSent', now);
-    showToast('Note sent!');
-  });
+  };
+
+  await push(ref(db, 'notes'), note);
+  localStorage.setItem('lastSent', now.toString());
+  document.getElementById('cooldownNotice').classList.add('hidden');
+  showToast("Note sent!");
 });
 
-// Show toast notification
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
+// LOAD INBOX
+function loadInbox(userEmail) {
+  const inboxContainer = document.getElementById('notesList');
+  inboxContainer.innerHTML = "";
 
-// Switch tabs
-document.querySelectorAll('nav button').forEach(button => {
-  button.addEventListener('click', () => {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('nav button').forEach(button => button.classList.remove('active'));
-    document.getElementById(button.id.replace('Tab', '')).classList.add('active');
-    button.classList.add('active');
-  });
-});
+  const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(userEmail));
 
-// Clear inbox
-document.getElementById('clearInbox').addEventListener('click', () => {
-  const user = auth.currentUser;
-  db.ref('notes').orderByChild('email').equalTo(user.email).once('value', snapshot => {
-    snapshot.forEach(childSnapshot => {
-      childSnapshot.ref.remove();
-    });
-    document.getElementById('messageContainer').innerHTML = '';
-    showToast('Inbox cleared!');
-  });
-});
+  onChildAdded(notesQuery, snapshot => {
+    const msg = snapshot.val();
+    const noteEl = document.createElement('div');
+    noteEl.className = 'message-card';
+    const time = new Date(msg.timestamp).toLocaleString();
 
-function renderInbox(messages) {
-  inboxContainer.innerHTML = ""; // Clear existing messages
-
-  if (!messages || Object.keys(messages).length === 0) {
-    inboxContainer.innerHTML = "<p>No messages yet.</p>";
-    return;
-  }
-
-  Object.entries(messages).forEach(([msgId, msg]) => {
-    const timeSent = new Date(msg.timestamp).toLocaleString(); // Format timestamp
-
-    const note = document.createElement("div");
-    note.className = "note";
-    note.style.backgroundColor = msg.color || "#4a90e2";
-    note.innerHTML = `
-      <div class="note-header">
-        <strong>From:</strong> ${msg.from || "Unknown"}<br>
-        <small>Sent: ${timeSent}</small>
-      </div>
-      <div class="note-body">${msg.text}</div>
-      <button class="delete-note" data-id="${msgId}">Delete</button>
-    `;
-    inboxContainer.appendChild(note);
-  });
-
-  // Set up delete button handlers
-  document.querySelectorAll(".delete-note").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const msgId = btn.dataset.id;
-      const userId = auth.currentUser.uid;
-      await remove(ref(db, `users/${userId}/inbox/${msgId}`));
-      showToast("Message deleted.");
-    });
-  });
-}
-
-// Display inbox messages
-db.ref('notes').on('child_added', snapshot => {
-  const message = snapshot.val();
-  if (message.email === auth.currentUser.email) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message-card');
-    messageElement.innerHTML = `
-      <p><strong>From:</strong> ${message.sender}</p>
-      <p><strong>Note Color:</strong> <span style="color: ${message.noteColor};">●</span></p>
+    noteEl.innerHTML = `
+      <p><strong>From:</strong> ${msg.sender}</p>
+      <p>${msg.text}</p>
+      <small>Sent: ${time}</small><br>
       <button class="delete-btn" data-id="${snapshot.key}">Delete</button>
     `;
-    document.getElementById('messageContainer').appendChild(messageElement);
-    
-    // Delete individual message
-    messageElement.querySelector('.delete-btn').addEventListener('click', () => {
-      snapshot.ref.remove();
-      messageElement.remove();
-      showToast('Message deleted!');
+    inboxContainer.appendChild(noteEl);
+
+    noteEl.querySelector('.delete-btn').addEventListener('click', async () => {
+      await remove(ref(db, `notes/${snapshot.key}`));
+      noteEl.remove();
+      showToast("Note deleted.");
     });
-  }
+  });
+}
+
+// CLEAR INBOX
+document.getElementById('clearInboxBtn').addEventListener('click', async () => {
+  const user = auth.currentUser;
+  const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
+  const snap = await get(notesQuery);
+
+  snap.forEach(child => {
+    child.ref.remove();
+  });
+
+  document.getElementById('notesList').innerHTML = '';
+  showToast("Inbox cleared!");
 });
+
+// PROFILE
+function updateProfile(user) {
+  document.getElementById('profileDisplayName').textContent = user.displayName || 'No name set';
+  document.getElementById('profileEmail').textContent = user.email;
+  get(ref(db, `users/${user.uid}/settings/bio`)).then(snap => {
+    document.getElementById('profileBio').textContent = snap.val() || 'No bio set.';
+  });
+}
+
+// TOAST
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
