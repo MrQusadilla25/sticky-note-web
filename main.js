@@ -1,135 +1,106 @@
-import { auth, db } from './firebase-init.js';
-import { signUpUser, loginUser, sendNote } from './auth.js';
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import {
-  ref, get, update, onValue
-} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+document.addEventListener("DOMContentLoaded", function() {
+  // Get DOM elements
+  const signupBtn = document.getElementById("signupBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const displayName = document.getElementById("display-name");
+  const bio = document.getElementById("bio");
+  const toast = document.getElementById("toast");
+  const loading = document.getElementById("loading");
+  const authContainer = document.getElementById("auth-container");
+  const mainContent = document.getElementById("main-content");
 
-// DOM elements
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const signupBtn = document.getElementById("signupBtn");
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const authSection = document.getElementById("auth-section");
-const userSection = document.getElementById("user-section");
-const tabs = document.getElementById("tabs");
-const displayName = document.getElementById("display-name");
-const bio = document.getElementById("bio");
-const noteBox = document.getElementById("note");
+  // Firebase Authentication helpers
+  const auth = firebase.auth();
 
-// Show tab
-window.showTab = (name) => {
-  ["profile", "settings", "send", "inbox"].forEach(id => {
-    document.getElementById(`${id}-tab`).style.display = "none";
-  });
-  document.getElementById(`${name}-tab`).style.display = "block";
-};
-
-// Show loading spinner
-function showLoading(show) {
-  const spinner = document.getElementById("loadingSpinner");
-  if (spinner) {
-    spinner.style.display = show ? "flex" : "none";
+  // Function to show toast notifications
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
   }
-}
 
-// Save Settings
-document.getElementById("saveSettingsBtn").onclick = async () => {
-  const uid = auth.currentUser.uid;
-  await update(ref(db, `users/${uid}`), {
-    displayName: document.getElementById("nameInput").value,
-    bio: document.getElementById("bioInput").value,
-    color: document.getElementById("colorInput").value
-  });
-  showToast("Profile updated!");
-};
-
-// Send Note
-document.getElementById("sendNoteBtn").onclick = async () => {
-  try {
-    await sendNote(
-      auth.currentUser.uid,
-      document.getElementById("targetEmail").value,
-      document.getElementById("noteText").value
-    );
-    document.getElementById("sendStatus").textContent = "Note sent!";
-  } catch (e) {
-    document.getElementById("sendStatus").textContent = e.message;
+  // Function to show or hide the loading spinner
+  function showLoading(show) {
+    loading.style.display = show ? "flex" : "none";
   }
-};
 
-// Handle Auth State Changes
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    authSection.style.display = "none";
-    userSection.style.display = "block";
-    tabs.style.display = "block";
+  // Sign up function
+  signupBtn.onclick = async () => {
+    const emailValue = email.value;
+    const passwordValue = password.value;
+    const displayNameValue = displayName.value;
+    const bioValue = bio.value;
 
-    const snap = await get(ref(db, `users/${user.uid}`));
-    const data = snap.val();
+    try {
+      showLoading(true);
+      // Create a new user with email and password
+      const userCredential = await firebase.auth().createUserWithEmailAndPassword(emailValue, passwordValue);
+      const user = userCredential.user;
 
-    displayName.textContent = data.displayName;
-    bio.textContent = data.bio;
-    noteBox.style.background = data.color;
-
-    // Load inbox
-    const inboxRef = ref(db, `users/${user.uid}/inbox`);
-    onValue(inboxRef, (snapshot) => {
-      const inboxDiv = document.getElementById("inboxMessages");
-      inboxDiv.innerHTML = "";
-      snapshot.forEach((child) => {
-        const msg = child.val();
-        const div = document.createElement("div");
-        div.textContent = `${new Date(msg.timestamp).toLocaleString()} — ${msg.message}`;
-        inboxDiv.appendChild(div);
+      // Set display name and bio after successful signup
+      await user.updateProfile({
+        displayName: displayNameValue,
       });
-    });
 
-    showTab("profile");
-  } else {
-    authSection.style.display = "block";
-    userSection.style.display = "none";
-    tabs.style.display = "none";
-  }
-});
+      // Save user bio in Firebase Realtime Database
+      const userRef = firebase.database().ref("users/" + user.uid);
+      await userRef.set({
+        bio: bioValue,
+        displayName: displayNameValue,
+      });
 
-// Dark Mode Toggle
-document.getElementById("darkToggle").onclick = () => {
-  document.body.classList.toggle("dark-mode");
-};
+      showToast("Account created successfully!");
+    } catch (e) {
+      showToast(e.message);
+    } finally {
+      showLoading(false);
+    }
+  };
 
-// Auth actions
-signupBtn.onclick = () => signUpUser(email.value, password.value);
-loginBtn.onclick = () => {
-  showLoading(true);
-  loginUser(email.value, password.value)
-    .finally(() => showLoading(false));
-};
-logoutBtn.onclick = () => signOut(auth);
+  // Log in function
+  loginBtn.onclick = async () => {
+    const emailValue = email.value;
+    const passwordValue = password.value;
 
-// Show Toast Notification
-function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.textContent = message;
-  document.body.appendChild(toast);
+    try {
+      showLoading(true);
+      // Sign in the user with email and password
+      await firebase.auth().signInWithEmailAndPassword(emailValue, passwordValue);
 
-  setTimeout(() => toast.classList.add("show"), 0);
-  setTimeout(() => toast.classList.remove("show"), 3000);
-  setTimeout(() => toast.remove(), 3500);
-}
+      showToast("Logged in successfully!");
 
-// Wait for DOM to load before attaching event listeners
-document.addEventListener('DOMContentLoaded', () => {
-  // Add event listeners for authentication-related actions
-  signupBtn.addEventListener('click', () => signUpUser(email.value, password.value));
-  loginBtn.addEventListener('click', () => {
-    showLoading(true);
-    loginUser(email.value, password.value)
-      .finally(() => showLoading(false));
+      // Hide the login screen and show the main content
+      authContainer.style.display = "none";
+      mainContent.style.display = "block";
+    } catch (e) {
+      showToast(e.message);
+    } finally {
+      showLoading(false);
+    }
+  };
+
+  // Handle user state changes (for logged-in users)
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      // User is signed in, show the main content
+      authContainer.style.display = "none";
+      mainContent.style.display = "block";
+
+      // Load user info from Firebase
+      const userRef = firebase.database().ref("users/" + user.uid);
+      userRef.once("value", function(snapshot) {
+        const userData = snapshot.val();
+        if (userData) {
+          displayName.value = userData.displayName || "";
+          bio.value = userData.bio || "";
+        }
+      });
+    } else {
+      // User is not signed in, show the login screen
+      authContainer.style.display = "block";
+      mainContent.style.display = "none";
+    }
   });
 });
