@@ -7,24 +7,57 @@
 
 body {
   font-family: "Arial", sans-serif;
-  background: #fff;
-  color: #333;
+  background: #222; /* Dark mode background */
+  color: #fff; /* Dark mode text */
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-body.dark-mode {
-  background: #222;
-  color: #fff;
-}
-
-/* Gradient text */
+/* Gradient for the word 'Remastered' only */
 .gradient-text {
   background: linear-gradient(to right, #ff7a18, #af002d, #3205b1);
   background-clip: text;
   color: transparent;
   font-size: 3rem;
+  font-weight: bold;
   text-align: center;
-  padding: 0 10px;
+  margin-bottom: 30px; /* Add spacing for better design */
+}
+
+/* Centered Layout */
+#auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  text-align: center;
+}
+
+h1 {
+  font-size: 4rem;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+/* Input Fields */
+input, textarea {
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  margin-bottom: 20px;
+  width: 250px;
+  background-color: #333;
+  color: #fff;
+}
+
+input:focus, textarea:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #aaa;
 }
 
 /* Buttons */
@@ -32,35 +65,28 @@ button {
   background-color: #4a90e2;
   border: none;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 25px;
   font-size: 1rem;
   cursor: pointer;
   border-radius: 8px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease;
+  width: 250px;
 }
 
 button:hover {
   background-color: #357ab7;
-  transform: scale(1.05);
 }
 
-input, textarea {
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  transition: border-color 0.3s ease;
-}
-
-input:focus, textarea:focus {
-  border-color: #4a90e2;
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
 }
 
 /* Loading Spinner */
 .spinner-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
@@ -101,15 +127,6 @@ input:focus, textarea:focus {
   opacity: 1;
 }
 
-/* Dark Mode Styles */
-body.dark-mode button {
-  background-color: #333;
-}
-
-body.dark-mode button:hover {
-  background-color: #444;
-}
-
 /* Smooth Animation for Tabs */
 #tab-content {
   animation: fadeIn 0.5s ease-in-out;
@@ -124,41 +141,16 @@ body.dark-mode button:hover {
   }
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .gradient-text {
-    font-size: 2rem;
-  }
-
-  button {
-    font-size: 0.9rem;
-    padding: 8px 16px;
-  }
-
-  input, textarea {
-    font-size: 0.9rem;
-  }
-
-  #tabs button {
-    font-size: 0.9rem;
-  }
-
-  #tab-content {
-    padding: 10px;
-  }
+/* Dark Mode Styles */
+body.dark-mode {
+  background: #222;
+  color: #fff;
 }
 
-@media (max-width: 480px) {
-  .gradient-text {
-    font-size: 1.5rem;
-  }
+body.dark-mode button {
+  background-color: #333;
+}
 
-  button {
-    font-size: 0.8rem;
-    padding: 6px 12px;
-  }
-
-  input, textarea {
-    font-size: 0.8rem;
-  }
+body.dark-mode button:hover {
+  background-color: #444;
 }
