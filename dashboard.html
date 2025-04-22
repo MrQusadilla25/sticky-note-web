@@ -1,77 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - SendMeANote Remastered</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | SendMeANote Remastered</title>
   <link rel="stylesheet" href="dashboard.css">
 </head>
-<body>
-  <!-- Header -->
+<body class="dark-mode">
+
+  <!-- Gradient Header -->
   <header>
-    <h1>SendMeANote <span>Remastered</span></h1>
+    <h1>
+      <span class="gradienttwo">SendMeANote</span> 
+      <span class="gradient-text">Remastered Dashboard</span>
+    </h1>
   </header>
 
-  <!-- Navigation Tabs -->
-  <nav>
-    <button id="settingsTab" class="active">Settings</button>
-    <button id="sendNoteTab">Send a Note</button>
-    <button id="noteboxTab">Notebox</button>
-    <button id="profileTab">Profile</button>
+  <!-- Tab Navigation -->
+  <nav class="tab-nav">
+    <button data-tab="settings">Settings</button>
+    <button data-tab="send">Send a Note</button>
+    <button data-tab="notebox">Notebox</button>
+    <button data-tab="profile">Profile</button>
+    <button id="logoutBtn" class="logout">Logout</button>
   </nav>
 
-  <!-- Main Content -->
-  <main>
-    <div id="settings" class="tab-content active">
+  <!-- Tab Content Area -->
+  <main id="tab-content">
+    <!-- Settings Tab -->
+    <section id="settings" class="tab-panel">
       <h2>Settings</h2>
-      <form id="settingsForm">
-        <label for="displayName">Display Name:</label>
-        <input type="text" id="displayName" name="displayName" required>
+      <label>Display Name</label>
+      <input type="text" id="displayName" placeholder="Enter display name">
+      
+      <label>Bio</label>
+      <textarea id="bio" rows="4" placeholder="Tell us about yourself"></textarea>
 
-        <label for="bio">Bio:</label>
-        <textarea id="bio" name="bio" rows="4"></textarea>
+      <label>Sticky Note Color</label>
+      <input type="color" id="noteColor">
 
-        <label for="stickyColor">Sticky Note Color:</label>
-        <input type="color" id="stickyColor" name="stickyColor" value="#ffcc00">
+      <button id="saveSettingsBtn">Save Settings</button>
+    </section>
 
-        <button type="submit" class="action">Save Settings</button>
-      </form>
-    </div>
-
-    <div id="sendNote" class="tab-content">
+    <!-- Send a Note Tab -->
+    <section id="send" class="tab-panel hidden">
       <h2>Send a Note</h2>
-      <form id="sendNoteForm">
-        <label for="email">Recipient Email:</label>
-        <input type="email" id="email" name="email" required>
+      <label>To (email)</label>
+      <input type="email" id="sendTo" placeholder="someone@example.com">
 
-        <label for="noteColor">Choose Note Color:</label>
-        <input type="color" id="noteColor" name="noteColor" value="#ffcc00">
+      <label>Message</label>
+      <textarea id="noteMessage" rows="4" placeholder="Type your note here..."></textarea>
 
-        <button type="submit" class="action">Send Note</button>
-      </form>
-    </div>
+      <label>Note Color</label>
+      <input type="color" id="noteColorPicker">
 
-    <div id="notebox" class="tab-content">
-      <h2>Your Inbox</h2>
-      <div id="messageContainer"></div>
-      <button id="clearInbox" class="action">Clear All Messages</button>
-    </div>
+      <button id="sendNoteBtn">Send Note</button>
+      <p id="cooldownNotice" class="cooldown-text hidden">Please wait before sending another note.</p>
+    </section>
 
-    <div id="profile" class="tab-content">
-      <h2>Profile</h2>
-      <p><strong>Display Name:</strong> <span id="profileName"></span></p>
-      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-      <p><strong>Bio:</strong> <span id="profileBio"></span></p>
-    </div>
+    <!-- Notebox Tab -->
+    <section id="notebox" class="tab-panel hidden">
+      <h2>Your Notebox</h2>
+      <div id="notesList"></div>
+      <button id="clearInboxBtn" class="danger">Clear All</button>
+    </section>
+
+    <!-- Profile Tab -->
+    <section id="profile" class="tab-panel hidden">
+      <h2>Your Profile</h2>
+      <p><strong>Display Name:</strong> <span id="profileDisplayName">Loading...</span></p>
+      <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+      <p><strong>Bio:</strong> <span id="profileBio">Loading...</span></p>
+    </section>
   </main>
 
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loading-overlay" style="display: none;"></div>
+  <!-- Toast + Spinner -->
+  <div id="toast"></div>
+  <div class="spinner-overlay" id="loading" style="display: none;">
+    <div class="spinner"></div>
+  </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="toast">Message Sent!</div>
-
-  <script src="firebase-init.js"></script>
-  <script src="dashboard.js"></script>
+  <script type="module" src="dashboard.js"></script>
 </body>
 </html>
