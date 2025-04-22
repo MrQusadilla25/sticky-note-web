@@ -8,7 +8,7 @@
 </head>
 <body class="dark-mode">
 
-  <!-- Gradient Header -->
+  <!-- Header -->
   <header>
     <h1>
       <span class="gradienttwo">SendMeANote</span> 
@@ -16,7 +16,7 @@
     </h1>
   </header>
 
-  <!-- Tab Navigation -->
+  <!-- Navigation Tabs -->
   <nav class="tab-nav">
     <button data-tab="settings">Settings</button>
     <button data-tab="send">Send a Note</button>
@@ -25,47 +25,47 @@
     <button id="logoutBtn" class="logout">Logout</button>
   </nav>
 
-  <!-- Tab Content Area -->
+  <!-- Tab Panels -->
   <main id="tab-content">
-    <!-- Settings Tab -->
-    <section id="settings" class="tab-panel">
+    <!-- Settings Panel -->
+    <section id="settings" class="tab-panel hidden">
       <h2>Settings</h2>
       <label>Display Name</label>
-      <input type="text" id="displayName" placeholder="Enter display name">
-      
+      <input type="text" id="displayName" placeholder="Enter display name" />
+
       <label>Bio</label>
       <textarea id="bio" rows="4" placeholder="Tell us about yourself"></textarea>
 
       <label>Sticky Note Color</label>
-      <input type="color" id="noteColor">
+      <input type="color" id="noteColor" />
 
       <button id="saveSettingsBtn">Save Settings</button>
     </section>
 
-    <!-- Send a Note Tab -->
+    <!-- Send a Note Panel -->
     <section id="send" class="tab-panel hidden">
       <h2>Send a Note</h2>
       <label>To (email)</label>
-      <input type="email" id="sendTo" placeholder="someone@example.com">
+      <input type="email" id="sendTo" placeholder="someone@example.com" />
 
       <label>Message</label>
       <textarea id="noteMessage" rows="4" placeholder="Type your note here..."></textarea>
 
       <label>Note Color</label>
-      <input type="color" id="noteColorPicker">
+      <input type="color" id="noteColorPicker" />
 
       <button id="sendNoteBtn">Send Note</button>
       <p id="cooldownNotice" class="cooldown-text hidden">Please wait before sending another note.</p>
     </section>
 
-    <!-- Notebox Tab -->
+    <!-- Notebox Panel -->
     <section id="notebox" class="tab-panel hidden">
       <h2>Your Notebox</h2>
       <div id="notesList"></div>
       <button id="clearInboxBtn" class="danger">Clear All</button>
     </section>
 
-    <!-- Profile Tab -->
+    <!-- Profile Panel -->
     <section id="profile" class="tab-panel hidden">
       <h2>Your Profile</h2>
       <p><strong>Display Name:</strong> <span id="profileDisplayName">Loading...</span></p>
@@ -74,7 +74,7 @@
     </section>
   </main>
 
-  <!-- Toast + Spinner -->
+  <!-- Toast & Spinner -->
   <div id="toast"></div>
   <div class="spinner-overlay" id="loading" style="display: none;">
     <div class="spinner"></div>
