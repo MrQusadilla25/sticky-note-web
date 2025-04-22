@@ -21,15 +21,6 @@ const displayName = document.getElementById("display-name");
 const bio = document.getElementById("bio");
 const noteBox = document.getElementById("note");
 
-// Auth actions
-signupBtn.onclick = () => signUpUser(email.value, password.value);
-loginBtn.onclick = () => {
-  showLoading(true);
-  loginUser(email.value, password.value)
-    .finally(() => showLoading(false));
-};
-logoutBtn.onclick = () => signOut(auth);
-
 // Show tab
 window.showTab = (name) => {
   ["profile", "settings", "send", "inbox"].forEach(id => {
@@ -37,6 +28,14 @@ window.showTab = (name) => {
   });
   document.getElementById(`${name}-tab`).style.display = "block";
 };
+
+// Show loading spinner
+function showLoading(show) {
+  const spinner = document.getElementById("loadingSpinner");
+  if (spinner) {
+    spinner.style.display = show ? "flex" : "none";
+  }
+}
 
 // Save Settings
 document.getElementById("saveSettingsBtn").onclick = async () => {
@@ -103,11 +102,14 @@ document.getElementById("darkToggle").onclick = () => {
   document.body.classList.toggle("dark-mode");
 };
 
-// Show loading spinner
-function showLoading(show) {
-  const spinner = document.getElementById("loadingSpinner");
-  spinner.style.display = show ? "flex" : "none";
-}
+// Auth actions
+signupBtn.onclick = () => signUpUser(email.value, password.value);
+loginBtn.onclick = () => {
+  showLoading(true);
+  loginUser(email.value, password.value)
+    .finally(() => showLoading(false));
+};
+logoutBtn.onclick = () => signOut(auth);
 
 // Show Toast Notification
 function showToast(message) {
@@ -120,3 +122,14 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove("show"), 3000);
   setTimeout(() => toast.remove(), 3500);
 }
+
+// Wait for DOM to load before attaching event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  // Add event listeners for authentication-related actions
+  signupBtn.addEventListener('click', () => signUpUser(email.value, password.value));
+  loginBtn.addEventListener('click', () => {
+    showLoading(true);
+    loginUser(email.value, password.value)
+      .finally(() => showLoading(false));
+  });
+});
