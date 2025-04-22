@@ -1,106 +1,69 @@
-document.addEventListener("DOMContentLoaded", function() {
-  // Get DOM elements
-  const signupBtn = document.getElementById("signupBtn");
-  const loginBtn = document.getElementById("loginBtn");
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-  const displayName = document.getElementById("display-name");
-  const bio = document.getElementById("bio");
-  const toast = document.getElementById("toast");
-  const loading = document.getElementById("loading");
-  const authContainer = document.getElementById("auth-container");
-  const mainContent = document.getElementById("main-content");
+// main.js
+import { login, signup, watchAuthState } from './auth.js';
 
-  // Firebase Authentication helpers
-  const auth = firebase.auth();
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const loadingOverlay = document.getElementById("loading");
+const toast = document.getElementById("toast");
 
-  // Function to show toast notifications
-  function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 3000);
+loginBtn.addEventListener("click", async () => {
+  const email = emailInput.value;
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    showToast("Please enter email and password.");
+    return;
   }
 
-  // Function to show or hide the loading spinner
-  function showLoading(show) {
-    loading.style.display = show ? "flex" : "none";
+  showLoading(true);
+  try {
+    await login(email, password);
+    showToast("Logged in successfully!");
+  } catch (error) {
+    showToast("Login failed: " + error.message);
+  } finally {
+    showLoading(false);
   }
-
-  // Sign up function
-  signupBtn.onclick = async () => {
-    const emailValue = email.value;
-    const passwordValue = password.value;
-    const displayNameValue = displayName.value;
-    const bioValue = bio.value;
-
-    try {
-      showLoading(true);
-      // Create a new user with email and password
-      const userCredential = await firebase.auth().createUserWithEmailAndPassword(emailValue, passwordValue);
-      const user = userCredential.user;
-
-      // Set display name and bio after successful signup
-      await user.updateProfile({
-        displayName: displayNameValue,
-      });
-
-      // Save user bio in Firebase Realtime Database
-      const userRef = firebase.database().ref("users/" + user.uid);
-      await userRef.set({
-        bio: bioValue,
-        displayName: displayNameValue,
-      });
-
-      showToast("Account created successfully!");
-    } catch (e) {
-      showToast(e.message);
-    } finally {
-      showLoading(false);
-    }
-  };
-
-  // Log in function
-  loginBtn.onclick = async () => {
-    const emailValue = email.value;
-    const passwordValue = password.value;
-
-    try {
-      showLoading(true);
-      // Sign in the user with email and password
-      await firebase.auth().signInWithEmailAndPassword(emailValue, passwordValue);
-
-      showToast("Logged in successfully!");
-
-      // Hide the login screen and show the main content
-      authContainer.style.display = "none";
-      mainContent.style.display = "block";
-    } catch (e) {
-      showToast(e.message);
-    } finally {
-      showLoading(false);
-    }
-  };
-
-  // Handle user state changes (for logged-in users)
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      // User is signed in, show the main content
-      authContainer.style.display = "none";
-      mainContent.style.display = "block";
-
-      // Load user info from Firebase
-      const userRef = firebase.database().ref("users/" + user.uid);
-      userRef.once("value", function(snapshot) {
-        const userData = snapshot.val();
-        if (userData) {
-          displayName.value = userData.displayName || "";
-          bio.value = userData.bio || "";
-        }
-      });
-    } else {
-      // User is not signed in, show the login screen
-      authContainer.style.display = "block";
-      mainContent.style.display = "none";
-    }
-  });
 });
+
+signupBtn.addEventListener("click", async () => {
+  const email = emailInput.value;
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    showToast("Please enter email and password.");
+    return;
+  }
+
+  showLoading(true);
+  try {
+    await signup(email, password);
+    showToast("Account created! You can now log in.");
+  } catch (error) {
+    showToast("Signup failed: " + error.message);
+  } finally {
+    showLoading(false);
+  }
+});
+
+watchAuthState(user => {
+  if (user) {
+    // Redirect or load main content
+    showToast("Welcome back, " + user.email);
+    // window.location.href = "dashboard.html"; // Example
+  }
+});
+
+function showLoading(show) {
+  loadingOverlay.style.display = show ? "flex" : "none";
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.className = "toast show";
+  setTimeout(() => {
+    toast.className = "toast";
+  }, 3000);
+}
