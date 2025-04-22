@@ -20,74 +20,36 @@ const tabs = document.getElementById("tabs");
 const displayName = document.getElementById("display-name");
 const bio = document.getElementById("bio");
 const noteBox = document.getElementById("note");
-const toast = document.getElementById("toast");
-const loading = document.getElementById("loading");
-
-// Helpers
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
-}
-
-function showLoading(show) {
-  loading.style.display = show ? "flex" : "none";
-}
 
 // Auth actions
-signupBtn.onclick = async () => {
-  try {
-    showLoading(true);
-    await signUpUser(email.value, password.value);
-    showToast("Account created successfully!");
-  } catch (e) {
-    showToast(e.message);
-  } finally {
-    showLoading(false);
-  }
+signupBtn.onclick = () => signUpUser(email.value, password.value);
+loginBtn.onclick = () => {
+  showLoading(true);
+  loginUser(email.value, password.value)
+    .finally(() => showLoading(false));
 };
-
-loginBtn.onclick = async () => {
-  try {
-    showLoading(true);
-    await loginUser(email.value, password.value);
-    showToast("Logged in successfully!");
-  } catch (e) {
-    showToast(e.message);
-  } finally {
-    showLoading(false);
-  }
-};
-
 logoutBtn.onclick = () => signOut(auth);
 
 // Show tab
 window.showTab = (name) => {
   ["profile", "settings", "send", "inbox"].forEach(id => {
-    const tab = document.getElementById(`${id}-tab`);
-    tab.classList.remove("tab-visible");
-    setTimeout(() => tab.style.display = "none", 300);
+    document.getElementById(`${id}-tab`).style.display = "none";
   });
-
-  const newTab = document.getElementById(`${name}-tab`);
-  newTab.style.display = "block";
-  setTimeout(() => newTab.classList.add("tab-visible"), 10);
+  document.getElementById(`${name}-tab`).style.display = "block";
 };
 
+// Save Settings
 document.getElementById("saveSettingsBtn").onclick = async () => {
-  try {
-    const uid = auth.currentUser.uid;
-    await update(ref(db, `users/${uid}`), {
-      displayName: document.getElementById("nameInput").value,
-      bio: document.getElementById("bioInput").value,
-      color: document.getElementById("colorInput").value
-    });
-    showToast("Settings updated!");
-  } catch (e) {
-    showToast(e.message);
-  }
+  const uid = auth.currentUser.uid;
+  await update(ref(db, `users/${uid}`), {
+    displayName: document.getElementById("nameInput").value,
+    bio: document.getElementById("bioInput").value,
+    color: document.getElementById("colorInput").value
+  });
+  showToast("Profile updated!");
 };
 
+// Send Note
 document.getElementById("sendNoteBtn").onclick = async () => {
   try {
     await sendNote(
@@ -95,17 +57,18 @@ document.getElementById("sendNoteBtn").onclick = async () => {
       document.getElementById("targetEmail").value,
       document.getElementById("noteText").value
     );
-    showToast("Note sent!");
+    document.getElementById("sendStatus").textContent = "Note sent!";
   } catch (e) {
-    showToast(e.message);
+    document.getElementById("sendStatus").textContent = e.message;
   }
 };
 
+// Handle Auth State Changes
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     authSection.style.display = "none";
     userSection.style.display = "block";
-    tabs.style.display = "flex";
+    tabs.style.display = "block";
 
     const snap = await get(ref(db, `users/${user.uid}`));
     const data = snap.val();
@@ -135,7 +98,25 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Dark mode
+// Dark Mode Toggle
 document.getElementById("darkToggle").onclick = () => {
   document.body.classList.toggle("dark-mode");
 };
+
+// Show loading spinner
+function showLoading(show) {
+  const spinner = document.getElementById("loadingSpinner");
+  spinner.style.display = show ? "flex" : "none";
+}
+
+// Show Toast Notification
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.classList.add("show"), 0);
+  setTimeout(() => toast.classList.remove("show"), 3000);
+  setTimeout(() => toast.remove(), 3500);
+}
