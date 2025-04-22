@@ -1,185 +1,123 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-
+/* Basic Reset */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
-  transition: background 0.4s, color 0.4s;
-  color: #000;
+  font-family: "Arial", sans-serif;
+  background: #fff;
+  color: #333;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Dark mode support */
-.dark-mode {
-  background: linear-gradient(145deg, #0e0e0e, #1c1c1c);
-  color: white;
+body.dark-mode {
+  background: #222;
+  color: #fff;
 }
 
-/* Main container */
-.container {
-  width: 100%;
-  max-width: 600px;
-  padding: 2rem;
-  margin: 1rem;
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.dark-mode .container {
-  background-color: rgba(30, 30, 30, 0.4);
-}
-
-/* Animated gradient header */
-h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(to right, #ff7a18, #af002d, #3205b1);
+  background-clip: text;
+  color: transparent;
+  font-size: 3rem;
   text-align: center;
-  background: linear-gradient(90deg, #ff3cac, #2b86c5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: fadeGradient 3s ease-in-out forwards;
-}
-
-@keyframes fadeGradient {
-  0% {
-    -webkit-text-fill-color: transparent;
-  }
-  100% {
-    -webkit-text-fill-color: initial;
-  }
-}
-
-/* Form styling */
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Rounded glassy inputs */
-input, textarea {
-  font-family: inherit;
-  padding: 0.75rem 1rem;
-  border-radius: 16px;
-  border: none;
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  width: 100%;
-  max-width: 350px;
-  font-size: 1rem;
-  transition: box-shadow 0.3s, background-color 0.3s;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
-}
-
-input:focus, textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(43, 134, 197, 0.3);
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-.dark-mode input, .dark-mode textarea {
-  background-color: rgba(40, 40, 40, 0.6);
-  color: white;
 }
 
 /* Buttons */
 button {
-  font-family: inherit;
-  padding: 0.75rem 1.5rem;
-  border-radius: 16px;
+  background-color: #4a90e2;
   border: none;
-  background: linear-gradient(90deg, #ff3cac, #2b86c5);
   color: white;
+  padding: 10px 20px;
   font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.2s, background 0.3s;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background: linear-gradient(90deg, #2b86c5, #ff3cac);
-  transform: translateY(-2px);
+  background-color: #357ab7;
 }
 
-/* Tabs */
-#tabs {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+input, textarea {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s ease;
 }
 
-#tabs button {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  padding: 0.5rem 1rem;
+input:focus, textarea:focus {
+  border-color: #4a90e2;
 }
 
-.dark-mode #tabs button {
-  background: rgba(30, 30, 30, 0.4);
-}
-
-/* Sticky Note style */
-.sticky-note {
-  width: 200px;
-  height: 200px;
-  background-color: #fffaa8;
-  border-radius: 20px;
-  margin: 1rem auto;
-  padding: 1rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+/* Loading Spinner */
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-weight: 500;
-  font-size: 1.1rem;
-  transition: transform 0.3s ease;
+  z-index: 1000;
 }
 
-.sticky-note:hover {
-  transform: scale(1.03);
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--accent, #4a90e2);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-/* Inbox messages */
-#inboxMessages > div {
-  background: rgba(240, 240, 240, 0.8);
-  margin: 0.4rem 0;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  transition: background 0.3s;
-}
-
-.dark-mode #inboxMessages > div {
-  background: rgba(30, 30, 30, 0.6);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: 1.5rem;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
 
-  h1 {
-    font-size: 2rem;
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4a90e2;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* Dark Mode Styles */
+body.dark-mode button {
+  background-color: #333;
+}
+
+body.dark-mode button:hover {
+  background-color: #444;
+}
+
+/* Smooth Animation for Tabs */
+#tab-content {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-
-  input, textarea {
-    max-width: 100%;
+  to {
+    opacity: 1;
   }
 }
