@@ -5,70 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SendMeANote Remastered</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="firebase-init.js"></script>
-  <script defer src="auth.js"></script>
-  <script defer src="main.js"></script>
 </head>
-<body>
+<body class="dark-mode">
+  <div id="auth-container">
+    <!-- Title with gradient effect -->
+    <h1>
+      <span class="gradienttwo">SendMeANote</span> <span class="gradient-text">Remastered</span>
+    </h1>
+
+    <!-- Form for login -->
+    <div id="auth-form">
+      <input type="email" id="email" placeholder="Enter your email" required>
+      <input type="password" id="password" placeholder="Enter your password" required>
+      <button id="loginBtn">Login</button>
+      <button id="signupBtn">Sign Up</button>
+    </div>
+  </div>
+
   <!-- Loading Spinner -->
-  <div id="loading" class="spinner-overlay" style="display: none;">
+  <div class="spinner-overlay" id="loading" style="display: none;">
     <div class="spinner"></div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="toast"></div>
+  <!-- Toast Notifications -->
+  <div id="toast"></div>
 
-  <!-- Authentication Form -->
-  <div id="auth-container">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Log In</button>
-  </div>
-
-  <!-- Main Content Section (Visible after login) -->
-  <div id="main-content" style="display: none;">
-    <!-- User Info & Settings Section -->
-    <div id="user-info">
-      <h1>Welcome, <span id="display-name"></span></h1>
-      <p><strong>Bio:</strong> <span id="bio"></span></p>
-      <button id="editProfileBtn">Edit Profile</button>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div id="editProfileModal" style="display: none;">
-      <h2>Edit Profile</h2>
-      <input id="editNameInput" placeholder="New Display Name" /><br />
-      <input id="editBioInput" placeholder="New Bio" /><br />
-      <button id="saveProfileBtn">Save</button>
-      <button id="closeProfileModalBtn">Close</button>
-    </div>
-
-    <!-- Sticky Note Section -->
-    <div id="sticky-note-section">
-      <textarea id="note" placeholder="Write a note..."></textarea><br />
-      <button id="save-note">Save Note</button>
-    </div>
-
-    <!-- Inbox Section -->
-    <div id="inbox-section">
-      <h2>Your Inbox</h2>
-      <div id="inboxMessages"></div>
-    </div>
-
-    <!-- Send Note Section -->
-    <div id="send-note-section">
-      <h2>Send a Note</h2>
-      <input id="targetEmail" placeholder="Recipient Email" /><br />
-      <textarea id="noteText" placeholder="Your note"></textarea><br />
-      <button id="sendNoteBtn">Send Note</button>
-      <p id="sendStatus"></p>
-    </div>
-
-    <!-- Dark Mode Toggle -->
-    <button id="darkToggle">Toggle Dark Mode</button>
-
-  </div>
-
+  <script src="main.js"></script>
 </body>
 </html>
