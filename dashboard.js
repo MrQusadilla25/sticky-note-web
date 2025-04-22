@@ -4,26 +4,26 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 import { firebaseConfig } from './firebase-init.js';
 
-// Init Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Elements
+// DOM Elements
 const tabs = document.querySelectorAll('nav button[data-tab]');
 const panels = document.querySelectorAll('.tab-panel');
 const logoutBtn = document.getElementById('logoutBtn');
 const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
 
-// User state
+// Auth state
 onAuthStateChanged(auth, user => {
   if (!user) {
     location.href = "login.html";
   } else {
     loadUserSettings(user.uid);
     loadInbox(user.email);
-    updateProfile(user);
+    updateProfile(user.uid, user.email);
   }
 });
 
@@ -31,9 +31,14 @@ onAuthStateChanged(auth, user => {
 tabs.forEach(btn => {
   btn.addEventListener('click', () => {
     panels.forEach(p => p.classList.add('hidden'));
+    tabs.forEach(b => b.classList.remove('active'));
     document.getElementById(btn.dataset.tab).classList.remove('hidden');
+    btn.classList.add('active');
   });
 });
+
+// Set default tab
+document.querySelector('button[data-tab="settings"]').classList.add('active');
 
 // Logout
 logoutBtn.addEventListener('click', () => {
@@ -42,34 +47,45 @@ logoutBtn.addEventListener('click', () => {
   });
 });
 
-// SETTINGS
+// Save settings
 document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
   const user = auth.currentUser;
   if (!user) return;
 
-  const displayName = document.getElementById('displayName').value;
-  const bio = document.getElementById('bio').value;
+  const displayName = document.getElementById('displayName').value.trim();
+  const bio = document.getElementById('bio').value.trim();
   const stickyColor = document.getElementById('noteColor').value;
 
-  await set(ref(db, `users/${user.uid}/settings`), { displayName, bio, stickyColor });
-  showToast("Settings saved!");
+  try {
+    await set(ref(db, `users/${user.uid}/settings`), { displayName, bio, stickyColor });
+    showToast("Settings saved!");
+  } catch (err) {
+    console.error(err);
+    showToast("Error saving settings.");
+  }
 });
 
+// Load user settings
 async function loadUserSettings(uid) {
-  const snap = await get(ref(db, `users/${uid}/settings`));
-  const data = snap.val();
-  if (data) {
-    document.getElementById('displayName').value = data.displayName || '';
-    document.getElementById('bio').value = data.bio || '';
-    document.getElementById('noteColor').value = data.stickyColor || '#ffcc00';
+  try {
+    const snap = await get(ref(db, `users/${uid}/settings`));
+    const data = snap.val();
+    if (data) {
+      document.getElementById('displayName').value = data.displayName || '';
+      document.getElementById('bio').value = data.bio || '';
+      document.getElementById('noteColor').value = data.stickyColor || '#ffcc00';
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to load settings.");
   }
 }
 
-// SEND NOTE
+// Send note
 document.getElementById('sendNoteBtn').addEventListener('click', async () => {
   const to = document.getElementById('sendTo').value.trim();
   const message = document.getElementById('noteMessage').value.trim();
-  const noteColor = document.getElementById('noteColorPicker').value;
+  const noteColor = document.getElementById('noteColorPicker').value || '#ffcc00';
   const sender = auth.currentUser;
 
   if (!to || !message) return showToast("Please fill in all fields.");
@@ -90,13 +106,22 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
     timestamp: now
   };
 
-  await push(ref(db, 'notes'), note);
-  localStorage.setItem('lastSent', now.toString());
-  document.getElementById('cooldownNotice').classList.add('hidden');
-  showToast("Note sent!");
+  try {
+    showSpinner(true);
+    await push(ref(db, 'notes'), note);
+    localStorage.setItem('lastSent', now.toString());
+    document.getElementById('cooldownNotice').classList.add('hidden');
+    showToast("Note sent!");
+    document.getElementById('noteMessage').value = "";
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to send note.");
+  } finally {
+    showSpinner(false);
+  }
 });
 
-// LOAD INBOX
+// Load inbox
 function loadInbox(userEmail) {
   const inboxContainer = document.getElementById('notesList');
   inboxContainer.innerHTML = "";
@@ -118,39 +143,60 @@ function loadInbox(userEmail) {
     inboxContainer.appendChild(noteEl);
 
     noteEl.querySelector('.delete-btn').addEventListener('click', async () => {
-      await remove(ref(db, `notes/${snapshot.key}`));
-      noteEl.remove();
-      showToast("Note deleted.");
+      try {
+        await remove(ref(db, `notes/${snapshot.key}`));
+        noteEl.remove();
+        showToast("Note deleted.");
+      } catch (err) {
+        console.error(err);
+        showToast("Error deleting note.");
+      }
     });
   });
 }
 
-// CLEAR INBOX
+// Clear inbox
 document.getElementById('clearInboxBtn').addEventListener('click', async () => {
   const user = auth.currentUser;
-  const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
-  const snap = await get(notesQuery);
+  if (!user) return;
 
-  snap.forEach(child => {
-    child.ref.remove();
-  });
+  try {
+    const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
+    const snap = await get(notesQuery);
 
-  document.getElementById('notesList').innerHTML = '';
-  showToast("Inbox cleared!");
+    snap.forEach(child => {
+      child.ref.remove();
+    });
+
+    document.getElementById('notesList').innerHTML = '';
+    showToast("Inbox cleared!");
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to clear inbox.");
+  }
 });
 
-// PROFILE
-function updateProfile(user) {
-  document.getElementById('profileDisplayName').textContent = user.displayName || 'No name set';
-  document.getElementById('profileEmail').textContent = user.email;
-  get(ref(db, `users/${user.uid}/settings/bio`)).then(snap => {
-    document.getElementById('profileBio').textContent = snap.val() || 'No bio set.';
+// Update profile tab
+function updateProfile(uid, email) {
+  get(ref(db, `users/${uid}/settings`)).then(snap => {
+    const data = snap.val() || {};
+    document.getElementById('profileDisplayName').textContent = data.displayName || 'No name set';
+    document.getElementById('profileBio').textContent = data.bio || 'No bio set.';
+    document.getElementById('profileEmail').textContent = email;
+  }).catch(err => {
+    console.error(err);
+    showToast("Failed to load profile.");
   });
 }
 
-// TOAST
+// Toast
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Spinner
+function showSpinner(show) {
+  spinner.style.display = show ? 'flex' : 'none';
 }
