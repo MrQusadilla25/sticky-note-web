@@ -199,7 +199,7 @@ async function updateProfile(uid, email) {
     document.getElementById('profileBio').textContent = data.bio || 'No bio set.';
     document.getElementById('profileEmail').textContent = email;
     document.getElementById('profilePicture').src = pfp;
-    document.getElementById('picturebanStatus').textContent = `pictureban: ${pictureban}`;
+    
   } catch (err) {
     console.error(err);
     showToast("Failed to load profile.");
