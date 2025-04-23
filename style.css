@@ -1,166 +1,124 @@
-/* Basic Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  font-family: "Arial", sans-serif;
-  background: #222; /* Dark mode background */
-  color: #fff; /* Dark mode text */
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
-/* Gradient for the word 'Remastered' only */
-.gradient-text {
-  background: linear-gradient(to right, #ff7a18, #af002d, #3205b1);
-  background-clip: text;
-  color: transparent;
-  font-size: 3rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 30px; /* Add spacing for better design */
-}
-
-.gradienttwo {
-  background: white;
-  background-clip: text;
-  color: transparent;
-  font-size: 3rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 30px; /* Add spacing for better design */
-}
-
-/* Centered Layout */
-#auth-container {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f0f0f, #1f1f1f);
+  color: white;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   height: 100vh;
-  flex-direction: column;
+  overflow: hidden;
+}
+
+.container {
   text-align: center;
+  animation: fadeIn 1s ease;
 }
 
-h1 {
-  font-size: 4rem;
-  color: #fff;
-  margin-bottom: 20px;
+.logo {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
 }
 
-/* Input Fields */
-input, textarea {
-  padding: 12px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #444;
-  margin-bottom: 20px;
-  width: 250px;
-  background-color: #333;
-  color: #fff;
+.white-gradient {
+  background: linear-gradient(to right, #ffffff, #dddddd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-input:focus, textarea:focus {
-  border-color: #4a90e2;
-  outline: none;
+.color-gradient {
+  background: linear-gradient(to right, #00bcd4, #8e24aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-input::placeholder, textarea::placeholder {
-  color: #aaa;
+.auth-box {
+  background: #121212;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 15px #00000066;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 350px;
+  margin: 0 auto;
 }
 
-/* Buttons */
-button {
-  background-color: #4a90e2;
+.auth-box input {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 0.7rem;
+  background: #1f1f1f;
+  color: white;
+}
+
+.auth-box button {
+  padding: 0.8rem;
+  background: #00bcd4;
   border: none;
   color: white;
-  padding: 12px 25px;
-  font-size: 1rem;
+  border-radius: 0.7rem;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-  width: 250px;
+  transition: background 0.3s;
 }
 
-button:hover {
-  background-color: #357ab7;
+.auth-box button.alt {
+  background: #8e24aa;
 }
 
-button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
+.auth-box button:hover {
+  filter: brightness(1.2);
 }
 
-/* Loading Spinner */
-.spinner-overlay {
+.toast, .error {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.toast.show, .error.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 6px solid rgba(0, 0, 0, 0.1);
-  border-top-color: var(--accent, #4a90e2);
+  position: fixed;
+  top: 0; left: 0;
+  height: 100%; width: 100%;
+  background: #00000088;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.spinner::after {
+  content: '';
+  width: 60px;
+  height: 60px;
+  border: 6px solid #ffffff44;
+  border-top-color: #00bcd4;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
+.hidden {
+  display: none !important;
+}
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Toast Notifications */
-.toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #4a90e2;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  z-index: 999;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-
-.toast.show {
-  opacity: 1;
-}
-
-/* Smooth Animation for Tabs */
-#tab-content {
-  animation: fadeIn 0.5s ease-in-out;
+  to { transform: rotate(360deg); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Dark Mode Styles */
-body.dark-mode {
-  background: #222;
-  color: #fff;
-}
-
-body.dark-mode button {
-  background-color: #333;
-}
-
-body.dark-mode button:hover {
-  background-color: #444;
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
