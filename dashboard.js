@@ -1,4 +1,3 @@
-// dashboard.js
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove, update } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
@@ -85,8 +84,12 @@ document.getElementById('pfpInput').addEventListener('change', async e => {
     }
 
     showSpinner(true);
+
+    // Resize + crop to 200x200 circle
+    const resizedBlob = await resizeAndCropToCircle(file, 200);
+
     const pfpRef = storageRef(storage, `pfps/${user.uid}.jpg`);
-    await uploadBytes(pfpRef, file);
+    await uploadBytes(pfpRef, resizedBlob);
     const url = await getDownloadURL(pfpRef);
     await set(ref(db, `users/${user.uid}/pfp`), url);
     document.getElementById('pfpImage').src = url;
@@ -190,4 +193,38 @@ function showToast(msg) {
 // Spinner
 function showSpinner(state) {
   spinner.style.display = state ? 'flex' : 'none';
+}
+
+// Resize and Crop to Circle (200x200)
+function resizeAndCropToCircle(file, size = 200) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Crop to square first
+        const minSide = Math.min(img.width, img.height);
+        const sx = (img.width - minSide) / 2;
+        const sy = (img.height - minSide) / 2;
+
+        // Circle mask
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
