@@ -37,7 +37,7 @@ document.querySelector('button[data-tab="settings"]').classList.add('active');
 // Logout
 logoutBtn.addEventListener('click', () => {
   signOut(auth).then(() => {
-    location.href = 'login.html';
+    location.href = 'index.html';
   });
 });
 
