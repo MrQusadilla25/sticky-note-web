@@ -56,13 +56,13 @@ body {
 
 .tab-buttons button {
   flex: 1;
-  background-color: #3a3a3c;
-  color: #f2f2f7;
   padding: 12px;
-  border: none;
-  border-radius: 12px;
   font-size: 1rem;
   font-weight: 500;
+  border-radius: 12px;
+  background-color: #3a3a3c;
+  color: #f2f2f7;
+  border: none;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
 }
@@ -73,18 +73,23 @@ body {
 }
 
 .tab-buttons button:hover {
-  transform: translateY(-1px);
   background-color: #48484a;
+  transform: translateY(-1px);
 }
 
 /* Tabs Content */
-.tab-content {
+.tab-panel {
   display: none;
   animation: fadeIn 0.4s ease-in-out;
 }
 
-.tab-content.active {
+.tab-panel.active {
   display: block;
+}
+
+/* Utility */
+.hidden {
+  display: none !important;
 }
 
 /* Input & Textarea */
@@ -102,18 +107,18 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: #0a84ff;
-  outline: none;
+  outline: 2px solid #0a84ff;
+  outline-offset: 2px;
 }
 
 input::placeholder, textarea::placeholder {
   color: #8e8e93;
 }
 
-/* Buttons */
+/* Primary Action Buttons */
 button.save-button,
 button.send-button {
   background: #0a84ff;
-  border: none;
   color: white;
   padding: 14px;
   font-size: 1rem;
@@ -121,6 +126,7 @@ button.send-button {
   border-radius: 14px;
   cursor: pointer;
   width: 100%;
+  border: none;
   transition: background 0.3s ease;
 }
 
@@ -129,7 +135,7 @@ button.send-button:hover {
   background: #0060df;
 }
 
-/* Notes */
+/* Note Box */
 .note {
   background: #3a3a3c;
   border-radius: 12px;
@@ -143,7 +149,7 @@ button.send-button:hover {
   margin-bottom: 6px;
 }
 
-/* Toast */
+/* Toast Notification */
 .toast {
   position: fixed;
   top: 20px;
@@ -162,7 +168,7 @@ button.send-button:hover {
   opacity: 1;
 }
 
-/* Spinner */
+/* Spinner Overlay */
 .spinner-overlay {
   position: fixed;
   inset: 0;
@@ -183,22 +189,7 @@ button.send-button:hover {
   animation: spin 1s linear infinite;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Modern Apple-Inspired Button Design */
+/* Global Button Style (Apple-Inspired) */
 button {
   all: unset;
   display: inline-block;
@@ -229,6 +220,11 @@ button:active {
   transform: scale(0.98);
 }
 
+button:focus {
+  outline: 2px solid #0a84ff;
+  outline-offset: 2px;
+}
+
 button:disabled {
   background: #2c2c2e;
   color: #aaa;
@@ -237,12 +233,11 @@ button:disabled {
   box-shadow: none;
 }
 
-/* Modifier: Full Width */
+/* Button Modifiers */
 button.full-width {
   width: 100%;
 }
 
-/* Modifier: Accent Button */
 button.accent {
   background: linear-gradient(to bottom, #0a84ff, #0060df);
   color: white;
@@ -255,4 +250,14 @@ button.accent:hover {
 
 button.accent:active {
   background: linear-gradient(to bottom, #0060df, #004aad);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
