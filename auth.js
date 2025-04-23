@@ -10,7 +10,7 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-// DOM
+// DOM Elements
 const loginBtn = document.getElementById('loginBtn');
 const signupBtn = document.getElementById('signupBtn');
 const emailInput = document.getElementById('email');
@@ -19,7 +19,7 @@ const errorDiv = document.getElementById('authError');
 const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
 
-// Login
+// Login functionality
 loginBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
@@ -37,7 +37,7 @@ loginBtn.addEventListener('click', async () => {
   }
 });
 
-// Sign Up
+// Sign Up functionality
 signupBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
@@ -49,11 +49,12 @@ signupBtn.addEventListener('click', async () => {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     const uid = result.user.uid;
 
-    // Default user settings
+    // Default user settings including pictureban: false
     await set(ref(db, `users/${uid}/settings`), {
-      displayName: "New User",
-      bio: "",
-      stickyColor: "#ffcc00"
+      displayName: "New User",  // Default name
+      bio: "",                  // Default bio
+      stickyColor: "#ffcc00",   // Default sticky note color
+      pictureban: false         // Default pictureban field
     });
 
     showToast("Account created!");
@@ -64,18 +65,21 @@ signupBtn.addEventListener('click', async () => {
   }
 });
 
+// Error handling
 function showError(msg) {
   errorDiv.textContent = msg;
   errorDiv.classList.add('show');
   setTimeout(() => errorDiv.classList.remove('show'), 4000);
 }
 
+// Toast notification
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+// Loading spinner
 function showSpinner(show) {
   spinner.classList.toggle('hidden', !show);
 }
