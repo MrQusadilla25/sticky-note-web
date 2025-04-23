@@ -162,24 +162,32 @@ button:hover {
 }
 
 /* === TOAST === */
-.toast {
+/* Toast Notification */
+#toast {
   position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #323232;
-  color: #fff;
-  padding: 1rem 2rem;
-  border-radius: 999px;
+  top: 20px;                /* Position from the top */
+  right: 20px;              /* Position from the right */
+  background: #222;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 1rem;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s ease;
-  z-index: 9999;
+  transition: opacity 0.4s ease;
+  z-index: 100;
 }
 
-.toast.show {
+#toast.show {
   opacity: 1;
   pointer-events: auto;
+}
+
+#toast.error {
+  background: #ff5252;  /* Error messages in red */
+}
+
+#toast.success {
+  background: #00bcd4;  /* Success messages in blue */
 }
 
 /* === SPINNER === */
