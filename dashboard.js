@@ -1,6 +1,7 @@
 // dashboard.js
+// dashboard.js
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove, child } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 import { auth, db } from './firebase-init.js';
 
 // DOM Elements
@@ -31,7 +32,7 @@ tabs.forEach(btn => {
   });
 });
 
-// Set default tab
+// Default tab
 document.querySelector('button[data-tab="settings"]').classList.add('active');
 
 // Logout
@@ -122,18 +123,34 @@ function loadInbox(userEmail) {
 
   const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(userEmail));
 
-  onChildAdded(notesQuery, snapshot => {
+  onChildAdded(notesQuery, async snapshot => {
     const msg = snapshot.val();
     const noteEl = document.createElement('div');
     noteEl.className = 'message-card';
+
     const time = new Date(msg.timestamp).toLocaleString();
+    const senderEmail = msg.sender;
+    let senderProfile = {};
+    const usersSnap = await get(ref(db, `users`));
+    usersSnap.forEach(userSnap => {
+      const userData = userSnap.val();
+      if (userData && userData.settings && userData.settings.email === senderEmail) {
+        senderProfile = userData.settings;
+      }
+    });
+
+    const pfp = senderProfile.profilePicture || 'default-pfp.png';
 
     noteEl.innerHTML = `
+      <div class="pfp-wrapper">
+        <img src="${pfp}" alt="pfp" class="pfp" />
+      </div>
       <p><strong>From:</strong> ${msg.sender}</p>
       <p>${msg.text}</p>
       <small>Sent: ${time}</small><br>
       <button class="delete-btn" data-id="${snapshot.key}">Delete</button>
     `;
+
     inboxContainer.appendChild(noteEl);
 
     noteEl.querySelector('.delete-btn').addEventListener('click', async () => {
@@ -171,16 +188,22 @@ document.getElementById('clearInboxBtn').addEventListener('click', async () => {
 });
 
 // Update profile tab
-function updateProfile(uid, email) {
-  get(ref(db, `users/${uid}/settings`)).then(snap => {
+async function updateProfile(uid, email) {
+  try {
+    const snap = await get(ref(db, `users/${uid}/settings`));
     const data = snap.val() || {};
+    const pfp = data.profilePicture || 'default-pfp.png';
+    const pictureban = data.pictureban === true;
+
     document.getElementById('profileDisplayName').textContent = data.displayName || 'No name set';
     document.getElementById('profileBio').textContent = data.bio || 'No bio set.';
     document.getElementById('profileEmail').textContent = email;
-  }).catch(err => {
+    document.getElementById('profilePicture').src = pfp;
+    document.getElementById('picturebanStatus').textContent = `pictureban: ${pictureban}`;
+  } catch (err) {
     console.error(err);
     showToast("Failed to load profile.");
-  });
+  }
 }
 
 // Toast
