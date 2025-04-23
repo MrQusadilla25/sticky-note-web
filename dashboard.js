@@ -1,28 +1,27 @@
 // dashboard.js
-// dashboard.js
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove, child } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove, update } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 import { auth, db } from './firebase-init.js';
 
-// DOM Elements
+const storage = getStorage();
 const tabs = document.querySelectorAll('nav button[data-tab]');
 const panels = document.querySelectorAll('.tab-panel');
 const logoutBtn = document.getElementById('logoutBtn');
 const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
 
-// Auth state
+// Auth
 onAuthStateChanged(auth, user => {
-  if (!user) {
-    location.href = "index.html";
-  } else {
+  if (!user) location.href = "index.html";
+  else {
     loadUserSettings(user.uid);
     loadInbox(user.email);
     updateProfile(user.uid, user.email);
   }
 });
 
-// Tab switching
+// Tab logic
 tabs.forEach(btn => {
   btn.addEventListener('click', () => {
     panels.forEach(p => p.classList.add('hidden'));
@@ -31,15 +30,11 @@ tabs.forEach(btn => {
     btn.classList.add('active');
   });
 });
-
-// Default tab
 document.querySelector('button[data-tab="settings"]').classList.add('active');
 
 // Logout
 logoutBtn.addEventListener('click', () => {
-  signOut(auth).then(() => {
-    location.href = 'index.html';
-  });
+  signOut(auth).then(() => location.href = 'index.html');
 });
 
 // Save settings
@@ -76,47 +71,39 @@ async function loadUserSettings(uid) {
   }
 }
 
-// Send note
-document.getElementById('sendNoteBtn').addEventListener('click', async () => {
-  const to = document.getElementById('sendTo').value.trim();
-  const message = document.getElementById('noteMessage').value.trim();
-  const noteColor = document.getElementById('noteColorPicker').value || '#ffcc00';
-  const sender = auth.currentUser;
+// Upload profile picture
+document.getElementById('pfpInput').addEventListener('change', async e => {
+  const user = auth.currentUser;
+  const file = e.target.files[0];
+  if (!user || !file) return;
 
-  if (!to || !message) return showToast("Please fill in all fields.");
+  const banSnap = await get(ref(db, `users/${user.uid}/pictureban`));
+  const isBanned = banSnap.exists() && banSnap.val() === true;
 
-  const now = Date.now();
-  const lastSent = parseInt(localStorage.getItem('lastSent')) || 0;
-
-  if (now - lastSent < 5000) {
-    document.getElementById('cooldownNotice').classList.remove('hidden');
+  if (isBanned) {
+    showToast("You are suspended from changing your profile picture.");
     return;
   }
 
-  const note = {
-    email: to,
-    sender: sender.email,
-    text: message,
-    color: noteColor,
-    timestamp: now
-  };
+  const filePath = `pfps/${user.uid}.jpg`;
+  const fileRef = storageRef(storage, filePath);
 
   try {
     showSpinner(true);
-    await push(ref(db, 'notes'), note);
-    localStorage.setItem('lastSent', now.toString());
-    document.getElementById('cooldownNotice').classList.add('hidden');
-    showToast("Note sent!");
-    document.getElementById('noteMessage').value = "";
+    await uploadBytes(fileRef, file);
+    const url = await getDownloadURL(fileRef);
+    await set(ref(db, `users/${user.uid}/pfp`), url);
+    document.getElementById('pfpImage').src = url;
+    showToast("Profile picture updated!");
   } catch (err) {
     console.error(err);
-    showToast("Failed to send note.");
+    showToast("Failed to upload picture.");
   } finally {
     showSpinner(false);
   }
 });
 
-// Load inbox
+// Load inbox messages
 function loadInbox(userEmail) {
   const inboxContainer = document.getElementById('notesList');
   inboxContainer.innerHTML = "";
@@ -125,32 +112,22 @@ function loadInbox(userEmail) {
 
   onChildAdded(notesQuery, async snapshot => {
     const msg = snapshot.val();
+    const senderSnap = await get(ref(db, `users`));
+    const senderUid = Object.keys(senderSnap.val()).find(uid => senderSnap.val()[uid].settings?.email === msg.sender);
+    const pfpSnap = senderUid ? await get(ref(db, `users/${senderUid}/pfp`)) : null;
+    const pfpUrl = pfpSnap?.val() || "default-pfp.png";
+
     const noteEl = document.createElement('div');
     noteEl.className = 'message-card';
-
     const time = new Date(msg.timestamp).toLocaleString();
-    const senderEmail = msg.sender;
-    let senderProfile = {};
-    const usersSnap = await get(ref(db, `users`));
-    usersSnap.forEach(userSnap => {
-      const userData = userSnap.val();
-      if (userData && userData.settings && userData.settings.email === senderEmail) {
-        senderProfile = userData.settings;
-      }
-    });
-
-    const pfp = senderProfile.profilePicture || 'default-pfp.png';
 
     noteEl.innerHTML = `
-      <div class="pfp-wrapper">
-        <img src="${pfp}" alt="pfp" class="pfp" />
-      </div>
+      <img src="${pfpUrl}" class="profile-pic" alt="pfp" />
       <p><strong>From:</strong> ${msg.sender}</p>
       <p>${msg.text}</p>
       <small>Sent: ${time}</small><br>
       <button class="delete-btn" data-id="${snapshot.key}">Delete</button>
     `;
-
     inboxContainer.appendChild(noteEl);
 
     noteEl.querySelector('.delete-btn').addEventListener('click', async () => {
@@ -174,11 +151,7 @@ document.getElementById('clearInboxBtn').addEventListener('click', async () => {
   try {
     const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
     const snap = await get(notesQuery);
-
-    snap.forEach(child => {
-      child.ref.remove();
-    });
-
+    snap.forEach(child => child.ref.remove());
     document.getElementById('notesList').innerHTML = '';
     showToast("Inbox cleared!");
   } catch (err) {
@@ -187,23 +160,31 @@ document.getElementById('clearInboxBtn').addEventListener('click', async () => {
   }
 });
 
-// Update profile tab
-async function updateProfile(uid, email) {
-  try {
-    const snap = await get(ref(db, `users/${uid}/settings`));
+// Update profile info
+function updateProfile(uid, email) {
+  get(ref(db, `users/${uid}`)).then(async snap => {
     const data = snap.val() || {};
-    const pfp = data.profilePicture || 'default-pfp.png';
-    const pictureban = data.pictureban === true;
-
-    document.getElementById('profileDisplayName').textContent = data.displayName || 'No name set';
-    document.getElementById('profileBio').textContent = data.bio || 'No bio set.';
+    document.getElementById('profileDisplayName').textContent = data.settings?.displayName || 'No name set';
     document.getElementById('profileEmail').textContent = email;
-    document.getElementById('profilePicture').src = pfp;
-    
-  } catch (err) {
+    document.getElementById('profileBio').textContent = data.settings?.bio || 'No bio set.';
+
+    const pfp = data.pfp || "default-pfp.png";
+    document.getElementById('pfpImage').src = pfp;
+
+    const isBanned = data.pictureban === true;
+    if (isBanned) {
+      const fileRef = storageRef(storage, `pfps/${uid}.jpg`);
+      try {
+        await deleteObject(fileRef);
+        await update(ref(db, `users/${uid}`), { pfp: null });
+      } catch (err) {
+        console.warn("No existing PFP to delete or already removed.");
+      }
+    }
+  }).catch(err => {
     console.error(err);
     showToast("Failed to load profile.");
-  }
+  });
 }
 
 // Toast
