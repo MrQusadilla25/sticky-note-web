@@ -72,6 +72,7 @@
       <h2>Your Profile</h2>
       <div class="profile-info">
         <img id="profilePic" src="default-pfp.png" alt="Profile Picture" class="profile-pic" />
+        <button id="changeProfilePicBtn" onclick="changeProfilePic()">Change Profile Picture</button>
         <p><strong>pictureban:</strong> <span id="pictureBanStatus">Loading...</span></p>
       </div>
       <p><strong>Display Name:</strong> <span id="profileDisplayName">Loading...</span></p>
@@ -81,7 +82,7 @@
   </main>
 
   <!-- Toast & Spinner -->
-  <div id="toast"></div>
+  <div id="toast" class="hidden">You cannot change your profile picture at this time.</div>
   <div class="spinner-overlay" id="loading" style="display: none;">
     <div class="spinner"></div>
   </div>
@@ -92,5 +93,50 @@
   <div id="logout-container" style="display: none;"></div>
 
   <script type="module" src="dashboard.js"></script>
+
+  <script>
+    // Change profile picture function
+    function changeProfilePic() {
+      const pictureban = /* Fetch from Firebase if user is banned from changing profile picture */;
+
+      if (pictureban) {
+        showToast("You are suspended from changing your profile picture.");
+        document.getElementById('profilePic').src = "default-pfp.png"; // Removes current profile picture
+        return;
+      }
+
+      // Code for selecting and uploading a new profile picture
+    }
+
+    // Show toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Call the correct tab by default
+    document.querySelectorAll('.tab-nav button').forEach(button => {
+      button.addEventListener('click', function() {
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+          panel.classList.add('hidden');
+        });
+        document.getElementById(button.getAttribute('data-tab')).classList.remove('hidden');
+      });
+    });
+
+    // Load user profile data on page load
+    window.onload = function() {
+      // Fetch profile data from Firebase and update the page content
+      // Example:
+      const userProfile = fetchUserProfile();
+      document.getElementById('profileDisplayName').textContent = userProfile.displayName;
+      document.getElementById('profilePic').src = userProfile.profilePicture || 'default-pfp.png';
+      document.getElementById('profileEmail').textContent = userProfile.email;
+      document.getElementById('profileBio').textContent = userProfile.bio;
+      // document.getElementById('pictureBanStatus').textContent = userProfile.pictureBan ? 'Banned' : 'Active';
+    }
+  </script>
 </body>
 </html>
