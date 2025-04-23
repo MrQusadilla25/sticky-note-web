@@ -28,6 +28,7 @@
 
   <!-- Tab Panels -->
   <main id="tab-content">
+
     <!-- Settings Panel -->
     <section id="settings" class="tab-panel">
       <h2>Settings</h2>
@@ -69,6 +70,10 @@
     <!-- Profile Panel -->
     <section id="profile" class="tab-panel hidden">
       <h2>Your Profile</h2>
+      <div class="profile-info">
+        <img id="profilePic" src="default-pfp.png" alt="Profile Picture" class="profile-pic" />
+        <p><strong>pictureban:</strong> <span id="pictureBanStatus">Loading...</span></p>
+      </div>
       <p><strong>Display Name:</strong> <span id="profileDisplayName">Loading...</span></p>
       <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
       <p><strong>Bio:</strong> <span id="profileBio">Loading...</span></p>
@@ -81,7 +86,7 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- These are necessary for script logic to work -->
+  <!-- Hidden containers for logic triggers -->
   <div id="profile-container" style="display: none;"></div>
   <div id="note-container" style="display: none;"></div>
   <div id="logout-container" style="display: none;"></div>
