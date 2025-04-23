@@ -1,132 +1,220 @@
-/* ==== BASE LAYOUT ==== */
-body {
+/* Global styles */
+* {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #0f0f0f, #1f1f1f);
-  color: white;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #232526, #414345);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
   overflow: hidden;
+  color: #fff;
+  transition: all 0.3s ease;
+  scroll-behavior: smooth; /* Smooth scrolling */
 }
 
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  padding: 2rem;
   text-align: center;
-  animation: fadeIn 1s ease;
+  animation: fadeIn 1s ease-in-out;
 }
 
-/* ==== LOGO ==== */
-.logo {
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
+header h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 40px;
 }
 
-.white-gradient {
-  background: linear-gradient(to right, #ffffff, #dddddd);
+.gradient-text {
+  background: linear-gradient(45deg, #ff5e62, #ff9966);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
-.color-gradient {
-  background: linear-gradient(to right, #00bcd4, #8e24aa);
+.gradienttwo {
+  background: linear-gradient(45deg, #2BC0E4, #EAECC6);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
-/* ==== AUTH BOX ==== */
+/* Auth box styles */
 .auth-box {
-  background: #181818;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 15px #00000088;
-  width: 100%;
-  max-width: 360px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideUp 1s ease-in-out;
 }
 
-.auth-box input {
+.input-field {
   width: 100%;
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  background: #1f1f1f;
+  padding: 15px;
+  margin: 10px 0;
   border: none;
-  border-radius: 0.6rem;
-  color: white;
-  font-size: 1rem;
+  border-radius: 8px;
+  background: #444;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
 }
 
-.auth-box button {
-  width: 100%;
-  padding: 0.8rem;
-  background: #00bcd4;
-  color: white;
-  border: none;
-  border-radius: 0.6rem;
-  font-size: 1rem;
+.input-field:focus {
+  background: #5c5c5c;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Password visibility toggle */
+.password-icon {
+  position: absolute;
+  top: 37px;
+  right: 10px;
   cursor: pointer;
-  transition: background 0.3s;
+  color: #fff;
+  font-size: 18px;
+  transition: color 0.3s ease;
 }
 
-.auth-box button:hover {
-  filter: brightness(1.2);
+.password-icon:hover {
+  color: #ff5e62;
 }
 
-.auth-box button.alt {
-  background: #8e24aa;
-  margin-top: 0.5rem;
+/* Forgot password link */
+.forgot-password {
+  display: block;
+  margin-top: 10px;
+  color: #ff5e62;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-.auth-box .error {
-  color: #ff5252;
-  margin-top: 1rem;
-  font-size: 0.9rem;
+.forgot-password:hover {
+  color: #ff9966;
 }
 
-/* ==== TOAST NOTIFICATION ==== */
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #222;
-  color: white;
-  padding: 0.7rem 1.2rem;
-  border-radius: 1rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-  z-index: 100;
+/* Button styles */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-#toast.show {
-  opacity: 1;
-  pointer-events: auto;
+.main-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  background: #ff5e62;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 5px;
 }
 
-/* ==== SPINNER ==== */
-.spinner {
-  margin-top: 1rem;
-  width: 50px;
-  height: 50px;
-  border: 5px solid #ffffff44;
-  border-top-color: #00bcd4;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.main-btn:hover {
+  background: #ff9966;
 }
 
-.spinner.hidden {
+.alt-btn {
+  background: #2BC0E4;
+}
+
+.alt-btn:hover {
+  background: #50d4ff;
+}
+
+.error-msg {
+  color: #ff5e62;
+  font-size: 14px;
+  margin-top: 10px;
   display: none;
 }
 
-/* ==== ANIMATIONS ==== */
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.hidden {
+  display: none;
 }
 
+/* Spinner */
+.spinner {
+  border: 4px solid #fff;
+  border-top: 4px solid #ff5e62;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-top: 20px;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2rem;
+  }
+
+  .auth-box {
+    padding: 20px;
+    width: 90%;
+  }
+
+  .input-field {
+    padding: 12px;
+  }
+
+  .main-btn, .alt-btn {
+    padding: 10px 25px;
+  }
 }
