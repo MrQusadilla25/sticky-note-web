@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SendMeANote Remastered</title>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="auth.js" defer></script>
   <script type="module" src="firebase-init.js" defer></script>
+  <!-- Add FontAwesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="container">
@@ -17,12 +20,19 @@
     </header>
 
     <div class="auth-box">
-      <input type="email" id="email" placeholder="Email" class="input-field">
-      <input type="password" id="password" placeholder="Password" class="input-field">
+      <input type="email" id="email" placeholder="Email" class="input-field" required>
+      <input type="password" id="password" placeholder="Password" class="input-field" required>
+      <!-- Password visibility toggle -->
+      <span id="togglePassword" class="password-icon"><i class="fas fa-eye"></i></span>
+      
+      <!-- Forgot password link -->
+      <a href="reset-password.html" class="forgot-password">Forgot Password?</a>
+
       <div class="btn-group">
         <button id="loginBtn" class="main-btn">Login</button>
         <button id="signupBtn" class="main-btn alt-btn">Sign Up</button>
       </div>
+      
       <div id="authError" class="error-msg"></div>
     </div>
 
