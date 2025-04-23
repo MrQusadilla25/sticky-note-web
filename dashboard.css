@@ -11,6 +11,7 @@ body {
   color: #f1f1f1;
   min-height: 100vh;
   padding: 2rem;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -42,12 +43,12 @@ h2 {
 
 /* === CONTAINER === */
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: auto;
   background: #1a1a1d;
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
 /* === HEADER === */
@@ -65,7 +66,7 @@ header {
   padding: 0.5rem 1rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s ease;
 }
 
 #logoutBtn:hover {
@@ -75,8 +76,9 @@ header {
 /* === NAVIGATION TABS === */
 nav {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   margin-bottom: 1.5rem;
+  gap: 0.5rem;
 }
 
 nav button {
@@ -85,7 +87,6 @@ nav button {
   color: #ddd;
   border: none;
   padding: 0.75rem;
-  margin: 0 0.25rem;
   border-radius: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -101,7 +102,7 @@ nav button:hover {
 /* === TAB PANELS === */
 .tab-panel {
   display: none;
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.4s ease-in-out;
 }
 
 .tab-panel:not(.hidden) {
@@ -113,7 +114,7 @@ nav button:hover {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -173,6 +174,7 @@ button:hover {
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s ease;
+  z-index: 9999;
 }
 
 .toast.show {
@@ -222,6 +224,21 @@ button:hover {
   border-radius: 0.5rem;
   border-left: 5px solid #4facfe;
   position: relative;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.message-card img.profile-pic {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #00f2fe;
+}
+
+.message-card p {
+  margin: 0.25rem 0;
 }
 
 .message-card button.delete-btn {
@@ -234,9 +251,32 @@ button:hover {
   padding: 0.3rem 0.6rem;
   border-radius: 0.5rem;
   font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .notice {
   color: #ffcc00;
   margin-top: 0.5rem;
+}
+
+/* === PROFILE PANEL === */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-section img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #00f2fe;
+  margin-bottom: 1rem;
+}
+
+.profile-info p {
+  margin: 0.25rem 0;
+  line-height: 1.5;
 }
