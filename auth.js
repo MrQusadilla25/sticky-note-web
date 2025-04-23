@@ -1,7 +1,7 @@
 // auth.js
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 import { auth, db } from './firebase-init.js';
-import { ref, set } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { ref, set, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
 // Redirect if already signed in
 onAuthStateChanged(auth, user => {
@@ -75,6 +75,54 @@ signupBtn.addEventListener('click', async () => {
     showSpinner(false);
   }
 });
+
+// Function to get current user email
+function getCurrentUserEmail() {
+  const user = auth.currentUser;
+  if (user) {
+    return user.email;
+  } else {
+    console.log("No user signed in");
+    return null;
+  }
+}
+
+// Send Note Functionality
+async function sendNote() {
+  const recipientEmail = document.getElementById('recipientEmail').value;
+  const noteContent = document.getElementById('noteContent').value;
+
+  const senderEmail = getCurrentUserEmail();
+
+  if (!senderEmail) {
+    return showError("No user signed in.");
+  }
+
+  const usersRef = ref(db, 'users');
+  
+  try {
+    const snapshot = await get(usersRef);
+    const users = snapshot.val();
+    let recipientFound = false;
+
+    for (let userId in users) {
+      if (users[userId].email === recipientEmail) {
+        recipientFound = true;
+        break;
+      }
+    }
+
+    if (recipientFound) {
+      // Send note to the recipient, logic goes here
+      console.log("Note sent to:", recipientEmail);
+      showToast("Note sent successfully!");
+    } else {
+      showError("Recipient not found.");
+    }
+  } catch (error) {
+    showError("Error checking recipient: " + error.message);
+  }
+}
 
 // Error handling
 function showError(msg) {
