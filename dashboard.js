@@ -1,230 +1,190 @@
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-import { getDatabase, ref, set, push, get, onChildAdded, query, orderByChild, equalTo, remove, update } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 import { auth, db } from './firebase-init.js';
+import {
+  ref,
+  set,
+  get,
+  update,
+  push,
+  remove,
+  onValue,
+  child
+} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
 
-const storage = getStorage();
-const tabs = document.querySelectorAll('nav button[data-tab]');
-const panels = document.querySelectorAll('.tab-panel');
+// DOM Elements
+const displayNameInput = document.getElementById('displayName');
+const bioInput = document.getElementById('bio');
+const noteColorInput = document.getElementById('noteColor');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+const sendToInput = document.getElementById('sendTo');
+const noteMessageInput = document.getElementById('noteMessage');
+const noteColorPicker = document.getElementById('noteColorPicker');
+const sendNoteBtn = document.getElementById('sendNoteBtn');
+const cooldownNotice = document.getElementById('cooldownNotice');
+
+const notesList = document.getElementById('notesList');
+const clearInboxBtn = document.getElementById('clearInboxBtn');
+
+const logoutBtn = document.getElementById('logoutBtn');
 const toast = document.getElementById('toast');
-const spinner = document.getElementById('loading');
+const loading = document.getElementById('loading');
 
-// Redirect if not signed in
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    location.href = "index.html";
-  } else {
-    loadUserSettings(user.uid);
-    loadInbox(user.email);
-    updateProfile(user.uid, user.email);
-  }
-});
-
-// Tabs
-tabs.forEach(button => {
-  button.addEventListener('click', () => {
-    tabs.forEach(btn => btn.classList.remove('active'));
-    panels.forEach(panel => panel.classList.add('hidden'));
-    document.getElementById(button.dataset.tab).classList.remove('hidden');
-    button.classList.add('active');
-  });
-});
-document.querySelector('button[data-tab="settings"]').classList.add('active');
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  signOut(auth).then(() => location.href = "index.html");
-});
-
-// Save settings
-document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const displayName = document.getElementById('displayName').value.trim();
-  const bio = document.getElementById('bio').value.trim();
-  const stickyColor = document.getElementById('noteColor').value;
-
-  try {
-    await set(ref(db, `users/${user.uid}/settings`), { displayName, bio, stickyColor });
-    showToast("Settings saved!");
-  } catch (err) {
-    console.error(err);
-    showToast("Error saving settings.");
-  }
-});
-
-// Load settings
-async function loadUserSettings(uid) {
-  try {
-    const snap = await get(ref(db, `users/${uid}/settings`));
-    const settings = snap.val();
-    if (settings) {
-      document.getElementById('displayName').value = settings.displayName || '';
-      document.getElementById('bio').value = settings.bio || '';
-      document.getElementById('noteColor').value = settings.stickyColor || '#ffcc00';
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to load settings.");
-  }
-}
-
-// Upload PFP
-document.getElementById('pfpInput').addEventListener('change', async e => {
-  const user = auth.currentUser;
-  const file = e.target.files[0];
-  if (!user || !file) return;
-
-  try {
-    const banSnap = await get(ref(db, `users/${user.uid}/pictureban`));
-    if (banSnap.exists() && banSnap.val() === true) {
-      showToast("You are suspended from changing your profile picture.");
-      return;
-    }
-
-    showSpinner(true);
-
-    // Resize + crop to 200x200 circle
-    const resizedBlob = await resizeAndCropToCircle(file, 200);
-
-    const pfpRef = storageRef(storage, `pfps/${user.uid}.jpg`);
-    await uploadBytes(pfpRef, resizedBlob);
-    const url = await getDownloadURL(pfpRef);
-    await set(ref(db, `users/${user.uid}/pfp`), url);
-    document.getElementById('pfpImage').src = url;
-    showToast("Profile picture updated!");
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to upload picture.");
-  } finally {
-    showSpinner(false);
-  }
-});
-
-// Load Inbox
-function loadInbox(userEmail) {
-  const container = document.getElementById('notesList');
-  container.innerHTML = '';
-
-  const notesRef = query(ref(db, 'notes'), orderByChild('email'), equalTo(userEmail));
-
-  onChildAdded(notesRef, async snapshot => {
-    const note = snapshot.val();
-    const senderSnap = await get(ref(db, `users`));
-    const senderUid = Object.keys(senderSnap.val() || {}).find(uid => senderSnap.val()[uid]?.settings?.email === note.sender);
-    const pfpSnap = senderUid ? await get(ref(db, `users/${senderUid}/pfp`)) : null;
-    const pfpUrl = pfpSnap?.val() || 'default-pfp.png';
-    const time = new Date(note.timestamp).toLocaleString();
-
-    const div = document.createElement('div');
-    div.className = 'message-card';
-    div.innerHTML = `
-      <img src="${pfpUrl}" class="profile-pic" alt="pfp">
-      <p><strong>From:</strong> ${note.sender}</p>
-      <p>${note.text}</p>
-      <small>Sent: ${time}</small><br>
-      <button class="delete-btn" data-id="${snapshot.key}">Delete</button>
-    `;
-    container.appendChild(div);
-
-    div.querySelector('.delete-btn').addEventListener('click', async () => {
-      try {
-        await remove(ref(db, `notes/${snapshot.key}`));
-        div.remove();
-        showToast("Note deleted.");
-      } catch (err) {
-        console.error(err);
-        showToast("Error deleting note.");
-      }
-    });
-  });
-}
-
-// Clear inbox
-document.getElementById('clearInboxBtn').addEventListener('click', async () => {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  try {
-    const notesRef = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
-    const snap = await get(notesRef);
-    snap.forEach(child => child.ref.remove());
-    document.getElementById('notesList').innerHTML = '';
-    showToast("Inbox cleared.");
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to clear inbox.");
-  }
-});
-
-// Profile tab
-async function updateProfile(uid, email) {
-  try {
-    const snap = await get(ref(db, `users/${uid}`));
-    const user = snap.val() || {};
-    document.getElementById('profileDisplayName').textContent = user.settings?.displayName || 'No name set';
-    document.getElementById('profileEmail').textContent = email;
-    document.getElementById('profileBio').textContent = user.settings?.bio || 'No bio set';
-    document.getElementById('pfpImage').src = user.pfp || 'default-pfp.png';
-
-    if (user.pictureban === true) {
-      const pfpRef = storageRef(storage, `pfps/${uid}.jpg`);
-      try {
-        await deleteObject(pfpRef);
-        await update(ref(db, `users/${uid}`), { pfp: null });
-      } catch (err) {
-        console.warn("No PFP to delete or already removed.");
-      }
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to load profile.");
-  }
-}
-
-// Toast
-function showToast(msg) {
-  toast.textContent = msg;
+// Utilities
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.remove('hidden');
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Spinner
-function showSpinner(state) {
-  spinner.style.display = state ? 'flex' : 'none';
+function showSpinner() {
+  loading.classList.remove('hidden');
+}
+function hideSpinner() {
+  loading.classList.add('hidden');
 }
 
-// Resize and Crop to Circle (200x200)
-function resizeAndCropToCircle(file, size = 200) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const img = new Image();
-      img.onload = function () {
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
+// Auth State
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
 
-        // Crop to square first
-        const minSide = Math.min(img.width, img.height);
-        const sx = (img.width - minSide) / 2;
-        const sy = (img.height - minSide) / 2;
+  const uid = user.uid;
+  const userRef = ref(db, `users/${uid}`);
 
-        // Circle mask
-        ctx.beginPath();
-        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-
-        ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
-        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
-      };
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+  // Load settings
+  get(userRef).then(snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      displayNameInput.value = data.displayName || '';
+      bioInput.value = data.bio || '';
+      noteColorInput.value = data.noteColor || '#ffff88';
+    }
   });
-}
+
+  // Load notebox
+  const inboxRef = ref(db, `inbox/${uid}`);
+  onValue(inboxRef, snapshot => {
+    notesList.innerHTML = '';
+    if (!snapshot.exists()) {
+      notesList.innerHTML = '<p>No notes received.</p>';
+      return;
+    }
+
+    const notes = snapshot.val();
+    Object.entries(notes).forEach(([key, note]) => {
+      const div = document.createElement('div');
+      div.className = 'note';
+      div.style.background = note.color || '#ffff88';
+      div.innerHTML = `
+        <p><strong>From:</strong> ${note.from || 'Anonymous'}</p>
+        <p>${note.message}</p>
+        <p><small>${new Date(note.time).toLocaleString()}</small></p>
+        <button data-key="${key}" class="deleteNoteBtn">Delete</button>
+      `;
+      notesList.appendChild(div);
+    });
+
+    document.querySelectorAll('.deleteNoteBtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-key');
+        remove(child(inboxRef, key));
+        showToast('Note deleted');
+      });
+    });
+  });
+
+  // Save Settings
+  saveSettingsBtn.addEventListener('click', () => {
+    const displayName = displayNameInput.value.trim();
+    const bio = bioInput.value.trim();
+    const color = noteColorInput.value;
+
+    if (!displayName) {
+      showToast('Display name is required.');
+      return;
+    }
+
+    update(userRef, {
+      displayName,
+      bio,
+      noteColor: color
+    }).then(() => showToast('Settings saved!'));
+  });
+
+  // Send a Note with Cooldown
+  sendNoteBtn.addEventListener('click', async () => {
+    const to = sendToInput.value.trim().toLowerCase();
+    const message = noteMessageInput.value.trim();
+    const color = noteColorPicker.value;
+
+    if (!to || !message) {
+      showToast('Fill out all fields.');
+      return;
+    }
+
+    showSpinner();
+    try {
+      const allUsersSnap = await get(ref(db, 'users'));
+      const allUsers = allUsersSnap.val();
+      const recipient = Object.entries(allUsers).find(([id, data]) => data.email?.toLowerCase() === to);
+
+      if (!recipient) {
+        hideSpinner();
+        showToast('Recipient not found.');
+        return;
+      }
+
+      const [recipientId, recipientData] = recipient;
+
+      // Check cooldown
+      const cooldownRef = ref(db, `cooldowns/${uid}`);
+      const cooldownSnap = await get(cooldownRef);
+      const now = Date.now();
+
+      if (cooldownSnap.exists() && now - cooldownSnap.val() < 10000) {
+        hideSpinner();
+        cooldownNotice.classList.remove('hidden');
+        setTimeout(() => cooldownNotice.classList.add('hidden'), 3000);
+        return;
+      }
+
+      // Send note
+      const noteRef = push(ref(db, `inbox/${recipientId}`));
+      await set(noteRef, {
+        from: auth.currentUser.email,
+        message,
+        color,
+        time: now
+      });
+
+      // Set cooldown
+      await set(cooldownRef, now);
+
+      showToast('Note sent!');
+      sendToInput.value = '';
+      noteMessageInput.value = '';
+    } catch (err) {
+      console.error(err);
+      showToast('Error sending note.');
+    }
+    hideSpinner();
+  });
+
+  // Clear inbox
+  clearInboxBtn.addEventListener('click', () => {
+    if (confirm("Are you sure you want to delete all notes?")) {
+      remove(ref(db, `inbox/${uid}`));
+      showToast('Inbox cleared.');
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => {
+      window.location.href = 'index.html';
+    });
+  });
+});
