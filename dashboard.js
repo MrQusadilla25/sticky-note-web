@@ -7,34 +7,34 @@ import { auth, db } from './firebase-init.js';
 const storage = getStorage();
 const tabs = document.querySelectorAll('nav button[data-tab]');
 const panels = document.querySelectorAll('.tab-panel');
-const logoutBtn = document.getElementById('logoutBtn');
 const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
 
-// Auth
+// Redirect if not signed in
 onAuthStateChanged(auth, user => {
-  if (!user) location.href = "index.html";
-  else {
+  if (!user) {
+    location.href = "index.html";
+  } else {
     loadUserSettings(user.uid);
     loadInbox(user.email);
     updateProfile(user.uid, user.email);
   }
 });
 
-// Tab logic
-tabs.forEach(btn => {
-  btn.addEventListener('click', () => {
-    panels.forEach(p => p.classList.add('hidden'));
-    tabs.forEach(b => b.classList.remove('active'));
-    document.getElementById(btn.dataset.tab).classList.remove('hidden');
-    btn.classList.add('active');
+// Tabs
+tabs.forEach(button => {
+  button.addEventListener('click', () => {
+    tabs.forEach(btn => btn.classList.remove('active'));
+    panels.forEach(panel => panel.classList.add('hidden'));
+    document.getElementById(button.dataset.tab).classList.remove('hidden');
+    button.classList.add('active');
   });
 });
 document.querySelector('button[data-tab="settings"]').classList.add('active');
 
 // Logout
-logoutBtn.addEventListener('click', () => {
-  signOut(auth).then(() => location.href = 'index.html');
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  signOut(auth).then(() => location.href = "index.html");
 });
 
 // Save settings
@@ -55,15 +55,15 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async () =>
   }
 });
 
-// Load user settings
+// Load settings
 async function loadUserSettings(uid) {
   try {
     const snap = await get(ref(db, `users/${uid}/settings`));
-    const data = snap.val();
-    if (data) {
-      document.getElementById('displayName').value = data.displayName || '';
-      document.getElementById('bio').value = data.bio || '';
-      document.getElementById('noteColor').value = data.stickyColor || '#ffcc00';
+    const settings = snap.val();
+    if (settings) {
+      document.getElementById('displayName').value = settings.displayName || '';
+      document.getElementById('bio').value = settings.bio || '';
+      document.getElementById('noteColor').value = settings.stickyColor || '#ffcc00';
     }
   } catch (err) {
     console.error(err);
@@ -71,27 +71,23 @@ async function loadUserSettings(uid) {
   }
 }
 
-// Upload profile picture
+// Upload PFP
 document.getElementById('pfpInput').addEventListener('change', async e => {
   const user = auth.currentUser;
   const file = e.target.files[0];
   if (!user || !file) return;
 
-  const banSnap = await get(ref(db, `users/${user.uid}/pictureban`));
-  const isBanned = banSnap.exists() && banSnap.val() === true;
-
-  if (isBanned) {
-    showToast("You are suspended from changing your profile picture.");
-    return;
-  }
-
-  const filePath = `pfps/${user.uid}.jpg`;
-  const fileRef = storageRef(storage, filePath);
-
   try {
+    const banSnap = await get(ref(db, `users/${user.uid}/pictureban`));
+    if (banSnap.exists() && banSnap.val() === true) {
+      showToast("You are suspended from changing your profile picture.");
+      return;
+    }
+
     showSpinner(true);
-    await uploadBytes(fileRef, file);
-    const url = await getDownloadURL(fileRef);
+    const pfpRef = storageRef(storage, `pfps/${user.uid}.jpg`);
+    await uploadBytes(pfpRef, file);
+    const url = await getDownloadURL(pfpRef);
     await set(ref(db, `users/${user.uid}/pfp`), url);
     document.getElementById('pfpImage').src = url;
     showToast("Profile picture updated!");
@@ -103,37 +99,36 @@ document.getElementById('pfpInput').addEventListener('change', async e => {
   }
 });
 
-// Load inbox messages
+// Load Inbox
 function loadInbox(userEmail) {
-  const inboxContainer = document.getElementById('notesList');
-  inboxContainer.innerHTML = "";
+  const container = document.getElementById('notesList');
+  container.innerHTML = '';
 
-  const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(userEmail));
+  const notesRef = query(ref(db, 'notes'), orderByChild('email'), equalTo(userEmail));
 
-  onChildAdded(notesQuery, async snapshot => {
-    const msg = snapshot.val();
+  onChildAdded(notesRef, async snapshot => {
+    const note = snapshot.val();
     const senderSnap = await get(ref(db, `users`));
-    const senderUid = Object.keys(senderSnap.val()).find(uid => senderSnap.val()[uid].settings?.email === msg.sender);
+    const senderUid = Object.keys(senderSnap.val() || {}).find(uid => senderSnap.val()[uid]?.settings?.email === note.sender);
     const pfpSnap = senderUid ? await get(ref(db, `users/${senderUid}/pfp`)) : null;
-    const pfpUrl = pfpSnap?.val() || "default-pfp.png";
+    const pfpUrl = pfpSnap?.val() || 'default-pfp.png';
+    const time = new Date(note.timestamp).toLocaleString();
 
-    const noteEl = document.createElement('div');
-    noteEl.className = 'message-card';
-    const time = new Date(msg.timestamp).toLocaleString();
-
-    noteEl.innerHTML = `
-      <img src="${pfpUrl}" class="profile-pic" alt="pfp" />
-      <p><strong>From:</strong> ${msg.sender}</p>
-      <p>${msg.text}</p>
+    const div = document.createElement('div');
+    div.className = 'message-card';
+    div.innerHTML = `
+      <img src="${pfpUrl}" class="profile-pic" alt="pfp">
+      <p><strong>From:</strong> ${note.sender}</p>
+      <p>${note.text}</p>
       <small>Sent: ${time}</small><br>
       <button class="delete-btn" data-id="${snapshot.key}">Delete</button>
     `;
-    inboxContainer.appendChild(noteEl);
+    container.appendChild(div);
 
-    noteEl.querySelector('.delete-btn').addEventListener('click', async () => {
+    div.querySelector('.delete-btn').addEventListener('click', async () => {
       try {
         await remove(ref(db, `notes/${snapshot.key}`));
-        noteEl.remove();
+        div.remove();
         showToast("Note deleted.");
       } catch (err) {
         console.error(err);
@@ -149,52 +144,50 @@ document.getElementById('clearInboxBtn').addEventListener('click', async () => {
   if (!user) return;
 
   try {
-    const notesQuery = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
-    const snap = await get(notesQuery);
+    const notesRef = query(ref(db, 'notes'), orderByChild('email'), equalTo(user.email));
+    const snap = await get(notesRef);
     snap.forEach(child => child.ref.remove());
     document.getElementById('notesList').innerHTML = '';
-    showToast("Inbox cleared!");
+    showToast("Inbox cleared.");
   } catch (err) {
     console.error(err);
     showToast("Failed to clear inbox.");
   }
 });
 
-// Update profile info
-function updateProfile(uid, email) {
-  get(ref(db, `users/${uid}`)).then(async snap => {
-    const data = snap.val() || {};
-    document.getElementById('profileDisplayName').textContent = data.settings?.displayName || 'No name set';
+// Profile tab
+async function updateProfile(uid, email) {
+  try {
+    const snap = await get(ref(db, `users/${uid}`));
+    const user = snap.val() || {};
+    document.getElementById('profileDisplayName').textContent = user.settings?.displayName || 'No name set';
     document.getElementById('profileEmail').textContent = email;
-    document.getElementById('profileBio').textContent = data.settings?.bio || 'No bio set.';
+    document.getElementById('profileBio').textContent = user.settings?.bio || 'No bio set';
+    document.getElementById('pfpImage').src = user.pfp || 'default-pfp.png';
 
-    const pfp = data.pfp || "default-pfp.png";
-    document.getElementById('pfpImage').src = pfp;
-
-    const isBanned = data.pictureban === true;
-    if (isBanned) {
-      const fileRef = storageRef(storage, `pfps/${uid}.jpg`);
+    if (user.pictureban === true) {
+      const pfpRef = storageRef(storage, `pfps/${uid}.jpg`);
       try {
-        await deleteObject(fileRef);
+        await deleteObject(pfpRef);
         await update(ref(db, `users/${uid}`), { pfp: null });
       } catch (err) {
-        console.warn("No existing PFP to delete or already removed.");
+        console.warn("No PFP to delete or already removed.");
       }
     }
-  }).catch(err => {
+  } catch (err) {
     console.error(err);
     showToast("Failed to load profile.");
-  });
+  }
 }
 
 // Toast
-function showToast(message) {
-  toast.textContent = message;
+function showToast(msg) {
+  toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 // Spinner
-function showSpinner(show) {
-  spinner.style.display = show ? 'flex' : 'none';
+function showSpinner(state) {
+  spinner.style.display = state ? 'flex' : 'none';
 }
