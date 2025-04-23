@@ -19,3 +19,4 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 export { auth, db };
+// hehehe
