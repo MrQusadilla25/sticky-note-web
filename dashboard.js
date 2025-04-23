@@ -116,7 +116,7 @@ auth.onAuthStateChanged(user => {
 
   // Send a Note with Cooldown
   sendNoteBtn.addEventListener('click', async () => {
-    const to = sendToInput.value.trim().toLowerCase();
+    const to = sendToInput.value.trim().toLowerCase(); // Lowercase the recipient input
     const message = noteMessageInput.value.trim();
     const color = noteColorPicker.value;
 
@@ -129,7 +129,7 @@ auth.onAuthStateChanged(user => {
     try {
       const allUsersSnap = await get(ref(db, 'users'));
       const allUsers = allUsersSnap.val();
-      const recipient = Object.entries(allUsers).find(([id, data]) => data.email?.toLowerCase() === to);
+      const recipient = Object.entries(allUsers).find(([id, data]) => data.email?.toLowerCase() === to); // Compare emails in lowercase
 
       if (!recipient) {
         hideSpinner();
