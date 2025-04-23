@@ -13,7 +13,7 @@ const spinner = document.getElementById('loading');
 // Auth state
 onAuthStateChanged(auth, user => {
   if (!user) {
-    location.href = "login.html";
+    location.href = "index.html";
   } else {
     loadUserSettings(user.uid);
     loadInbox(user.email);
