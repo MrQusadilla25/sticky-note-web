@@ -72,7 +72,8 @@
       <h2>Your Profile</h2>
       <div class="profile-info">
         <img id="profilePic" src="default-pfp.png" alt="Profile Picture" class="profile-pic" />
-        <button id="changeProfilePicBtn" onclick="changeProfilePic()">Change Profile Picture</button>
+        <input type="url" id="profilePicURL" placeholder="Enter image URL" />
+        <button id="updatePicBtn">Change Profile Picture</button>
         <p><strong>pictureban:</strong> <span id="pictureBanStatus">Loading...</span></p>
       </div>
       <p><strong>Display Name:</strong> <span id="profileDisplayName">Loading...</span></p>
@@ -82,7 +83,7 @@
   </main>
 
   <!-- Toast & Spinner -->
-  <div id="toast" class="hidden">You cannot change your profile picture at this time.</div>
+  <div id="toast" class="hidden"></div>
   <div class="spinner-overlay" id="loading" style="display: none;">
     <div class="spinner"></div>
   </div>
@@ -93,50 +94,75 @@
   <div id="logout-container" style="display: none;"></div>
 
   <script type="module" src="dashboard.js"></script>
+  <script type="module">
+    import { auth, db } from './firebase-init.js';
+    import { ref, get, update } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
 
-  <script>
-    // Change profile picture function
-    function changeProfilePic() {
-      const pictureban = /* Fetch from Firebase if user is banned from changing profile picture */;
+    const toast = document.getElementById('toast');
+    const updateBtn = document.getElementById('updatePicBtn');
+    const profilePic = document.getElementById('profilePic');
+    const profilePicURL = document.getElementById('profilePicURL');
+    const pictureBanStatus = document.getElementById('pictureBanStatus');
 
-      if (pictureban) {
-        showToast("You are suspended from changing your profile picture.");
-        document.getElementById('profilePic').src = "default-pfp.png"; // Removes current profile picture
-        return;
-      }
-
-      // Code for selecting and uploading a new profile picture
-    }
-
-    // Show toast notification
     function showToast(message) {
-      const toast = document.getElementById('toast');
       toast.textContent = message;
+      toast.classList.remove('hidden');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Call the correct tab by default
+    function loadUserData(uid) {
+      const userRef = ref(db, `users/${uid}`);
+      get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById('profileDisplayName').textContent = data.displayName || 'No name';
+          document.getElementById('profileEmail').textContent = auth.currentUser.email;
+          document.getElementById('profileBio').textContent = data.bio || '';
+          profilePic.src = data.profilePicture || 'default-pfp.png';
+          pictureBanStatus.textContent = data.pictureban ? 'Banned' : 'Active';
+        }
+      });
+    }
+
+    updateBtn.addEventListener('click', () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const url = profilePicURL.value.trim();
+      if (!url.startsWith('http')) {
+        showToast("Please enter a valid image URL.");
+        return;
+      }
+
+      const userRef = ref(db, `users/${uid}`);
+      get(userRef).then(snapshot => {
+        const data = snapshot.val();
+        if (data?.pictureban) {
+          showToast("You are suspended from changing your profile picture.");
+          update(userRef, { profilePicture: null });
+          profilePic.src = "default-pfp.png";
+        } else {
+          update(userRef, { profilePicture: url });
+          profilePic.src = url;
+          showToast("Profile picture updated!");
+        }
+      });
+    });
+
     document.querySelectorAll('.tab-nav button').forEach(button => {
-      button.addEventListener('click', function() {
-        document.querySelectorAll('.tab-panel').forEach(panel => {
-          panel.classList.add('hidden');
-        });
+      button.addEventListener('click', function () {
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
         document.getElementById(button.getAttribute('data-tab')).classList.remove('hidden');
       });
     });
 
-    // Load user profile data on page load
-    window.onload = function() {
-      // Fetch profile data from Firebase and update the page content
-      // Example:
-      const userProfile = fetchUserProfile();
-      document.getElementById('profileDisplayName').textContent = userProfile.displayName;
-      document.getElementById('profilePic').src = userProfile.profilePicture || 'default-pfp.png';
-      document.getElementById('profileEmail').textContent = userProfile.email;
-      document.getElementById('profileBio').textContent = userProfile.bio;
-      // document.getElementById('pictureBanStatus').textContent = userProfile.pictureBan ? 'Banned' : 'Active';
-    }
+    window.onload = function () {
+      auth.onAuthStateChanged(user => {
+        if (user) loadUserData(user.uid);
+        else window.location.href = "index.html";
+      });
+    };
   </script>
 </body>
 </html>
