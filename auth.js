@@ -1,7 +1,7 @@
 // auth.js
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 import { auth, db } from './firebase-init.js';
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
 // Redirect if already signed in
 onAuthStateChanged(auth, user => {
@@ -19,12 +19,17 @@ const errorDiv = document.getElementById('authError');
 const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
 
+// Email validation helper
+const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
+
 // Login functionality
 loginBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!email || !password) return showError("Please fill in both fields.");
+  if (!email || !password || !isValidEmail(email)) {
+    return showError("Please enter a valid email and password.");
+  }
 
   showSpinner(true);
   try {
@@ -42,7 +47,13 @@ signupBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!email || !password) return showError("Please fill in both fields.");
+  if (!email || !password || !isValidEmail(email)) {
+    return showError("Please enter a valid email and password.");
+  }
+
+  if (password.length < 6) {
+    return showError("Password must be at least 6 characters.");
+  }
 
   showSpinner(true);
   try {
