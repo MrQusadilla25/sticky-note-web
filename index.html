@@ -1,80 +1,30 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SendMeANote Remastered - Dashboard</title>
-  <link rel="stylesheet" href="dashboard.css" />
+  <meta charset="UTF-8">
+  <title>SendMeANote Remastered</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="auth.js" defer></script>
+  <script type="module" src="firebase-init.js" defer></script>
 </head>
 <body>
-  <div id="loading" class="spinner-overlay hidden">
-    <div class="spinner"></div>
-  </div>
-
   <div class="container">
-    <header>
-      <h1><span class="white-gradient">SendMeANote</span><span class="color-gradient">Remastered</span></h1>
-      <button id="logoutBtn">Logout</button>
-    </header>
+    <h1 class="logo">
+      <span class="white-gradient">SendMeANote</span>
+      <span class="color-gradient">Remastered</span>
+    </h1>
 
-    <nav>
-      <button data-tab="settings">Settings</button>
-      <button data-tab="send">Send a Note</button>
-      <button data-tab="inbox">Notebox</button>
-      <button data-tab="profile">Profile</button>
-    </nav>
+    <div class="auth-box">
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn">Login</button>
+      <button id="signupBtn" class="alt">Sign Up</button>
+      <div id="authError" class="error"></div>
+    </div>
 
-    <main>
-      <!-- Settings Tab -->
-      <section id="settings" class="tab-panel">
-        <h2>Settings</h2>
-        <label for="displayName">Display Name:</label>
-        <input type="text" id="displayName" />
-
-        <label for="bio">Bio:</label>
-        <textarea id="bio"></textarea>
-
-        <label for="noteColor">Sticky Note Color:</label>
-        <input type="color" id="noteColor" value="#ffcc00"/>
-
-        <button id="saveSettingsBtn">Save Settings</button>
-      </section>
-
-      <!-- Send a Note Tab -->
-      <section id="send" class="tab-panel hidden">
-        <h2>Send a Note</h2>
-        <label for="sendTo">Recipient Email:</label>
-        <input type="email" id="sendTo" />
-
-        <label for="noteMessage">Message:</label>
-        <textarea id="noteMessage"></textarea>
-
-        <label for="noteColorPicker">Note Color:</label>
-        <input type="color" id="noteColorPicker" value="#ffcc00"/>
-
-        <div id="cooldownNotice" class="hidden notice">Wait a few seconds before sending again.</div>
-        <button id="sendNoteBtn">Send Note</button>
-      </section>
-
-      <!-- Notebox Tab -->
-      <section id="inbox" class="tab-panel hidden">
-        <h2>Notebox</h2>
-        <div id="notesList" class="inbox-list"></div>
-        <button id="clearInboxBtn">Clear All</button>
-      </section>
-
-      <!-- Profile Tab -->
-      <section id="profile" class="tab-panel hidden">
-        <h2>Your Profile</h2>
-        <p><strong>Display Name:</strong> <span id="profileDisplayName"></span></p>
-        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-        <p><strong>Bio:</strong> <span id="profileBio"></span></p>
-      </section>
-    </main>
-
+    <div id="loading" class="spinner hidden"></div>
     <div id="toast" class="toast"></div>
   </div>
-
-  <script type="module" src="dashboard.js"></script>
 </body>
 </html>
