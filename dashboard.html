@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Dashboard for SendMeANote Remastered – manage notes, profile, and settings with style." />
   <title>Dashboard | SendMeANote Remastered</title>
   <link rel="stylesheet" href="dashboard.css">
 </head>
@@ -13,17 +14,17 @@
     <h1>
       <span class="gradienttwo">SendMeANote</span> 
       <span class="gradient-text">Remastered Dashboard</span>
-      <span class="gradienttwo">v13.0</span> 
+      <span class="gradienttwo">v13.1</span> 
     </h1>
   </header>
 
   <!-- Navigation Tabs -->
   <nav class="tab-nav">
-    <button data-tab="settings">Settings</button>
-    <button data-tab="send">Send a Note</button>
-    <button data-tab="notebox">Notebox</button>
-    <button data-tab="profile">Profile</button>
-    <button id="logoutBtn" class="logout">Logout</button>
+    <button type="button" data-tab="settings">Settings</button>
+    <button type="button" data-tab="send">Send a Note</button>
+    <button type="button" data-tab="notebox">Notebox</button>
+    <button type="button" data-tab="profile">Profile</button>
+    <button type="button" id="logoutBtn" class="logout">Logout</button>
   </nav>
 
   <!-- Tab Panels -->
@@ -41,7 +42,7 @@
       <label>Sticky Note Color</label>
       <input type="color" id="noteColor" />
 
-      <button id="saveSettingsBtn">Save Settings</button>
+      <button type="button" id="saveSettingsBtn">Save Settings</button>
     </section>
 
     <!-- Send a Note Panel -->
@@ -56,7 +57,7 @@
       <label>Note Color</label>
       <input type="color" id="noteColorPicker" />
 
-      <button id="sendNoteBtn">Send Note</button>
+      <button type="button" id="sendNoteBtn">Send Note</button>
       <p id="cooldownNotice" class="cooldown-text hidden">Please wait before sending another note.</p>
     </section>
 
@@ -64,16 +65,16 @@
     <section id="notebox" class="tab-panel hidden">
       <h2>Your Notebox</h2>
       <div id="notesList"></div>
-      <button id="clearInboxBtn" class="danger">Clear All</button>
+      <button type="button" id="clearInboxBtn" class="danger">Clear All</button>
     </section>
 
     <!-- Profile Panel -->
     <section id="profile" class="tab-panel hidden">
       <h2>Your Profile</h2>
       <div class="profile-info">
-        <img id="profilePic" src="default-pfp.png" alt="Profile Picture" class="profile-pic" />
+        <img id="profilePic" src="default-pfp.png" alt="Your profile picture" class="profile-pic" />
         <input type="url" id="profilePicURL" placeholder="Enter image URL" />
-        <button id="updatePicBtn">Change Profile Picture</button>
+        <button type="button" id="updatePicBtn">Change Profile Picture</button>
         <p><strong>pictureban:</strong> <span id="pictureBanStatus">Loading...</span></p>
       </div>
       <p><strong>Display Name:</strong> <span id="profileDisplayName">Loading...</span></p>
@@ -84,15 +85,11 @@
 
   <!-- Toast & Spinner -->
   <div id="toast" class="hidden"></div>
-  <div class="spinner-overlay" id="loading" style="display: none;">
+  <div class="spinner-overlay hidden" id="loading">
     <div class="spinner"></div>
   </div>
 
-  <!-- Hidden containers for logic triggers -->
-  <div id="profile-container" style="display: none;"></div>
-  <div id="note-container" style="display: none;"></div>
-  <div id="logout-container" style="display: none;"></div>
-
+  <!-- Script Logic -->
   <script type="module" src="dashboard.js"></script>
   <script type="module">
     import { auth, db } from './firebase-init.js';
@@ -116,11 +113,11 @@
       get(userRef).then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
-          document.getElementById('profileDisplayName').textContent = data.displayName || 'No name';
-          document.getElementById('profileEmail').textContent = auth.currentUser.email;
-          document.getElementById('profileBio').textContent = data.bio || '';
-          profilePic.src = data.profilePicture || 'default-pfp.png';
-          pictureBanStatus.textContent = data.pictureban ? 'Banned' : 'Active';
+          document.getElementById('profileDisplayName').textContent = data?.displayName ?? 'No name';
+          document.getElementById('profileEmail').textContent = auth.currentUser?.email ?? 'Unknown';
+          document.getElementById('profileBio').textContent = data?.bio ?? '';
+          profilePic.src = data?.profilePicture ?? 'default-pfp.png';
+          pictureBanStatus.textContent = data?.pictureban ? 'Banned' : 'Active';
         }
       });
     }
@@ -154,6 +151,9 @@
       button.addEventListener('click', function () {
         document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
         document.getElementById(button.getAttribute('data-tab')).classList.remove('hidden');
+
+        document.querySelectorAll('.tab-nav button').forEach(btn => btn.classList.remove('active-tab'));
+        button.classList.add('active-tab');
       });
     });
 
