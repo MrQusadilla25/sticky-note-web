@@ -1,4 +1,3 @@
-// auth.js
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 import { auth, db } from './firebase-init.js';
 import { ref, set, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
@@ -18,6 +17,17 @@ const passwordInput = document.getElementById('password');
 const errorDiv = document.getElementById('authError');
 const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
+
+// Password visibility toggle
+const togglePassword = document.getElementById('togglePassword');
+
+if (togglePassword) {
+  togglePassword.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+  });
+}
 
 // Email validation helper
 const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
