@@ -37,16 +37,21 @@ const toast = document.getElementById('toast');
 const loading = document.getElementById('loading');
 
 const profilePic = document.getElementById('profilePic');
-const uploadProfilePic = document.getElementById('uploadProfilePic');
+const profilePicURLInput = document.getElementById('profilePicURL');
+const updatePicBtn = document.getElementById('updatePicBtn');
 
-// Utilities
+const profileDisplayName = document.getElementById('profileDisplayName');
+const profileEmail = document.getElementById('profileEmail');
+const profileBio = document.getElementById('profileBio');
+const pictureBanStatus = document.getElementById('pictureBanStatus');
+
+// Toast & Spinner
 function showToast(message) {
   toast.textContent = message;
   toast.classList.remove('hidden');
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
-
 function showSpinner() {
   loading.classList.remove('hidden');
 }
@@ -54,8 +59,8 @@ function hideSpinner() {
   loading.classList.add('hidden');
 }
 
-// Auth State
-auth.onAuthStateChanged(user => {
+// Auth Listener
+auth.onAuthStateChanged(async user => {
   if (!user) {
     window.location.href = 'index.html';
     return;
@@ -64,28 +69,32 @@ auth.onAuthStateChanged(user => {
   const uid = user.uid;
   const userRef = dbRef(db, `users/${uid}`);
 
-  // Load settings
-  get(userRef).then(snapshot => {
-    const data = snapshot.val();
-    if (data) {
-      displayNameInput.value = data.displayName || '';
-      bioInput.value = data.bio || '';
-      noteColorInput.value = data.noteColor || '#ffff88';
-      noteColorPicker.value = data.noteColor || '#ffff88';
+  const snapshot = await get(userRef);
+  const data = snapshot.val();
 
-      // Profile Picture
-      if (data.pictureban) {
-        uploadProfilePic.classList.add('hidden');
-        deleteProfilePicture(uid); // Remove if banned
-        showToast("You are banned from changing profile pictures.");
-      } else {
-        uploadProfilePic.classList.remove('hidden');
-        loadProfilePicture(uid);
-      }
+  if (data) {
+    displayNameInput.value = data.displayName || '';
+    bioInput.value = data.bio || '';
+    noteColorInput.value = data.noteColor || '#ffff88';
+    noteColorPicker.value = data.noteColor || '#ffff88';
+
+    profileDisplayName.textContent = data.displayName || '—';
+    profileEmail.textContent = user.email || '—';
+    profileBio.textContent = data.bio || '—';
+
+    if (data.pictureban) {
+      updatePicBtn.disabled = true;
+      pictureBanStatus.textContent = 'True';
+      deleteProfilePicture(uid);
+      showToast('You are banned from changing your profile picture.');
+    } else {
+      updatePicBtn.disabled = false;
+      pictureBanStatus.textContent = 'False';
+      loadProfilePicture(uid);
     }
-  });
+  }
 
-  // Load inbox
+  // Inbox Listener
   const inboxRef = dbRef(db, `inbox/${uid}`);
   onValue(inboxRef, snapshot => {
     notesList.innerHTML = '';
@@ -95,8 +104,8 @@ auth.onAuthStateChanged(user => {
     }
 
     const notes = snapshot.val();
-    const sortedNotes = Object.entries(notes).sort((a, b) => b[1].time - a[1].time);
-    sortedNotes.forEach(([key, note]) => {
+    const sorted = Object.entries(notes).sort((a, b) => b[1].time - a[1].time);
+    sorted.forEach(([key, note]) => {
       const div = document.createElement('div');
       div.className = 'note';
       div.style.background = note.color || '#ffff88';
@@ -135,11 +144,13 @@ auth.onAuthStateChanged(user => {
       noteColor: color
     }).then(() => {
       noteColorPicker.value = color;
+      profileDisplayName.textContent = displayName;
+      profileBio.textContent = bio;
       showToast('Settings saved!');
     });
   });
 
-  // Send a Note with Cooldown
+  // Send Note with Cooldown
   sendNoteBtn.addEventListener('click', async () => {
     const to = sendToInput.value.trim().toLowerCase();
     const message = noteMessageInput.value.trim();
@@ -168,31 +179,27 @@ auth.onAuthStateChanged(user => {
       }
 
       const [recipientId] = recipient;
+      const now = Date.now();
 
-      // Check cooldown
       const cooldownRef = dbRef(db, `cooldowns/${uid}`);
       const cooldownSnap = await get(cooldownRef);
-      const now = Date.now();
 
       if (cooldownSnap.exists() && now - cooldownSnap.val() < 10000) {
         hideSpinner();
         cooldownNotice.classList.remove('hidden');
         setTimeout(() => cooldownNotice.classList.add('hidden'), 3000);
         sendNoteBtn.disabled = true;
-        setTimeout(() => sendNoteBtn.disabled = false, 3000);
+        setTimeout(() => (sendNoteBtn.disabled = false), 3000);
         return;
       }
 
-      // Send note
-      const noteRef = push(dbRef(db, `inbox/${recipientId}`));
-      await set(noteRef, {
-        from: auth.currentUser.email,
+      await push(dbRef(db, `inbox/${recipientId}`), {
+        from: user.email,
         message,
         color,
         time: now
       });
 
-      // Set cooldown
       await set(cooldownRef, now);
 
       showToast('Note sent!');
@@ -205,25 +212,32 @@ auth.onAuthStateChanged(user => {
     hideSpinner();
   });
 
-  // Clear inbox
+  // Clear Inbox
   clearInboxBtn.addEventListener('click', () => {
-    if (confirm("Are you sure you want to delete all notes?")) {
+    if (confirm('Are you sure you want to delete all notes?')) {
       remove(dbRef(db, `inbox/${uid}`));
       showToast('Inbox cleared.');
     }
   });
 
-  // Upload Profile Picture
-  uploadProfilePic.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // Update Profile Picture via URL
+  updatePicBtn.addEventListener('click', async () => {
+    const url = profilePicURLInput.value.trim();
+    if (!url) return showToast('Enter a valid image URL.');
 
     showSpinner();
-    const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
-    await uploadBytes(fileRef, file);
-    const url = await getDownloadURL(fileRef);
-    profilePic.src = url;
-    showToast('Profile picture updated.');
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
+      await uploadBytes(fileRef, blob);
+      const downloadURL = await getDownloadURL(fileRef);
+      profilePic.src = downloadURL;
+      showToast('Profile picture updated.');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to upload picture.');
+    }
     hideSpinner();
   });
 
@@ -247,7 +261,7 @@ function loadProfilePicture(uid) {
     });
 }
 
-// Delete Profile Picture (for pictureban)
+// Delete Profile Picture if banned
 function deleteProfilePicture(uid) {
   const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
   deleteObject(fileRef).catch(() => {});
