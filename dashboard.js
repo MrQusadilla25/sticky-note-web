@@ -1,7 +1,6 @@
-// dashboard.js
-import { auth, db } from './firebase-init.js';
+import { auth, db, storage } from './firebase-init.js';
 import {
-  ref,
+  ref as dbRef,
   set,
   get,
   update,
@@ -10,6 +9,13 @@ import {
   onValue,
   child
 } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
+
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js';
 
 // DOM Elements
 const displayNameInput = document.getElementById('displayName');
@@ -29,6 +35,9 @@ const clearInboxBtn = document.getElementById('clearInboxBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const toast = document.getElementById('toast');
 const loading = document.getElementById('loading');
+
+const profilePic = document.getElementById('profilePic');
+const uploadProfilePic = document.getElementById('uploadProfilePic');
 
 // Utilities
 function showToast(message) {
@@ -53,7 +62,7 @@ auth.onAuthStateChanged(user => {
   }
 
   const uid = user.uid;
-  const userRef = ref(db, `users/${uid}`);
+  const userRef = dbRef(db, `users/${uid}`);
 
   // Load settings
   get(userRef).then(snapshot => {
@@ -63,11 +72,21 @@ auth.onAuthStateChanged(user => {
       bioInput.value = data.bio || '';
       noteColorInput.value = data.noteColor || '#ffff88';
       noteColorPicker.value = data.noteColor || '#ffff88';
+
+      // Profile Picture
+      if (data.pictureban) {
+        uploadProfilePic.classList.add('hidden');
+        deleteProfilePicture(uid); // Remove if banned
+        showToast("You are banned from changing profile pictures.");
+      } else {
+        uploadProfilePic.classList.remove('hidden');
+        loadProfilePicture(uid);
+      }
     }
   });
 
   // Load inbox
-  const inboxRef = ref(db, `inbox/${uid}`);
+  const inboxRef = dbRef(db, `inbox/${uid}`);
   onValue(inboxRef, snapshot => {
     notesList.innerHTML = '';
     if (!snapshot.exists()) {
@@ -138,7 +157,7 @@ auth.onAuthStateChanged(user => {
 
     showSpinner();
     try {
-      const allUsersSnap = await get(ref(db, 'users'));
+      const allUsersSnap = await get(dbRef(db, 'users'));
       const allUsers = allUsersSnap.val();
       const recipient = Object.entries(allUsers).find(([id, data]) => data.email?.toLowerCase() === to);
 
@@ -151,7 +170,7 @@ auth.onAuthStateChanged(user => {
       const [recipientId] = recipient;
 
       // Check cooldown
-      const cooldownRef = ref(db, `cooldowns/${uid}`);
+      const cooldownRef = dbRef(db, `cooldowns/${uid}`);
       const cooldownSnap = await get(cooldownRef);
       const now = Date.now();
 
@@ -165,7 +184,7 @@ auth.onAuthStateChanged(user => {
       }
 
       // Send note
-      const noteRef = push(ref(db, `inbox/${recipientId}`));
+      const noteRef = push(dbRef(db, `inbox/${recipientId}`));
       await set(noteRef, {
         from: auth.currentUser.email,
         message,
@@ -189,9 +208,23 @@ auth.onAuthStateChanged(user => {
   // Clear inbox
   clearInboxBtn.addEventListener('click', () => {
     if (confirm("Are you sure you want to delete all notes?")) {
-      remove(ref(db, `inbox/${uid}`));
+      remove(dbRef(db, `inbox/${uid}`));
       showToast('Inbox cleared.');
     }
+  });
+
+  // Upload Profile Picture
+  uploadProfilePic.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    showSpinner();
+    const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
+    await uploadBytes(fileRef, file);
+    const url = await getDownloadURL(fileRef);
+    profilePic.src = url;
+    showToast('Profile picture updated.');
+    hideSpinner();
   });
 
   // Logout
@@ -201,3 +234,22 @@ auth.onAuthStateChanged(user => {
     });
   });
 });
+
+// Load Profile Picture
+function loadProfilePicture(uid) {
+  const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
+  getDownloadURL(fileRef)
+    .then(url => {
+      profilePic.src = url;
+    })
+    .catch(() => {
+      profilePic.src = 'default-profile.png';
+    });
+}
+
+// Delete Profile Picture (for pictureban)
+function deleteProfilePicture(uid) {
+  const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
+  deleteObject(fileRef).catch(() => {});
+  profilePic.src = 'default-profile.png';
+}
