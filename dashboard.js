@@ -1,4 +1,4 @@
-import { auth, db, storage } from './firebase-init.js';
+import { auth, db } from './firebase-init.js';
 import {
   ref as dbRef,
   set,
@@ -9,13 +9,6 @@ import {
   onValue,
   child
 } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
-
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js';
 
 // DOM Elements
 const displayNameInput = document.getElementById('displayName');
@@ -85,12 +78,12 @@ auth.onAuthStateChanged(async user => {
     if (data.pictureban) {
       updatePicBtn.disabled = true;
       pictureBanStatus.textContent = 'True';
-      deleteProfilePicture(uid);
       showToast('You are banned from changing your profile picture.');
+      profilePic.src = 'default-profile.png';
     } else {
       updatePicBtn.disabled = false;
       pictureBanStatus.textContent = 'False';
-      loadProfilePicture(uid);
+      profilePic.src = data.profilePicURL || 'default-profile.png';
     }
   }
 
@@ -220,23 +213,21 @@ auth.onAuthStateChanged(async user => {
     }
   });
 
-  // Update Profile Picture via URL
+  // Set Profile Picture via URL
   updatePicBtn.addEventListener('click', async () => {
     const url = profilePicURLInput.value.trim();
     if (!url) return showToast('Enter a valid image URL.');
 
     showSpinner();
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
-      await uploadBytes(fileRef, blob);
-      const downloadURL = await getDownloadURL(fileRef);
-      profilePic.src = downloadURL;
+      await update(dbRef(db, `users/${uid}`), {
+        profilePicURL: url
+      });
+      profilePic.src = url;
       showToast('Profile picture updated.');
     } catch (err) {
       console.error(err);
-      showToast('Failed to upload picture.');
+      showToast('Failed to update profile picture.');
     }
     hideSpinner();
   });
@@ -248,22 +239,3 @@ auth.onAuthStateChanged(async user => {
     });
   });
 });
-
-// Load Profile Picture
-function loadProfilePicture(uid) {
-  const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
-  getDownloadURL(fileRef)
-    .then(url => {
-      profilePic.src = url;
-    })
-    .catch(() => {
-      profilePic.src = 'default-profile.png';
-    });
-}
-
-// Delete Profile Picture if banned
-function deleteProfilePicture(uid) {
-  const fileRef = storageRef(storage, `profile-pictures/${uid}.jpg`);
-  deleteObject(fileRef).catch(() => {});
-  profilePic.src = 'default-profile.png';
-}
