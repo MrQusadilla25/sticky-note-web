@@ -8,14 +8,14 @@ import {
 import { auth, db } from './firebase-init.js';
 import { ref, set, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
-// Redirect if already signed in
+// Redirect if user is already signed in
 onAuthStateChanged(auth, user => {
   if (user) {
     location.href = "dashboard.html";
   }
 });
 
-// DOM Elements
+// Elements
 const loginBtn = document.getElementById('loginBtn');
 const signupBtn = document.getElementById('signupBtn');
 const emailInput = document.getElementById('email');
@@ -25,24 +25,25 @@ const toast = document.getElementById('toast');
 const spinner = document.getElementById('loading');
 const togglePassword = document.getElementById('togglePassword');
 
-// Password visibility toggle
+// Toggle password visibility
 if (togglePassword) {
   togglePassword.addEventListener('click', () => {
-    const type = passwordInput.type === 'password' ? 'text' : 'password';
-    passwordInput.type = type;
-    togglePassword.innerHTML = type === 'password'
-      ? '<i class="fas fa-eye"></i>'
-      : '<i class="fas fa-eye-slash"></i>';
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    togglePassword.innerHTML = isPassword
+      ? '<i class="fas fa-eye-slash"></i>'
+      : '<i class="fas fa-eye"></i>';
   });
 }
 
-// Email validation
-const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
+// Email format validator
+const isValidEmail = email => /\S+@\S+\.\S+/.test(email);
 
-// Save user data if not already present
+// Save default user data if not already present
 async function saveUserData(user) {
   const userRef = ref(db, `users/${user.uid}`);
   const snapshot = await get(userRef);
+
   if (!snapshot.exists()) {
     await set(userRef, {
       email: user.email,
@@ -59,12 +60,12 @@ async function saveUserData(user) {
   }
 }
 
-// Login
+// Handle login
 loginBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!email || !password || !isValidEmail(email)) {
+  if (!isValidEmail(email) || !password) {
     return showError("Please enter a valid email and password.");
   }
 
@@ -80,12 +81,12 @@ loginBtn.addEventListener('click', async () => {
   }
 });
 
-// Sign Up
+// Handle sign-up
 signupBtn.addEventListener('click', async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!email || !password || !isValidEmail(email)) {
+  if (!isValidEmail(email) || !password) {
     return showError("Please enter a valid email and password.");
   }
 
@@ -96,16 +97,7 @@ signupBtn.addEventListener('click', async () => {
   showSpinner(true);
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = result.user.uid;
-
-    await set(ref(db, `users/${uid}`), {
-      email: email,
-      displayName: "New User",
-      bio: "",
-      noteColor: "#ffff88",
-      pictureban: false
-    });
-
+    await saveUserData(result.user);
     showToast("Account created!");
   } catch (err) {
     showError(err.message);
@@ -114,21 +106,21 @@ signupBtn.addEventListener('click', async () => {
   }
 });
 
-// Error UI
-function showError(msg) {
-  errorDiv.textContent = msg;
+// Show error message
+function showError(message) {
+  errorDiv.textContent = message;
   errorDiv.classList.add('show');
   setTimeout(() => errorDiv.classList.remove('show'), 4000);
 }
 
-// Toast UI
-function showToast(msg) {
-  toast.textContent = msg;
+// Show toast message
+function showToast(message) {
+  toast.textContent = message;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Spinner UI
+// Toggle loading spinner
 function showSpinner(show) {
   spinner.classList.toggle('hidden', !show);
 }
