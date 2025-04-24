@@ -19,7 +19,7 @@
   </header>
 
   <!-- Navigation Tabs -->
-  <nav class="tab-nav">
+  <nav class="tab-nav" role="navigation" aria-label="Dashboard navigation">
     <button type="button" data-tab="settings" class="active-tab">Settings</button>
     <button type="button" data-tab="send">Send a Note</button>
     <button type="button" data-tab="notebox">Notebox</button>
@@ -29,31 +29,32 @@
 
   <!-- Tab Panels -->
   <main id="tab-content">
+
     <!-- Settings Panel -->
-    <section id="settings" class="tab-panel">
+    <section id="settings" class="tab-panel" aria-labelledby="settingsTab">
       <h2>Settings</h2>
-      <label>Display Name</label>
+      <label for="displayName">Display Name</label>
       <input type="text" id="displayName" placeholder="Enter display name" />
 
-      <label>Bio</label>
+      <label for="bio">Bio</label>
       <textarea id="bio" rows="4" placeholder="Tell us about yourself"></textarea>
 
-      <label>Sticky Note Color</label>
+      <label for="noteColor">Sticky Note Color</label>
       <input type="color" id="noteColor" />
 
       <button type="button" id="saveSettingsBtn">Save Settings</button>
     </section>
 
     <!-- Send a Note Panel -->
-    <section id="send" class="tab-panel hidden">
+    <section id="send" class="tab-panel hidden" aria-labelledby="sendTab">
       <h2>Send a Note</h2>
-      <label>To (email)</label>
+      <label for="sendTo">To (email)</label>
       <input type="email" id="sendTo" placeholder="someone@example.com" />
 
-      <label>Message</label>
+      <label for="noteMessage">Message</label>
       <textarea id="noteMessage" rows="4" placeholder="Type your note here..."></textarea>
 
-      <label>Note Color</label>
+      <label for="noteColorPicker">Note Color</label>
       <input type="color" id="noteColorPicker" />
 
       <button type="button" id="sendNoteBtn">Send Note</button>
@@ -61,14 +62,14 @@
     </section>
 
     <!-- Notebox Panel -->
-    <section id="notebox" class="tab-panel hidden">
+    <section id="notebox" class="tab-panel hidden" aria-labelledby="noteboxTab">
       <h2>Your Notebox</h2>
-      <div id="notesList"></div>
+      <div id="notesList" class="notes-container"></div>
       <button type="button" id="clearInboxBtn" class="danger">Clear All</button>
     </section>
 
     <!-- Profile Panel -->
-    <section id="profile" class="tab-panel hidden">
+    <section id="profile" class="tab-panel hidden" aria-labelledby="profileTab">
       <h2>Your Profile</h2>
       <div class="profile-info">
         <img id="profilePic" src="default-pfp.png" alt="Your profile picture" class="profile-pic" />
@@ -80,15 +81,16 @@
       <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
       <p><strong>Bio:</strong> <span id="profileBio">Loading...</span></p>
     </section>
+
   </main>
 
   <!-- Toast & Spinner -->
-  <div id="toast" class="hidden"></div>
-  <div class="spinner-overlay hidden" id="loading">
-    <div class="spinner"></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <div class="spinner-overlay hidden" id="loading" aria-hidden="true">
+    <div class="spinner" role="progressbar"></div>
   </div>
 
-  <!-- Main Dashboard Logic -->
+  <!-- Dashboard Logic -->
   <script type="module" src="dashboard.js"></script>
 </body>
 </html>
