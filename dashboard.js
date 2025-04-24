@@ -1,3 +1,4 @@
+// dashboard.js
 import { auth, db } from './firebase-init.js';
 import {
   ref,
@@ -61,10 +62,11 @@ auth.onAuthStateChanged(user => {
       displayNameInput.value = data.displayName || '';
       bioInput.value = data.bio || '';
       noteColorInput.value = data.noteColor || '#ffff88';
+      noteColorPicker.value = data.noteColor || '#ffff88';
     }
   });
 
-  // Load notebox
+  // Load inbox
   const inboxRef = ref(db, `inbox/${uid}`);
   onValue(inboxRef, snapshot => {
     notesList.innerHTML = '';
@@ -74,7 +76,8 @@ auth.onAuthStateChanged(user => {
     }
 
     const notes = snapshot.val();
-    Object.entries(notes).forEach(([key, note]) => {
+    const sortedNotes = Object.entries(notes).sort((a, b) => b[1].time - a[1].time);
+    sortedNotes.forEach(([key, note]) => {
       const div = document.createElement('div');
       div.className = 'note';
       div.style.background = note.color || '#ffff88';
@@ -111,12 +114,15 @@ auth.onAuthStateChanged(user => {
       displayName,
       bio,
       noteColor: color
-    }).then(() => showToast('Settings saved!'));
+    }).then(() => {
+      noteColorPicker.value = color;
+      showToast('Settings saved!');
+    });
   });
 
   // Send a Note with Cooldown
   sendNoteBtn.addEventListener('click', async () => {
-    const to = sendToInput.value.trim().toLowerCase(); // Lowercase the recipient input
+    const to = sendToInput.value.trim().toLowerCase();
     const message = noteMessageInput.value.trim();
     const color = noteColorPicker.value;
 
@@ -125,11 +131,16 @@ auth.onAuthStateChanged(user => {
       return;
     }
 
+    if (!/^\S+@\S+\.\S+$/.test(to)) {
+      showToast('Enter a valid email address.');
+      return;
+    }
+
     showSpinner();
     try {
       const allUsersSnap = await get(ref(db, 'users'));
       const allUsers = allUsersSnap.val();
-      const recipient = Object.entries(allUsers).find(([id, data]) => data.email?.toLowerCase() === to); // Compare emails in lowercase
+      const recipient = Object.entries(allUsers).find(([id, data]) => data.email?.toLowerCase() === to);
 
       if (!recipient) {
         hideSpinner();
@@ -137,7 +148,7 @@ auth.onAuthStateChanged(user => {
         return;
       }
 
-      const [recipientId, recipientData] = recipient;
+      const [recipientId] = recipient;
 
       // Check cooldown
       const cooldownRef = ref(db, `cooldowns/${uid}`);
@@ -148,6 +159,8 @@ auth.onAuthStateChanged(user => {
         hideSpinner();
         cooldownNotice.classList.remove('hidden');
         setTimeout(() => cooldownNotice.classList.add('hidden'), 3000);
+        sendNoteBtn.disabled = true;
+        setTimeout(() => sendNoteBtn.disabled = false, 3000);
         return;
       }
 
