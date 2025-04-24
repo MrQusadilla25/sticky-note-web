@@ -1,6 +1,12 @@
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
 import { auth, db } from './firebase-init.js';
-import { ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { ref, set, get } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
 // Redirect if already signed in
 onAuthStateChanged(auth, user => {
@@ -24,7 +30,9 @@ if (togglePassword) {
   togglePassword.addEventListener('click', () => {
     const type = passwordInput.type === 'password' ? 'text' : 'password';
     passwordInput.type = type;
-    togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    togglePassword.innerHTML = type === 'password'
+      ? '<i class="fas fa-eye"></i>'
+      : '<i class="fas fa-eye-slash"></i>';
   });
 }
 
@@ -38,15 +46,12 @@ async function saveUserData(user) {
   if (!snapshot.exists()) {
     await set(userRef, {
       email: user.email,
-      settings: {
-        displayName: "New User",
-        bio: "",
-        stickyColor: "#ffcc00",
-        pictureban: false
-      }
+      displayName: "New User",
+      bio: "",
+      noteColor: "#ffff88",
+      pictureban: false
     });
   } else {
-    // Update email if it doesn't exist
     const data = snapshot.val();
     if (!data.email) {
       await set(ref(db, `users/${user.uid}/email`), user.email);
@@ -95,12 +100,10 @@ signupBtn.addEventListener('click', async () => {
 
     await set(ref(db, `users/${uid}`), {
       email: email,
-      settings: {
-        displayName: "New User",
-        bio: "",
-        stickyColor: "#ffcc00",
-        pictureban: false
-      }
+      displayName: "New User",
+      bio: "",
+      noteColor: "#ffff88",
+      pictureban: false
     });
 
     showToast("Account created!");
@@ -110,46 +113,6 @@ signupBtn.addEventListener('click', async () => {
     showSpinner(false);
   }
 });
-
-// Get current user email
-function getCurrentUserEmail() {
-  const user = auth.currentUser;
-  return user ? user.email : null;
-}
-
-// Send Note
-async function sendNote() {
-  const recipientEmail = document.getElementById('recipientEmail').value;
-  const noteContent = document.getElementById('noteContent').value;
-  const senderEmail = getCurrentUserEmail();
-
-  if (!senderEmail) {
-    return showError("No user signed in.");
-  }
-
-  try {
-    const snapshot = await get(ref(db, 'users'));
-    const users = snapshot.val();
-    let recipientFound = false;
-
-    for (let userId in users) {
-      if (users[userId].email === recipientEmail) {
-        recipientFound = true;
-        break;
-      }
-    }
-
-    if (recipientFound) {
-      // Note sending logic here
-      console.log("Note sent to:", recipientEmail);
-      showToast("Note sent successfully!");
-    } else {
-      showError("Recipient not found.");
-    }
-  } catch (error) {
-    showError("Error checking recipient: " + error.message);
-  }
-}
 
 // Error UI
 function showError(msg) {
